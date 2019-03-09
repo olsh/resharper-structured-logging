@@ -1,0 +1,11 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+install:
+  - dotnet tool install -g Cake.Tool --version 0.30.0 
+build_script:
+- cmd: dotnet cake -Target=CI
+test: off
+cache:
+  - '%USERPROFILE%\.sonar\cache'
+  - '%USERPROFILE%\.nuget\packages -> **\*.csproj'
+  - 'tools -> build.cake'

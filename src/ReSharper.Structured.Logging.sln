@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.438
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReSharper.Structured.Logging", "ReSharper.Structured.Logging\ReSharper.Structured.Logging.csproj", "{0B29307F-4E38-4611-BA0D-408A4B4F4E15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReSharper.Structured.Logging.Tests", "..\test\src\ReSharper.Structured.Logging.Tests.csproj", "{D07C40A7-39BE-4725-889F-FF2F2B781442}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8F7509A6-86AF-48A9-BD71-464ED879D8FA}"
+	ProjectSection(SolutionItems) = preProject
+		..\appveyor.yml = ..\appveyor.yml
+		..\build.cake = ..\build.cake
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0B29307F-4E38-4611-BA0D-408A4B4F4E15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B29307F-4E38-4611-BA0D-408A4B4F4E15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B29307F-4E38-4611-BA0D-408A4B4F4E15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B29307F-4E38-4611-BA0D-408A4B4F4E15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D07C40A7-39BE-4725-889F-FF2F2B781442}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D07C40A7-39BE-4725-889F-FF2F2B781442}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D07C40A7-39BE-4725-889F-FF2F2B781442}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D07C40A7-39BE-4725-889F-FF2F2B781442}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2861CBD1-55F1-4AF9-8F6D-F2C345E8BB03}
+	EndGlobalSection
+EndGlobal

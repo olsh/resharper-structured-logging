@@ -1,0 +1,20 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Information("|{MyProperty}|(0) ||{AnotherProperty}|(1)|(2)", 1);
+            Log.Logger.Information("|{MyProperty}|(3)", 1, |2|(4));
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Format String Item: 
+(1): ReSharper Format String Item: 
+(2): ReSharper Warning: Non-existing argument in message template
+(3): ReSharper Format String Item: 
+(4): ReSharper Dead Code: Argument is not used in message template

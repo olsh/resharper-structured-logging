@@ -1,0 +1,19 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Information("|{MyProperty}|(0:a)", |1|(1:a));
+            Log.Logger.Information("|{MyProperty}|(2:b)", |1|(3:b));
+        }
+    }
+}
+
+---------------------------------------------------------
+(0:a): ReSharper Usage of element under cursor
+(1:a): ReSharper Usage of element under cursor
+(2:b): ReSharper Usage of element under cursor
+(3:b): ReSharper Usage of element under cursor
