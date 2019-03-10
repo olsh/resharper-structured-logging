@@ -24,12 +24,6 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var stringLiteral = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateArgument.Value);
-            if (stringLiteral == null)
-            {
-                return;
-            }
-
             var templateArgumentIndex = templateArgument.IndexOf();
             var exceptionType = element.PsiModule.GetPredefinedType().TryGetType(PredefinedType.EXCEPTION_FQN);
             if (exceptionType == null)

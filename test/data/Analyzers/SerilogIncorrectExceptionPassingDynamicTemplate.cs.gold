@@ -1,0 +1,18 @@
+﻿using System;
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Information($"{DateTime.Now} |{{|(0)Error|}}|(1)", |new Exception()|(2));
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper String Escape Character 1: 
+(1): ReSharper String Escape Character 1: 
+(2): ReSharper Warning: Exception should be passed to the exception argument
