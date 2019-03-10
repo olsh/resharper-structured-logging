@@ -322,6 +322,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analyzer\AnonymousTypeDestructureAnalyzerTests.cs" />
     <Compile Include="Analyzer\CorrectExceptionPassingAnalyzerTests.cs" />
     <Compile Include="Analyzer\DuplicatePropertiesTemplateAnalyzerTests.cs" />
     <Compile Include="Analyzer\MessageTemplateTests.cs" />

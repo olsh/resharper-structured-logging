@@ -324,11 +324,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analyzer\AnonymousTypeDestructureAnalyzer.cs" />
     <Compile Include="Analyzer\CompileTimeConstantTemplateAnalyzer.cs" />
     <Compile Include="Analyzer\CorrectExceptionPassingAnalyzer.cs" />
     <Compile Include="Analyzer\DuplicatePropertiesTemplateAnalyzer.cs" />
     <Compile Include="Analyzer\TemplateFormatAnalyzer.cs" />
     <Compile Include="Extensions\PsiExtensions.cs" />
+    <Compile Include="Highlighting\AnonymousObjectWithoutDestructuringWarning.cs" />
     <Compile Include="Highlighting\DuplicateTemplatePropertyWarning.cs" />
     <Compile Include="Highlighting\ExceptionPassedAsTemplateArgumentWarning.cs" />
     <Compile Include="Highlighting\TemplateFormatStringArgumentIsNotUsedWarning.cs" />

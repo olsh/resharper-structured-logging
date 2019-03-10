@@ -24,6 +24,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
                    || highlighting is TemplateFormatStringUnexistingArgumentWarning
                    || highlighting is StringEscapeCharacterHighlighting
                    || highlighting is DuplicateTemplatePropertyWarning
+                   || highlighting is AnonymousObjectDestructuringWarning
                    || highlighting is ExceptionPassedAsTemplateArgumentWarning;
         }
     }

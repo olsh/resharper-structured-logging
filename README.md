@@ -58,3 +58,19 @@ Compliant Solution:
 ```csharp
 Log.Error("Disk quota {Quota} MB exceeded by {User}", quota, user);
 ```
+
+### Anonymous objects must be destructured
+
+Noncompliant Code Examples:
+```csharp
+Log.Error("Processed {Position}", new { x = 4, y = 2});
+```
+
+Compliant Solution:
+```csharp
+Log.Error("Processed {@Position}", new { x = 4, y = 2});
+```
+
+## Credits
+
+Inpired by [SerilogAnalyzer](https://github.com/Suchiman/SerilogAnalyzer)

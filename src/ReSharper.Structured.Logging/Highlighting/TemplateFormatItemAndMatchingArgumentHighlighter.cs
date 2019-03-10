@@ -142,9 +142,6 @@ namespace ReSharper.Structured.Logging.Highlighting
                 consumer.ConsumeHighlighting(
                     HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                     templateArgument.GetTokenDocumentRange(property));
-                consumer.ConsumeHighlighting(
-                    HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                    selectedArgument.GetDocumentRange());
             }
             else if (positionalProperties != null)
             {
@@ -164,11 +161,11 @@ namespace ReSharper.Structured.Logging.Highlighting
                         HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                         templateArgument.GetTokenDocumentRange(property));
                 }
-
-                consumer.ConsumeHighlighting(
-                    HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                    selectedArgument.GetDocumentRange());
             }
+
+            consumer.ConsumeHighlighting(
+                HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                selectedArgument.GetDocumentRange());
         }
 
         private static void HighlightByNamedPlaceholder(
