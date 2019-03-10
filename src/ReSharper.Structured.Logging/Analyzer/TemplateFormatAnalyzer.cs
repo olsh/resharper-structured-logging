@@ -4,7 +4,6 @@ using JetBrains.ReSharper.Daemon.StringAnalysis;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 
 using ReSharper.Structured.Logging.Extensions;
@@ -41,7 +40,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var messageTemplate = _messageTemplateParser.Parse(stringLiteral.CompiledValue);
+            var messageTemplate = _messageTemplateParser.Parse(stringLiteral.Expression.GetUnquotedText());
 
             HighlightTemplate(consumer, stringLiteral, messageTemplate);
             HighlightUnusedArguments(element, consumer, templateArgument, messageTemplate);
@@ -56,9 +55,8 @@ namespace ReSharper.Structured.Logging.Analyzer
                     if (argumentsCount < 0)
                     {
                         consumer.AddHighlighting(
-                            new TemplateFormatStringInexistingArgumentWarning(
-                                stringLiteral.Expression.GetDocumentRange()
-                                    .GetTokenDocumentRange(property)));
+                            new TemplateFormatStringUnexistingArgumentWarning(
+                                stringLiteral.GetTokenDocumentRange(property)));
                     }
                 }
             }
@@ -74,9 +72,8 @@ namespace ReSharper.Structured.Logging.Analyzer
                     if (position >= argumentsCount)
                     {
                         consumer.AddHighlighting(
-                            new TemplateFormatStringInexistingArgumentWarning(
-                                stringLiteral.Expression.GetDocumentRange()
-                                    .GetTokenDocumentRange(property)));
+                            new TemplateFormatStringUnexistingArgumentWarning(
+                                stringLiteral.GetTokenDocumentRange(property)));
                     }
                 }
             }
@@ -87,7 +84,6 @@ namespace ReSharper.Structured.Logging.Analyzer
             IStringLiteralAlterer stringLiteral,
             MessageTemplate messageTemplate)
         {
-            var documentRange = stringLiteral.Expression.GetDocumentRange();
             foreach (var token in messageTemplate.Tokens)
             {
                 if (!(token is PropertyToken))
@@ -97,7 +93,7 @@ namespace ReSharper.Structured.Logging.Analyzer
 
                 consumer.AddHighlighting(
                     new StringEscapeCharacterHighlighting(
-                        documentRange.GetTokenDocumentRange(token),
+                        stringLiteral.GetTokenDocumentRange(token),
                         HighlightingAttributeIds.FORMAT_STRING_ITEM));
             }
         }

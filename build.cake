@@ -4,15 +4,14 @@
 
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");
-var waveVersion = Argument("wave", "[182.0]");
-var extensionsVersion =  Argument("Version", "2018.2.3");
+var waveVersion = Argument("wave", "[183.0]");
+var extensionsVersion =  Argument("Version", "2018.3.0");
 
 var solutionName = "ReSharper.Structured.Logging";
 var projectName = solutionName;
 
 var solutionFile = string.Format("./src/{0}.sln", solutionName);
 var solutionFolder = string.Format("./src/{0}/", solutionName);
-var testBinaries = string.Format("test/src/**/ReSharper.Structured.Logging.Tests.dll", solutionFolder);
 var projectFile = string.Format("{0}{1}.csproj", solutionFolder, projectName);
 
 Task("AppendBuildNumber")
@@ -55,16 +54,12 @@ Task("NugetPack")
 
      var files = new List<NuSpecContent>();
      files.Add(new NuSpecContent {Source = string.Format("{0}/{1}.dll", buildPath, projectName), Target = "dotFiles"});
-
-     if (buildConfiguration == "Debug") 
-     {
-        files.Add(new NuSpecContent {Source = string.Format("{0}/{1}.pdb", buildPath, projectName), Target = "dotFiles"});
-     }
+     files.Add(new NuSpecContent {Source = string.Format("{0}/{1}.pdb", buildPath, projectName), Target = "dotFiles"});
 
      var nuGetPackSettings   = new NuGetPackSettings {
                                      Id                      = projectName,
                                      Version                 = extensionsVersion,
-                                     Title                   = "Structure Logging",
+                                     Title                   = "Structured Logging",
                                      Authors                 = new[] { "Oleg Shevchenko" },
                                      Owners                  = new[] { "Oleg Shevchenko" },
                                      Description             = "Provides support for Serilog",

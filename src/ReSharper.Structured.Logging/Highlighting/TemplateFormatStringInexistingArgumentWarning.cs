@@ -5,8 +5,8 @@ using JetBrains.ReSharper.Psi.CSharp;
 using ReSharper.Structured.Logging.Highlighting;
 
 [assembly:
-    RegisterConfigurableSeverity(TemplateFormatStringInexistingArgumentWarning.SeverityId, null, HighlightingGroupIds.CompilerWarnings,
-        TemplateFormatStringInexistingArgumentWarning.Message, TemplateFormatStringInexistingArgumentWarning.Message,
+    RegisterConfigurableSeverity(TemplateFormatStringUnexistingArgumentWarning.SeverityId, null, HighlightingGroupIds.CompilerWarnings,
+        TemplateFormatStringUnexistingArgumentWarning.Message, TemplateFormatStringUnexistingArgumentWarning.Message,
         Severity.WARNING)]
 
 namespace ReSharper.Structured.Logging.Highlighting
@@ -16,7 +16,7 @@ namespace ReSharper.Structured.Logging.Highlighting
         CSharpLanguage.Name,
         OverlapResolve = OverlapResolveKind.WARNING,
         ToolTipFormatString = Message)]
-    public class TemplateFormatStringInexistingArgumentWarning : IHighlighting
+    public class TemplateFormatStringUnexistingArgumentWarning : IHighlighting
     {
         public const string SeverityId = "TemplateFormatStringProblem";
 
@@ -24,7 +24,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         private readonly DocumentRange _documentRange;
 
-        public TemplateFormatStringInexistingArgumentWarning(DocumentRange documentRange)
+        public TemplateFormatStringUnexistingArgumentWarning(DocumentRange documentRange)
         {
             _documentRange = documentRange;
         }

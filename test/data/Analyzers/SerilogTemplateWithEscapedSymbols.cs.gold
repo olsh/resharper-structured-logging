@@ -1,0 +1,20 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Information("|\r|(0)|\n|(1)|{MyProperty}|(2) |\r|(3)|\n|(4) |{OtherProperty}|(5)", 1, 2);
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper String Escape Character 1: 
+(1): ReSharper String Escape Character 2: 
+(2): ReSharper Format String Item: 
+(3): ReSharper String Escape Character 1: 
+(4): ReSharper String Escape Character 2: 
+(5): ReSharper Format String Item: 

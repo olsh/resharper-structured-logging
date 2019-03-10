@@ -21,7 +21,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
             IContextBoundSettingsStore settingsStore)
         {
             return highlighting is TemplateFormatStringArgumentIsNotUsedWarning
-                   || highlighting is TemplateFormatStringInexistingArgumentWarning
+                   || highlighting is TemplateFormatStringUnexistingArgumentWarning
                    || highlighting is StringEscapeCharacterHighlighting
                    || highlighting is DuplicateTemplatePropertyWarning
                    || highlighting is ExceptionPassedAsTemplateArgumentWarning;

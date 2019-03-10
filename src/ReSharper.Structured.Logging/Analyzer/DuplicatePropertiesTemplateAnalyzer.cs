@@ -2,7 +2,6 @@
 
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 
 using ReSharper.Structured.Logging.Extensions;
@@ -38,7 +37,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var messageTemplate = _messageTemplateParser.Parse(stringLiteral.CompiledValue);
+            var messageTemplate = _messageTemplateParser.Parse(stringLiteral.Expression.GetUnquotedText());
             if (messageTemplate.NamedProperties == null)
             {
                 return;
@@ -50,10 +49,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             {
                 foreach (var token in duplicates)
                 {
-                    consumer.AddHighlighting(
-                        new DuplicateTemplatePropertyWarning(
-                            stringLiteral.Expression.GetDocumentRange()
-                                .GetTokenDocumentRange(token)));
+                    consumer.AddHighlighting(new DuplicateTemplatePropertyWarning(stringLiteral.GetTokenDocumentRange(token)));
                 }
             }
         }

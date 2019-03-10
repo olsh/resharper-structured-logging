@@ -27,5 +27,11 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         {
             DoNamedTest2();
         }
+
+        [Test]
+        public void TestSerilogTemplateWithEscapedSymbols()
+        {
+            DoNamedTest2();
+        }
     }
 }

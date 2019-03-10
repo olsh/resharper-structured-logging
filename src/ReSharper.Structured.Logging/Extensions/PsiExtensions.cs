@@ -5,6 +5,7 @@ using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.CSharp.CodeStyle.Suggestions;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Util;
 
@@ -33,19 +34,23 @@ namespace ReSharper.Structured.Logging.Extensions
                 a => a.GetMatchingParameterName() == templateParameterName);
         }
 
-        [CanBeNull]
-        public static IStringLiteralAlterer GetMessageTemplateStringLiteral(this IInvocationExpression invocation)
+        public static DocumentRange GetTokenDocumentRange(this ICSharpArgument argument, MessageTemplateToken token)
         {
-            var templateArgument = invocation.GetTemplateArgument();
-            if (templateArgument == null)
-            {
-                return null;
-            }
+            var documentRange = argument.GetDocumentRange();
 
-            return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateArgument.Value);
+            return GetTokenDocumentRange(token, documentRange);
         }
 
-        public static DocumentRange GetTokenDocumentRange(this DocumentRange documentRange, MessageTemplateToken token)
+        public static DocumentRange GetTokenDocumentRange(this IStringLiteralAlterer stringLiteralAlterer, MessageTemplateToken token)
+        {
+            var documentRange = stringLiteralAlterer.Expression.GetDocumentRange();
+
+            return GetTokenDocumentRange(token, documentRange);
+        }
+
+        private static DocumentRange GetTokenDocumentRange(
+            MessageTemplateToken token,
+            DocumentRange documentRange)
         {
             var startOffset = documentRange.TextRange.StartOffset + token.StartIndex + 1;
 

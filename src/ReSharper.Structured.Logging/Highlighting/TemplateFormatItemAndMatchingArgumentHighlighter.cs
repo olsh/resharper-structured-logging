@@ -80,7 +80,7 @@ namespace ReSharper.Structured.Logging.Highlighting
             }
 
             var templateString = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateArgument.Value)
-                ?.CompiledValue;
+                ?.Expression.GetUnquotedText();
             if (templateString == null)
             {
                 return;
@@ -141,7 +141,7 @@ namespace ReSharper.Structured.Logging.Highlighting
                 var property = namedProperties[argumentIndex];
                 consumer.ConsumeHighlighting(
                     HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                    templateArgument.GetDocumentRange().GetTokenDocumentRange(property));
+                    templateArgument.GetTokenDocumentRange(property));
                 consumer.ConsumeHighlighting(
                     HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                     selectedArgument.GetDocumentRange());
@@ -162,7 +162,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
                     consumer.ConsumeHighlighting(
                         HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                        templateArgument.GetDocumentRange().GetTokenDocumentRange(property));
+                        templateArgument.GetTokenDocumentRange(property));
                 }
 
                 consumer.ConsumeHighlighting(
@@ -194,7 +194,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
                 consumer.ConsumeHighlighting(
                     HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                    templateArgument.GetDocumentRange().GetTokenDocumentRange(selectedToken));
+                    templateArgument.GetTokenDocumentRange(selectedToken));
                 consumer.ConsumeHighlighting(
                     HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                     arguments[argumentIndex].GetDocumentRange());
@@ -226,7 +226,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
                     consumer.ConsumeHighlighting(
                         HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                        templateArgument.GetDocumentRange().GetTokenDocumentRange(property));
+                        templateArgument.GetTokenDocumentRange(property));
                 }
 
                 var argumentIndex = templateArgument.IndexOf() + position + 1;
