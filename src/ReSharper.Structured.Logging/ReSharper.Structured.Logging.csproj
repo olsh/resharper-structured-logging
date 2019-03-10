@@ -324,8 +324,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analyzer\CorrectExceptionPassingAnalyzer.cs" />
+    <Compile Include="Analyzer\DuplicatePropertiesTemplateAnalyzer.cs" />
     <Compile Include="Analyzer\TemplateFormatAnalyzer.cs" />
     <Compile Include="Extensions\PsiExtensions.cs" />
+    <Compile Include="Highlighting\DuplicateTemplatePropertyWarning.cs" />
+    <Compile Include="Highlighting\ExceptionPassedAsTemplateArgumentWarning.cs" />
     <Compile Include="Highlighting\TemplateFormatStringArgumentIsNotUsedWarning.cs" />
     <Compile Include="Highlighting\TemplateFormatStringInexistingArgumentWarning.cs" />
     <Compile Include="Highlighting\TemplateFormatItemAndMatchingArgumentHighlighter.cs" />

@@ -133,6 +133,10 @@ namespace ReSharper.Structured.Logging.Analyzer
                         consumer.AddHighlighting(new TemplateFormatStringArgumentIsNotUsedWarning(argument.Expression));
                     }
                 }
+                else
+                {
+                    consumer.AddHighlighting(new TemplateFormatStringArgumentIsNotUsedWarning(argument.Expression));
+                }
             }
         }
     }

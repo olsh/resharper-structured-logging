@@ -322,6 +322,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analyzer\CorrectExceptionPassingAnalyzerTests.cs" />
+    <Compile Include="Analyzer\DuplicatePropertiesTemplateAnalyzerTests.cs" />
+    <Compile Include="Analyzer\MessageTemplateTests.cs" />
     <Compile Include="Analyzer\TemplateFormatAnalyzerTests.cs" />
     <Compile Include="Constants\NugetPackages.cs" />
     <Compile Include="Highlighting\TemplateFormatItemAndMatchingArgumentHighlighterTests.cs" />

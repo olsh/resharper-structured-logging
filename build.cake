@@ -1,5 +1,6 @@
-#tool nuget:?package=MSBuild.SonarQube.Runner.Tool
-#addin nuget:?package=Cake.Sonar
+#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.3.1"
+
+#addin "nuget:?package=Cake.Sonar&version=1.1.18"
 
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");
@@ -11,14 +12,15 @@ var projectName = solutionName;
 
 var solutionFile = string.Format("./src/{0}.sln", solutionName);
 var solutionFolder = string.Format("./src/{0}/", solutionName);
+var testBinaries = string.Format("test/src/**/ReSharper.Structured.Logging.Tests.dll", solutionFolder);
 var projectFile = string.Format("{0}{1}.csproj", solutionFolder, projectName);
 
 Task("AppendBuildNumber")
   .WithCriteria(BuildSystem.AppVeyor.IsRunningOnAppVeyor)
   .Does(() =>
 {
-	var buildNumber = BuildSystem.AppVeyor.Environment.Build.Number;
-	extensionsVersion = string.Format("{0}.{1}", extensionsVersion, buildNumber);
+    var buildNumber = BuildSystem.AppVeyor.Environment.Build.Number;
+    extensionsVersion = string.Format("{0}.{1}", extensionsVersion, buildNumber);
 });
 
 Task("UpdateBuildVersion")
@@ -26,13 +28,13 @@ Task("UpdateBuildVersion")
   .WithCriteria(BuildSystem.AppVeyor.IsRunningOnAppVeyor)
   .Does(() =>
 {
-	BuildSystem.AppVeyor.UpdateBuildVersion(extensionsVersion);
+    BuildSystem.AppVeyor.UpdateBuildVersion(extensionsVersion);
 });
 
 Task("NugetRestore")
   .Does(() =>
 {
-	NuGetRestore(solutionFile);
+    NuGetRestore(solutionFile);
 });
 
 Task("Build")
@@ -40,24 +42,23 @@ Task("Build")
   .Does(() =>
 {
     MSBuild(solutionFile, new MSBuildSettings {
-		Configuration = buildConfiguration
+        Configuration = buildConfiguration
     });
 });
-
 
 Task("NugetPack")
   .IsDependentOn("AppendBuildNumber")
   .IsDependentOn("Build")
   .Does(() =>
 {
-	 var buildPath = string.Format("./src/{0}/bin/{1}", solutionName, buildConfiguration);
+     var buildPath = string.Format("./src/{0}/bin/{1}", solutionName, buildConfiguration);
 
-	 var files = new List<NuSpecContent>();
+     var files = new List<NuSpecContent>();
      files.Add(new NuSpecContent {Source = string.Format("{0}/{1}.dll", buildPath, projectName), Target = "dotFiles"});
 
      if (buildConfiguration == "Debug") 
      {
-		files.Add(new NuSpecContent {Source = string.Format("{0}/{1}.pdb", buildPath, projectName), Target = "dotFiles"});
+        files.Add(new NuSpecContent {Source = string.Format("{0}/{1}.pdb", buildPath, projectName), Target = "dotFiles"});
      }
 
      var nuGetPackSettings   = new NuGetPackSettings {
@@ -75,8 +76,8 @@ Task("NugetPack")
                                      NoPackageAnalysis       = true,
                                      Files                   = files,
                                      OutputDirectory         = ".",
-									 Dependencies            = new [] { new NuSpecDependency() { Id = "Wave", Version = waveVersion } },
-									 ReleaseNotes            = new [] { "https://github.com/olsh/resharper-structured-logging/releases" }
+                                     Dependencies            = new [] { new NuSpecDependency() { Id = "Wave", Version = waveVersion } },
+                                     ReleaseNotes            = new [] { "https://github.com/olsh/resharper-structured-logging/releases" }
                                  };
 
      NuGetPack(nuGetPackSettings);
@@ -113,8 +114,8 @@ Task("CreateArtifact")
   .WithCriteria(BuildSystem.AppVeyor.IsRunningOnAppVeyor)
   .Does(() =>
 {
-	var artifactFile = string.Format("{0}.{1}.nupkg", projectName, extensionsVersion);
-	BuildSystem.AppVeyor.UploadArtifact(artifactFile);
+    var artifactFile = string.Format("{0}.{1}.nupkg", projectName, extensionsVersion);
+    BuildSystem.AppVeyor.UploadArtifact(artifactFile);
 });
 
 Task("CI")
@@ -122,6 +123,6 @@ Task("CI")
     .IsDependentOn("CreateArtifact");
 
 Task("Default")
-	.IsDependentOn("NugetPack");
+    .IsDependentOn("NugetPack");
 
 RunTarget(target);

@@ -1,22 +1,9 @@
-﻿using JetBrains.Application.Settings;
-using JetBrains.ReSharper.Daemon.StringAnalysis;
-using JetBrains.ReSharper.Feature.Services.Daemon;
-using JetBrains.ReSharper.FeaturesTestFramework.Daemon;
-using JetBrains.ReSharper.Psi;
-using JetBrains.ReSharper.TestFramework;
-
-using NUnit.Framework;
-
-using ReSharper.Structured.Logging.Highlighting;
-using ReSharper.Structured.Logging.Tests.Constants;
+﻿using NUnit.Framework;
 
 namespace ReSharper.Structured.Logging.Tests.Analyzer
 {
-    [TestPackages(NugetPackages.SerilogNugetPackage, NugetPackages.MicrosoftLoggingPackage, Inherits = true)]
-    public class TemplateFormatAnalyzerTests : CSharpHighlightingTestBase
+    public class TemplateFormatAnalyzerTests : MessageTemplateAnalyzerTestBase
     {
-        protected override string RelativeTestDataPath => "Analyzers";
-
         [Test]
         public void TestSerilogValidNamedProperty()
         {
@@ -39,16 +26,6 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         public void TestSerilogValidPositionProperty()
         {
             DoNamedTest2();
-        }
-
-        protected override bool HighlightingPredicate(
-            IHighlighting highlighting,
-            IPsiSourceFile sourceFile,
-            IContextBoundSettingsStore settingsStore)
-        {
-            return highlighting is TemplateFormatStringArgumentIsNotUsedWarning
-                   || highlighting is TemplateFormatStringInexistingArgumentWarning
-                   || highlighting is StringEscapeCharacterHighlighting;
         }
     }
 }

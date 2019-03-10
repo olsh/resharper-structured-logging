@@ -5,6 +5,7 @@ using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.CSharp.CodeStyle.Suggestions;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Util;
 
 using ReSharper.Structured.Logging.Serilog.Parsing;
@@ -30,6 +31,18 @@ namespace ReSharper.Structured.Logging.Extensions
 
             return invocationExpression.ArgumentList.Arguments.FirstOrDefault(
                 a => a.GetMatchingParameterName() == templateParameterName);
+        }
+
+        [CanBeNull]
+        public static IStringLiteralAlterer GetMessageTemplateStringLiteral(this IInvocationExpression invocation)
+        {
+            var templateArgument = invocation.GetTemplateArgument();
+            if (templateArgument == null)
+            {
+                return null;
+            }
+
+            return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateArgument.Value);
         }
 
         public static DocumentRange GetTokenDocumentRange(this DocumentRange documentRange, MessageTemplateToken token)
