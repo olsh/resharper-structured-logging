@@ -5,7 +5,7 @@
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");
 var waveVersion = Argument("wave", "[183.0]");
-var extensionsVersion =  Argument("Version", "2018.3.0");
+var extensionsVersion =  Argument("Version", "2018.3.4");
 
 var solutionName = "ReSharper.Structured.Logging";
 var projectName = solutionName;
@@ -62,10 +62,10 @@ Task("NugetPack")
                                      Title                   = "Structured Logging",
                                      Authors                 = new[] { "Oleg Shevchenko" },
                                      Owners                  = new[] { "Oleg Shevchenko" },
-                                     Description             = "Provides support for Serilog",
+                                     Description             = "Provides highlighting for structured logging message templates and contains some useful analyzers",
                                      ProjectUrl              = new Uri("https://github.com/olsh/resharper-structured-logging"),
-                                     LicenseUrl              = new Uri("https://github.com/olsh/resharper-structured-logging/raw/master/LICENSE"),
-                                     Tags                    = new [] { "resharper", "serilog", "nlog", "logging", "structurelogging" },
+                                     LicenseUrl              = new Uri("https://github.com/olsh/resharper-structured-logging/blob/master/LICENSE"),
+                                     Tags                    = new [] { "resharper", "serilog", "nlog", "logging", "structuredlogging" },
                                      RequireLicenseAcceptance= false,
                                      Symbols                 = false,
                                      NoPackageAnalysis       = true,
