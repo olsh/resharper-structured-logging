@@ -123,6 +123,7 @@ Task("CreateArtifact")
 
 Task("CI")
     .IsDependentOn("Sonar")
+    .IsDependentOn("Test")
     .IsDependentOn("CreateArtifact");
 
 Task("Default")
