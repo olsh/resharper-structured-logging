@@ -1,4 +1,5 @@
 #tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.3.1"
+#tool "nuget:?package=NUnit.Runners&version=2.6.4"
 
 #addin "nuget:?package=Cake.Sonar&version=1.1.18"
 
@@ -43,6 +44,13 @@ Task("Build")
     MSBuild(solutionFile, new MSBuildSettings {
         Configuration = buildConfiguration
     });
+});
+
+Task("Test")
+  .IsDependentOn("Build")
+  .Does(() =>
+{
+    NUnit(string.Format("./test/src/bin/{0}/ReSharper.Structured.Logging.Tests.dll", buildConfiguration));
 });
 
 Task("NugetPack")

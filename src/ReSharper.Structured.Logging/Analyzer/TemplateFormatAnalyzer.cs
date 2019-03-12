@@ -118,7 +118,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 {
                     if (messageTemplate.NamedProperties.Length < argumentPosition)
                     {
-                        consumer.AddHighlighting(new TemplateFormatStringArgumentIsNotUsedWarning(argument.Expression));
+                        consumer.AddHighlighting(new TemplateFormatStringArgumentIsNotUsedWarning(argument));
                     }
                 }
                 else if (messageTemplate.PositionalProperties != null)
@@ -126,12 +126,12 @@ namespace ReSharper.Structured.Logging.Analyzer
                     if (!messageTemplate.PositionalProperties.Any(
                             p => p.TryGetPositionalValue(out int position) && position == argumentPosition - 1))
                     {
-                        consumer.AddHighlighting(new TemplateFormatStringArgumentIsNotUsedWarning(argument.Expression));
+                        consumer.AddHighlighting(new TemplateFormatStringArgumentIsNotUsedWarning(argument));
                     }
                 }
                 else
                 {
-                    consumer.AddHighlighting(new TemplateFormatStringArgumentIsNotUsedWarning(argument.Expression));
+                    consumer.AddHighlighting(new TemplateFormatStringArgumentIsNotUsedWarning(argument));
                 }
             }
         }

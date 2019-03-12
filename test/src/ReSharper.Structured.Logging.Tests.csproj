@@ -330,6 +330,8 @@
     <Compile Include="Constants\NugetPackages.cs" />
     <Compile Include="Highlighting\TemplateFormatItemAndMatchingArgumentHighlighterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuickFixes\QuickFixTestBase.cs" />
+    <Compile Include="QuickFixes\RemoveRedundantMessageTemplateArgumentValueFixTests.cs" />
     <Compile Include="TestEnvironment.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,11 @@ An extension for ReSharper that highlights structured logging templates and cont
 
 At the moment it supports Serilog, NLog, and Microsoft.Extensions.Logging
 
+## Installation
+
+Look for `Structured Logging` in ReSharper -> Extension manager.  
+[JetBrains Plugins Repository](https://plugins.jetbrains.com/plugin/12083-structured-logging)
+
 ## Highlighting
 
 ![Highlighting](https://github.com/olsh/resharper-structured-logging/raw/master/images/highlighting.png)

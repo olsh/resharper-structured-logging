@@ -31,12 +31,12 @@ namespace ReSharper.Structured.Logging.Tests.Highlighting
 
         protected override CaretPositionsProcessor CreateCaretPositionProcessor(FileSystemPath temporaryDirectory)
         {
-            return new SerilogCaretPositionsProcessor(FileSystemPath.TryParse(Path.GetTempPath()));
+            return new StructuredLoggingCaretPositionsProcessor(FileSystemPath.TryParse(Path.GetTempPath()));
         }
 
-        private class SerilogCaretPositionsProcessor : CaretPositionsProcessor
+        private class StructuredLoggingCaretPositionsProcessor : CaretPositionsProcessor
         {
-            public SerilogCaretPositionsProcessor([NotNull] FileSystemPath temporaryDirectory)
+            public StructuredLoggingCaretPositionsProcessor([NotNull] FileSystemPath temporaryDirectory)
                 : base(temporaryDirectory)
             {
             }

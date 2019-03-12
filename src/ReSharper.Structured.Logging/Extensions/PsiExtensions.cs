@@ -70,7 +70,7 @@ namespace ReSharper.Structured.Logging.Extensions
             }
 
             var className = typeMember.GetContainingType()?.GetClrName().FullName;
-            if (className == "Microsoft.Extensions.Logging.LoggerExtensions" || className == "NLog.Logger")
+            if (className == "Microsoft.Extensions.Logging.LoggerExtensions")
             {
                 return "message";
             }

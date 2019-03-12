@@ -1,7 +1,7 @@
 ﻿using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
-using JetBrains.ReSharper.Psi.Tree;
+using JetBrains.ReSharper.Psi.CSharp.Tree;
 
 namespace ReSharper.Structured.Logging.Highlighting
 {
@@ -17,12 +17,12 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         private const string SeverityId = "TemplateFormatStringProblem";
 
-        private readonly IExpression _expression;
-
-        public TemplateFormatStringArgumentIsNotUsedWarning(IExpression expression)
+        public TemplateFormatStringArgumentIsNotUsedWarning(ICSharpArgument argument)
         {
-            _expression = expression;
+            Argument = argument;
         }
+
+        public ICSharpArgument Argument { get; }
 
         public string ErrorStripeToolTip => ToolTip;
 
@@ -30,14 +30,14 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         public DocumentRange CalculateRange()
         {
-            return _expression.GetHighlightingRange();
+            return Argument.Expression.GetHighlightingRange();
         }
 
         public bool IsValid()
         {
-            if (_expression != null)
+            if (Argument.Expression != null)
             {
-                return _expression.IsValid();
+                return Argument.Expression.IsValid();
             }
 
             return true;
