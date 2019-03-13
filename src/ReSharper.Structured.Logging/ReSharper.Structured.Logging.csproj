@@ -338,6 +338,7 @@
     <Compile Include="Highlighting\TemplateFormatItemAndMatchingArgumentHighlighter.cs" />
     <Compile Include="Highlighting\TemplateIsNotCompileTimeConstantWarning.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuickFixes\AddDestructuringToMessageTemplatePropertyFix.cs" />
     <Compile Include="QuickFixes\RemoveRedundantMessageTemplateArgumentValueFix.cs" />
     <Compile Include="Serilog\Core\IMessageTemplateParser.cs" />
     <Compile Include="Serilog\Events\MessageTemplate.cs" />

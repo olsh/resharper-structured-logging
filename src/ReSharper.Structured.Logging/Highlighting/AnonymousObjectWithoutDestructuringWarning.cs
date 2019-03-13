@@ -1,12 +1,18 @@
 ﻿using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
+using JetBrains.ReSharper.Psi.Util;
 
 using ReSharper.Structured.Logging.Highlighting;
+using ReSharper.Structured.Logging.Serilog.Parsing;
 
 [assembly:
-    RegisterConfigurableSeverity(AnonymousObjectDestructuringWarning.SeverityId, null, HighlightingGroupIds.CompilerWarnings,
-        AnonymousObjectDestructuringWarning.Message, AnonymousObjectDestructuringWarning.Message,
+    RegisterConfigurableSeverity(
+        AnonymousObjectDestructuringWarning.SeverityId,
+        null,
+        HighlightingGroupIds.CompilerWarnings,
+        AnonymousObjectDestructuringWarning.Message,
+        AnonymousObjectDestructuringWarning.Message,
         Severity.WARNING)]
 
 namespace ReSharper.Structured.Logging.Highlighting
@@ -22,25 +28,34 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         public const string SeverityId = "AnonymousObjectDestructuringProblem";
 
-        private readonly DocumentRange _documentRange;
-
-        public AnonymousObjectDestructuringWarning(DocumentRange documentRange)
+        public AnonymousObjectDestructuringWarning(
+            IStringLiteralAlterer stringLiteral,
+            PropertyToken namedProperty,
+            DocumentRange documentRange)
         {
-            _documentRange = documentRange;
+            StringLiteral = stringLiteral;
+            NamedProperty = namedProperty;
+            Range = documentRange;
         }
 
         public string ErrorStripeToolTip => ToolTip;
+
+        public PropertyToken NamedProperty { get; }
+
+        public DocumentRange Range { get; }
+
+        public IStringLiteralAlterer StringLiteral { get; }
 
         public string ToolTip => Message;
 
         public DocumentRange CalculateRange()
         {
-            return _documentRange;
+            return Range;
         }
 
         public bool IsValid()
         {
-            return _documentRange.IsValid();
+            return Range.IsValid();
         }
     }
 }

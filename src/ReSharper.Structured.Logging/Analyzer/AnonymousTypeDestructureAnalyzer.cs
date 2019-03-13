@@ -64,7 +64,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                         continue;
                     }
 
-                    consumer.AddHighlighting(new AnonymousObjectDestructuringWarning(stringLiteral.GetTokenDocumentRange(namedProperty)));
+                    consumer.AddHighlighting(new AnonymousObjectDestructuringWarning(stringLiteral, namedProperty, stringLiteral.GetTokenDocumentRange(namedProperty)));
                 }
             }
         }
