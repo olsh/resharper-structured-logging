@@ -10,26 +10,26 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IInvocationExpression))]
     public class ContextualLoggerSerilogFactoryAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
-        protected override void Run(IInvocationExpression invocation, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
+        protected override void Run(IInvocationExpression element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
         {
-            if (!invocation.IsSerilogContextFactoryLogger())
+            if (!element.IsSerilogContextFactoryLogger())
             {
                 return;
             }
 
-            var containingNode = invocation.GetContainingNode<ITypeDeclaration>();
+            var containingNode = element.GetContainingNode<ITypeDeclaration>();
             if (containingNode == null)
             {
                 return;
             }
 
-            var invocationTypeArgument = invocation.TypeArguments[0]?.GetScalarType()?.GetClrName();
+            var invocationTypeArgument = element.TypeArguments[0]?.GetScalarType()?.GetClrName();
             if (invocationTypeArgument?.FullName == containingNode.CLRName)
             {
                 return;
             }
 
-            consumer.AddHighlighting(new DuplicateTemplatePropertyWarning(invocation.GetDocumentRange()));
+            consumer.AddHighlighting(new DuplicateTemplatePropertyWarning(element.GetDocumentRange()));
         }
     }
 }

@@ -12,41 +12,41 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IConstructorDeclaration))]
     public class ContextualLoggerConstructorAnalyzer : ElementProblemAnalyzer<IConstructorDeclaration>
     {
-        protected override void Run(IConstructorDeclaration constructor, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
+        protected override void Run(IConstructorDeclaration element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
         {
-            if (constructor.Params?.ParameterDeclarations == null)
+            if (element.Params?.ParameterDeclarations == null)
             {
                 return;
             }
 
-            foreach (var declaration in constructor.Params.ParameterDeclarations)
+            foreach (var declaration in element.Params.ParameterDeclarations)
             {
                 if (!(declaration.Type is IDeclaredType declaredType))
                 {
-                    return;
+                    continue;
                 }
 
                 if (!declaredType.IsGenericMicrosoftExtensionsLogger())
                 {
-                    return;
+                    continue;
                 }
 
                 var argumentType = declaredType.GetFirstGenericArgumentType();
                 if (argumentType == null)
                 {
-                    return;
+                    continue;
                 }
 
-                var containingType = constructor.DeclaredElement?.GetContainingType();
+                var containingType = element.DeclaredElement?.GetContainingType();
                 var className = containingType?.GetClrName().FullName;
                 if (className == null)
                 {
-                    return;
+                    continue;
                 }
 
                 if (className.Equals(argumentType.GetClassType()?.GetClrName().FullName))
                 {
-                    return;
+                    continue;
                 }
 
                 consumer.AddHighlighting(new ContextualLoggerWarning(declaration.TypeUsage.GetDocumentRange()));
