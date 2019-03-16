@@ -33,6 +33,11 @@ namespace ReSharper.Structured.Logging.Wiki
                                                                                           AnonymousObjectDestructuringWarning
                                                                                               .SeverityId,
                                                                                           $"{BaseUrl}anonymous-objects-must-be-destructured"
+                                                                                      },
+                                                                                      {
+                                                                                          ContextualLoggerWarning
+                                                                                              .SeverityId,
+                                                                                          $"{BaseUrl}incorrect-type-is-used-for-contextual-logger"
                                                                                       }
                                                                                   };
 

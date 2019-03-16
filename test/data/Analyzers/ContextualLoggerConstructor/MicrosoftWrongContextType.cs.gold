@@ -1,0 +1,16 @@
+﻿using Microsoft.Extensions.Logging;
+
+class A
+{
+	ILogger<B> _log;
+	
+	public A(|ILogger<B>|(0) log)
+	{
+		_log = log;
+	}
+}
+
+class B { }
+
+---------------------------------------------------------
+(0): ReSharper Warning: Incorrect type is used for contextual logger
