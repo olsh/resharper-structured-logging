@@ -1,0 +1,11 @@
+﻿using Serilog;
+
+class A
+{
+    private static readonly ILogger Logger = |Logger.ForContext<B>()|(0);
+}
+
+class B {} 
+
+---------------------------------------------------------
+(0):<overlapped> ReSharper Warning: Duplicate properties in message template
