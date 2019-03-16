@@ -323,6 +323,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analyzer\AnonymousTypeDestructureAnalyzerTests.cs" />
+    <Compile Include="Analyzer\ContextualLoggerConstructorAnalyzerTests.cs" />
+    <Compile Include="Analyzer\ContextualLoggerSerilogFactoryAnalyzerTests.cs" />
     <Compile Include="Analyzer\CorrectExceptionPassingAnalyzerTests.cs" />
     <Compile Include="Analyzer\DuplicatePropertiesTemplateAnalyzerTests.cs" />
     <Compile Include="Analyzer\MessageTemplateTests.cs" />

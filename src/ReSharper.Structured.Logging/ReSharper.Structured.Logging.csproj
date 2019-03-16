@@ -326,11 +326,14 @@
   <ItemGroup>
     <Compile Include="Analyzer\AnonymousTypeDestructureAnalyzer.cs" />
     <Compile Include="Analyzer\CompileTimeConstantTemplateAnalyzer.cs" />
+    <Compile Include="Analyzer\ContextualLoggerConstructorAnalyzer.cs" />
+    <Compile Include="Analyzer\ContextualLoggerSerilogFactoryAnalyzer.cs" />
     <Compile Include="Analyzer\CorrectExceptionPassingAnalyzer.cs" />
     <Compile Include="Analyzer\DuplicatePropertiesTemplateAnalyzer.cs" />
     <Compile Include="Analyzer\TemplateFormatAnalyzer.cs" />
     <Compile Include="Extensions\PsiExtensions.cs" />
     <Compile Include="Highlighting\AnonymousObjectWithoutDestructuringWarning.cs" />
+    <Compile Include="Highlighting\ContextualLoggerWarning.cs" />
     <Compile Include="Highlighting\DuplicateTemplatePropertyWarning.cs" />
     <Compile Include="Highlighting\ExceptionPassedAsTemplateArgumentWarning.cs" />
     <Compile Include="Highlighting\TemplateFormatStringArgumentIsNotUsedWarning.cs" />
@@ -349,6 +352,7 @@
     <Compile Include="Serilog\Parsing\MessageTemplateToken.cs" />
     <Compile Include="Serilog\Parsing\PropertyToken.cs" />
     <Compile Include="Serilog\Parsing\TextToken.cs" />
+    <Compile Include="Wiki\StructuredLoggingWikiDataProvider.cs" />
     <Compile Include="ZoneMarker.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -48,6 +48,46 @@ namespace ReSharper.Structured.Logging.Extensions
             return GetTokenDocumentRange(token, documentRange);
         }
 
+        public static bool IsGenericMicrosoftExtensionsLogger([NotNull]this IDeclaredType declared)
+        {
+            return declared.GetClrName().FullName == "Microsoft.Extensions.Logging.ILogger`1";
+        }
+
+        public static bool IsSerilogContextFactoryLogger([NotNull]this IInvocationExpression invocationExpression)
+        {
+            if (invocationExpression.TypeArguments.Count != 1)
+            {
+                return false;
+            }
+
+            var declaredElement = invocationExpression.Reference?.Resolve().DeclaredElement as IClrDeclaredElement;
+            var containingType = declaredElement?.GetContainingType();
+            if (containingType == null)
+            {
+                return false;
+            }
+
+            if (containingType.GetClrName().FullName == "Serilog.ILogger" && declaredElement.ShortName == "ForContext")
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        [CanBeNull]
+        public static IType GetFirstGenericArgumentType([NotNull]this IDeclaredType declared)
+        {
+            var substitution = declared.GetSubstitution();
+            var typeParameter = substitution.Domain.FirstOrDefault();
+            if (typeParameter == null)
+            {
+                return null;
+            }
+
+            return substitution.Apply(typeParameter);
+        }
+
         private static DocumentRange GetTokenDocumentRange(
             MessageTemplateToken token,
             DocumentRange documentRange)
@@ -57,7 +97,7 @@ namespace ReSharper.Structured.Logging.Extensions
             return new DocumentRange(documentRange.Document, new TextRange(startOffset, startOffset + token.Length));
         }
 
-        private static string GetTemplateParameterName(this ITypeMember typeMember)
+        private static string GetTemplateParameterName([NotNull] this ITypeMember typeMember)
         {
             var templateFormatAttribute = typeMember.GetAttributeInstances(true)
                 .FirstOrDefault(a => a.GetAttributeShortName() == "MessageTemplateFormatMethodAttribute");
