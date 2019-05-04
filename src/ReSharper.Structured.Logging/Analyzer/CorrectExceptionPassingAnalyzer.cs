@@ -25,7 +25,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             }
 
             var templateArgumentIndex = templateArgument.IndexOf();
-            var exceptionType = element.PsiModule.GetPredefinedType().TryGetType(PredefinedType.EXCEPTION_FQN);
+            var exceptionType = element.PsiModule.GetPredefinedType().TryGetType(PredefinedType.EXCEPTION_FQN, NullableAnnotation.Unknown);
             if (exceptionType == null)
             {
                 return;

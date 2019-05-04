@@ -99,7 +99,7 @@ namespace ReSharper.Structured.Logging.Extensions
 
         private static string GetTemplateParameterName([NotNull] this ITypeMember typeMember)
         {
-            var templateFormatAttribute = typeMember.GetAttributeInstances(true)
+            var templateFormatAttribute = typeMember.GetAttributeInstances(AttributesSource.All)
                 .FirstOrDefault(a => a.GetAttributeShortName() == "MessageTemplateFormatMethodAttribute");
 
             if (templateFormatAttribute != null)

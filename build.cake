@@ -1,12 +1,12 @@
-#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.3.1"
+#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.6.0"
 #tool "nuget:?package=NUnit.Runners&version=2.6.4"
 
 #addin "nuget:?package=Cake.Sonar&version=1.1.18"
 
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");
-var waveVersion = Argument("wave", "[183.0]");
-var extensionsVersion =  Argument("Version", "2018.3.4");
+var waveVersion = Argument("wave", "[191.0]");
+var extensionsVersion =  Argument("Version", "2019.1.1");
 
 var solutionName = "ReSharper.Structured.Logging";
 var projectName = solutionName;
