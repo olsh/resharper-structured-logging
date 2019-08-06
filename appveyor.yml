@@ -7,8 +7,6 @@ build_script:
     dotnet cake -Target=CreateArtifact -buildConfig=Release
 
     dotnet cake -Host="Rider" -Target=CreateArtifact -buildConfig=Release
-
-    dotnet cake -Target=Sonar -buildConfig=Release
 test: off
 cache:
   - '%USERPROFILE%\.nuget\packages -> **\*.csproj'
