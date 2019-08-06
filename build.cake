@@ -136,7 +136,7 @@ Task("SonarEnd")
 
 Task("Sonar")
   .IsDependentOn("SonarBegin")
-  .IsDependentOn("Build")
+  .IsDependentOn("BuildSolution")
   .IsDependentOn("SonarEnd");
 
 Task("CreateArtifact")
