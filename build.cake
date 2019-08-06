@@ -38,17 +38,18 @@ Task("UpdateBuildVersion")
     BuildSystem.AppVeyor.UpdateBuildVersion(extensionsVersion);
 });
 
-Task("NugetRestore")
+Task("Build")
   .Does(() =>
 {
-    NuGetRestore(solutionFile);
+    DotNetCoreBuild(projectFile, new DotNetCoreBuildSettings {
+        Configuration = buildConfiguration
+    });
 });
 
-Task("Build")
-  .IsDependentOn("NugetRestore")
+Task("BuildSolution")
   .Does(() =>
 {
-    MSBuild(solutionFile, new MSBuildSettings {
+    DotNetCoreBuild(solutionFile, new DotNetCoreBuildSettings {
         Configuration = buildConfiguration
     });
 });
