@@ -5,12 +5,19 @@ using JetBrains.TestFramework.Application.Zones;
 
 using NUnit.Framework;
 
+#if RIDER
+using JetBrains.ReSharper.Host.Env;
+#endif
+
 [assembly: RequiresSTA]
 
 namespace ReSharper.Structured.Logging.Tests
 {
     [ZoneDefinition]
     public interface IReSharperSerilog : ITestsEnvZone, IRequire<PsiFeatureTestZone>
+#if RIDER
+                                         , IRequire<IRiderPlatformZone>
+#endif
     {
     }
 

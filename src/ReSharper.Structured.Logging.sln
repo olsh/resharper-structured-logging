@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.438
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReSharper.Structured.Logging", "ReSharper.Structured.Logging\ReSharper.Structured.Logging.csproj", "{0B29307F-4E38-4611-BA0D-408A4B4F4E15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReSharper.Structured.Logging", "ReSharper.Structured.Logging\ReSharper.Structured.Logging.csproj", "{0B29307F-4E38-4611-BA0D-408A4B4F4E15}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReSharper.Structured.Logging.Tests", "..\test\src\ReSharper.Structured.Logging.Tests.csproj", "{D07C40A7-39BE-4725-889F-FF2F2B781442}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReSharper.Structured.Logging.Tests", "..\test\src\ReSharper.Structured.Logging.Tests.csproj", "{D07C40A7-39BE-4725-889F-FF2F2B781442}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8F7509A6-86AF-48A9-BD71-464ED879D8FA}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\build.cake = ..\build.cake
 		..\README.md = ..\README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReSharper.Structured.Logging.Rider", "ReSharper.Structured.Logging\ReSharper.Structured.Logging.Rider.csproj", "{81C42342-6FD5-48D0-B45F-FD364B170FC1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReSharper.Structured.Logging.Rider.Tests", "..\test\src\ReSharper.Structured.Logging.Rider.Tests.csproj", "{6BC99E0B-6362-4A62-84F1-103B93896294}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +32,14 @@ Global
 		{D07C40A7-39BE-4725-889F-FF2F2B781442}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D07C40A7-39BE-4725-889F-FF2F2B781442}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D07C40A7-39BE-4725-889F-FF2F2B781442}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81C42342-6FD5-48D0-B45F-FD364B170FC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81C42342-6FD5-48D0-B45F-FD364B170FC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81C42342-6FD5-48D0-B45F-FD364B170FC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81C42342-6FD5-48D0-B45F-FD364B170FC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BC99E0B-6362-4A62-84F1-103B93896294}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BC99E0B-6362-4A62-84F1-103B93896294}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BC99E0B-6362-4A62-84F1-103B93896294}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BC99E0B-6362-4A62-84F1-103B93896294}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

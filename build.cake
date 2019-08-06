@@ -6,14 +6,21 @@
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");
 var waveVersion = Argument("wave", "[191.0]");
-var extensionsVersion =  Argument("Version", "2019.1.1");
+var host = Argument("Host", "Resharper");
 
 var solutionName = "ReSharper.Structured.Logging";
 var projectName = solutionName;
+var riderHost = "Rider";
+if (host == riderHost)
+{
+    projectName = solutionName + ".Rider";
+}
 
 var solutionFile = string.Format("./src/{0}.sln", solutionName);
 var solutionFolder = string.Format("./src/{0}/", solutionName);
 var projectFile = string.Format("{0}{1}.csproj", solutionFolder, projectName);
+
+var extensionsVersion = XmlPeek(projectFile, "Project/PropertyGroup[1]/VersionPrefix/text()");
 
 Task("AppendBuildNumber")
   .WithCriteria(BuildSystem.AppVeyor.IsRunningOnAppVeyor)
@@ -51,6 +58,7 @@ Task("Test")
   .Does(() =>
 {
     NUnit(string.Format("./test/src/bin/{0}/ReSharper.Structured.Logging.Tests.dll", buildConfiguration));
+    NUnit(string.Format("./test/src/bin/{0}/ReSharper.Structured.Logging.Rider.Tests.dll", buildConfiguration));
 });
 
 Task("NugetPack")
@@ -84,6 +92,25 @@ Task("NugetPack")
                                  };
 
      NuGetPack(nuGetPackSettings);
+
+     if (host == riderHost)
+     {
+         var tempDirectory = "./temp/";
+         if (DirectoryExists(tempDirectory))
+         {
+             DeleteDirectory(tempDirectory, new DeleteDirectorySettings { Force = true, Recursive = true });
+         }
+
+         var riderMetaFolderName = "rider-structured-logging";
+         var riderMetaFolderPath = string.Format("{0}{1}/", tempDirectory, riderMetaFolderName);
+         CopyDirectory(string.Format("./src/{0}/", riderMetaFolderName), riderMetaFolderPath);
+         var nugetPackage = string.Format("{0}.{1}.nupkg", projectName, extensionsVersion);
+         CopyFile(nugetPackage, string.Format("{0}{1}", riderMetaFolderPath, nugetPackage));
+
+         XmlPoke(string.Format("{0}META-INF/plugin.xml", riderMetaFolderPath), "idea-plugin/version", extensionsVersion, new XmlPokeSettings { Encoding = new UTF8Encoding(false) });
+
+         Zip(tempDirectory, string.Format("./{0}.zip", riderMetaFolderName));
+     }
 });
 
 Task("SonarBegin")
@@ -118,6 +145,11 @@ Task("CreateArtifact")
   .Does(() =>
 {
     var artifactFile = string.Format("{0}.{1}.nupkg", projectName, extensionsVersion);
+    if (host == riderHost)
+    {
+        artifactFile = string.Format("rider-structured-logging.zip");
+    }
+
     BuildSystem.AppVeyor.UploadArtifact(artifactFile);
 });
 
