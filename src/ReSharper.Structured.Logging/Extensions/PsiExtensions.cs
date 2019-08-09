@@ -31,7 +31,7 @@ namespace ReSharper.Structured.Logging.Extensions
             }
 
             return invocationExpression.ArgumentList.Arguments.FirstOrDefault(
-                a => a.GetMatchingParameterName() == templateParameterName);
+                a => a.MatchingParameter?.Element.ShortName == templateParameterName);
         }
 
         public static DocumentRange GetTokenDocumentRange(this ICSharpArgument argument, MessageTemplateToken token)

@@ -26,19 +26,5 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
         protected override string RelativeTestDataPath => @"QuickFixes\" + SubPath;
 
         protected abstract string SubPath { get; }
-
-        [TestCaseSource(nameof(FileNames))]
-        public void Test(string fileName)
-        {
-            DoTestFiles(fileName);
-        }
-
-        // ReSharper disable once MemberCanBePrivate.Global
-        protected TestCaseData[] FileNames()
-        {
-            return Directory.GetFiles(@"..\..\..\..\test\data\" + RelativeTestDataPath, "*.cs")
-                .Select(x => new TestCaseData(Path.GetFileName(x)))
-                .ToArray();
-        }
     }
 }

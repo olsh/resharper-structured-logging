@@ -9,7 +9,7 @@ using NUnit.Framework;
 using JetBrains.ReSharper.Host.Env;
 #endif
 
-[assembly: RequiresSTA]
+[assembly: RequiresThread(System.Threading.ApartmentState.STA)]
 
 namespace ReSharper.Structured.Logging.Tests
 {
