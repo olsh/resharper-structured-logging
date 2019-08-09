@@ -338,3 +338,6 @@ ASALocalRun/
 
 # Cake
 tools/
+
+# Temp build folder
+temp/
