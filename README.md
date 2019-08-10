@@ -2,14 +2,19 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/c4riih64hbd4sebw?svg=true)](https://ci.appveyor.com/project/olsh/resharper-structured-logging)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=resharper-structured-logging&metric=alert_status)](https://sonarcloud.io/dashboard?id=resharper-structured-logging)
 
-An extension for ReSharper that highlights structured logging templates and contains some useful analyzers
+An extension for ReSharper and Rider IDE that highlights structured logging templates and contains some useful analyzers
 
 At the moment it supports Serilog, NLog, and Microsoft.Extensions.Logging
 
-## Installation
+## Installation ReSharper
 
 Look for `Structured Logging` in ReSharper -> Extension manager.  
 [JetBrains Plugins Repository](https://plugins.jetbrains.com/plugin/12083-structured-logging)
+
+## Installation Rider
+
+Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.  
+[JetBrains Plugins Repository](https://plugins.jetbrains.com/plugin/12832-structured-logging)
 
 ## Highlighting
 

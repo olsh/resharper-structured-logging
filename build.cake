@@ -1,5 +1,5 @@
 #tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.6.0"
-#tool "nuget:?package=NUnit.Runners&version=2.6.4"
+#tool "nuget:?package=NUnit.ConsoleRunner&version=3.10.0"
 
 #addin "nuget:?package=Cake.Sonar&version=1.1.18"
 
@@ -16,6 +16,7 @@ if (host == riderHost)
     projectName = solutionName + ".Rider";
 }
 
+var testProjectName = projectName + ".Tests";
 var solutionFile = string.Format("./src/{0}.sln", solutionName);
 var solutionFolder = string.Format("./src/{0}/", solutionName);
 var projectFile = string.Format("{0}{1}.csproj", solutionFolder, projectName);
@@ -41,30 +42,37 @@ Task("UpdateBuildVersion")
 Task("Build")
   .Does(() =>
 {
-    DotNetCoreBuild(projectFile, new DotNetCoreBuildSettings {
-        Configuration = buildConfiguration
-    });
+    MSBuild(projectFile, s => 
+							s.SetConfiguration(buildConfiguration)
+							 .WithRestore());
 });
 
 Task("BuildSolution")
   .Does(() =>
 {
-    DotNetCoreBuild(solutionFile, new DotNetCoreBuildSettings {
-        Configuration = buildConfiguration
-    });
+    MSBuild(solutionFile, s => 
+							s.SetConfiguration(buildConfiguration)
+							 .WithRestore());
 });
 
 Task("Test")
   .IsDependentOn("Build")
   .Does(() =>
 {
-    NUnit(string.Format("./test/src/bin/{0}/ReSharper.Structured.Logging.Tests.dll", buildConfiguration));
-    NUnit(string.Format("./test/src/bin/{0}/ReSharper.Structured.Logging.Rider.Tests.dll", buildConfiguration));
+    if (host == riderHost)
+    {
+        NUnit3(string.Format("./test/src/bin/{0}/{1}/ReSharper.Structured.Logging.Rider.Tests.dll", testProjectName, buildConfiguration));
+    }
+    else
+    {
+        NUnit3(string.Format("./test/src/bin/{0}/{1}/ReSharper.Structured.Logging.Tests.dll", testProjectName, buildConfiguration));
+    }
 });
 
 Task("NugetPack")
   .IsDependentOn("AppendBuildNumber")
   .IsDependentOn("Build")
+  .IsDependentOn("Test")
   .Does(() =>
 {
      var buildPath = string.Format("./src/{0}/bin/{1}", solutionName, buildConfiguration);
@@ -153,11 +161,6 @@ Task("CreateArtifact")
 
     BuildSystem.AppVeyor.UploadArtifact(artifactFile);
 });
-
-Task("CI")
-    .IsDependentOn("Sonar")
-    .IsDependentOn("Test")
-    .IsDependentOn("CreateArtifact");
 
 Task("Default")
     .IsDependentOn("NugetPack");

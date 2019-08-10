@@ -29,7 +29,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            consumer.AddHighlighting(new DuplicateTemplatePropertyWarning(element.GetDocumentRange()));
+            consumer.AddHighlighting(new ContextualLoggerWarning(element.GetDocumentRange()));
         }
     }
 }

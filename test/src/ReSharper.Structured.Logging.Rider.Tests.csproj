@@ -14,7 +14,8 @@
     <SonarQubeExclude>true</SonarQubeExclude>
     <RootNamespace>ReSharper.Structured.Logging.Tests</RootNamespace>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup>
     <DefineConstants>RIDER</DefineConstants>
+    <OutputPath>bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
   </PropertyGroup>
 </Project>
