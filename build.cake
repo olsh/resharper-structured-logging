@@ -40,12 +40,21 @@ Task("UpdateBuildVersion")
     BuildSystem.AppVeyor.UpdateBuildVersion(extensionsVersion);
 });
 
-Task("Build")
+Task("NugetRestore")
   .Does(() =>
 {
-    MSBuild(solutionFile, s => 
-                            s.SetConfiguration(buildConfiguration)
-                             .WithRestore());
+    var projects = GetFiles("./**/*.csproj");
+    foreach(var project in projects)
+    {
+        NuGetRestore(project);
+    }
+});
+
+Task("Build")
+  .IsDependentOn("NugetRestore")
+  .Does(() =>
+{
+    MSBuild(solutionFile, s => s.SetConfiguration(buildConfiguration));
 });
 
 Task("Test")
