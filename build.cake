@@ -17,6 +17,7 @@ if (host == riderHost)
 }
 
 var testProjectName = projectName + ".Tests";
+var testAssembly = string.Format("./test/src/bin/{0}/{1}/{0}.dll", testProjectName, buildConfiguration);
 var solutionFile = string.Format("./src/{0}.sln", solutionName);
 var solutionFolder = string.Format("./src/{0}/", solutionName);
 var projectFile = string.Format("{0}{1}.csproj", solutionFolder, projectName);
@@ -42,31 +43,16 @@ Task("UpdateBuildVersion")
 Task("Build")
   .Does(() =>
 {
-    MSBuild(projectFile, s => 
-							s.SetConfiguration(buildConfiguration)
-							 .WithRestore());
-});
-
-Task("BuildSolution")
-  .Does(() =>
-{
     MSBuild(solutionFile, s => 
-							s.SetConfiguration(buildConfiguration)
-							 .WithRestore());
+                            s.SetConfiguration(buildConfiguration)
+                             .WithRestore());
 });
 
 Task("Test")
   .IsDependentOn("Build")
   .Does(() =>
 {
-    if (host == riderHost)
-    {
-        NUnit3(string.Format("./test/src/bin/{0}/{1}/ReSharper.Structured.Logging.Rider.Tests.dll", testProjectName, buildConfiguration));
-    }
-    else
-    {
-        NUnit3(string.Format("./test/src/bin/{0}/{1}/ReSharper.Structured.Logging.Tests.dll", testProjectName, buildConfiguration));
-    }
+    NUnit3(testAssembly);
 });
 
 Task("NugetPack")
@@ -75,7 +61,7 @@ Task("NugetPack")
   .IsDependentOn("Test")
   .Does(() =>
 {
-     var buildPath = string.Format("./src/{0}/bin/{1}", solutionName, buildConfiguration);
+     var buildPath = string.Format("./src/{0}/bin/{1}/{2}", solutionName, projectName, buildConfiguration);
 
      var files = new List<NuSpecContent>();
      files.Add(new NuSpecContent {Source = string.Format("{0}/{1}.dll", buildPath, projectName), Target = "dotFiles"});
@@ -144,7 +130,7 @@ Task("SonarEnd")
 
 Task("Sonar")
   .IsDependentOn("SonarBegin")
-  .IsDependentOn("BuildSolution")
+  .IsDependentOn("Build")
   .IsDependentOn("SonarEnd");
 
 Task("CreateArtifact")
