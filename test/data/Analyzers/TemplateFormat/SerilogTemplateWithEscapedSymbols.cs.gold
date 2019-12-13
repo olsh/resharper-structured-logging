@@ -12,9 +12,9 @@ namespace ConsoleApp
 }
 
 ---------------------------------------------------------
-(0): ReSharper String Escape Character 1: 
-(1): ReSharper String Escape Character 2: 
+(0): ReSharper C# Escape Character 1: 
+(1): ReSharper C# Escape Character 2: 
 (2): ReSharper Format String Item: 
-(3): ReSharper String Escape Character 1: 
-(4): ReSharper String Escape Character 2: 
+(3): ReSharper C# Escape Character 1: 
+(4): ReSharper C# Escape Character 2: 
 (5): ReSharper Format String Item: 
