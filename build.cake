@@ -5,7 +5,7 @@
 
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");
-var waveVersion = Argument("wave", "[192.0]");
+var waveVersion = Argument("wave", "[193.0]");
 var host = Argument("Host", "Resharper");
 
 var solutionName = "ReSharper.Structured.Logging";
