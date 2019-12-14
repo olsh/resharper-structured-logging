@@ -13,6 +13,6 @@ namespace ConsoleApp
 }
 
 ---------------------------------------------------------
-(0): ReSharper String Escape Character 1: 
-(1): ReSharper String Escape Character 1: 
+(0): ReSharper C# Escape Character 1: 
+(1): ReSharper C# Escape Character 1: 
 (2): ReSharper Warning: Exception should be passed to the exception argument
