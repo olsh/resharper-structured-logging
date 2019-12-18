@@ -1,7 +1,7 @@
 #tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.6.0"
 #tool "nuget:?package=NUnit.ConsoleRunner&version=3.10.0"
 
-#addin "nuget:?package=Cake.Sonar&version=1.1.18"
+#addin "nuget:?package=Cake.Sonar&version=1.1.22"
 
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");

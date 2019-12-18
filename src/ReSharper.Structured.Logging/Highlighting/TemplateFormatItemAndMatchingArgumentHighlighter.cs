@@ -3,7 +3,7 @@
 using JetBrains.Annotations;
 using JetBrains.ReSharper.Daemon.CaretDependentFeatures;
 using JetBrains.ReSharper.Feature.Services.Contexts;
-using JetBrains.ReSharper.Feature.Services.Daemon;
+using JetBrains.ReSharper.Feature.Services.Daemon.Attributes;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
@@ -138,7 +138,7 @@ namespace ReSharper.Structured.Logging.Highlighting
             {
                 var property = namedProperties[argumentIndex];
                 consumer.ConsumeHighlighting(
-                    HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                    GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                     templateArgument.GetTokenDocumentRange(property));
             }
             else if (positionalProperties != null)
@@ -156,13 +156,13 @@ namespace ReSharper.Structured.Logging.Highlighting
                     }
 
                     consumer.ConsumeHighlighting(
-                        HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                        GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                         templateArgument.GetTokenDocumentRange(property));
                 }
             }
 
             consumer.ConsumeHighlighting(
-                HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                 selectedArgument.GetDocumentRange());
         }
 
@@ -188,10 +188,10 @@ namespace ReSharper.Structured.Logging.Highlighting
                 }
 
                 consumer.ConsumeHighlighting(
-                    HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                    GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                     templateArgument.GetTokenDocumentRange(selectedToken));
                 consumer.ConsumeHighlighting(
-                    HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                    GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                     arguments[argumentIndex].GetDocumentRange());
             }
             else if (messageTemplate.PositionalProperties != null)
@@ -220,7 +220,7 @@ namespace ReSharper.Structured.Logging.Highlighting
                     }
 
                     consumer.ConsumeHighlighting(
-                        HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                        GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                         templateArgument.GetTokenDocumentRange(property));
                 }
 
@@ -231,7 +231,7 @@ namespace ReSharper.Structured.Logging.Highlighting
                 }
 
                 consumer.ConsumeHighlighting(
-                    HighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                    GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                     arguments[argumentIndex].GetDocumentRange());
             }
         }

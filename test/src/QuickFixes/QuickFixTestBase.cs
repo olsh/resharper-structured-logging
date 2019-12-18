@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-
-using JetBrains.ReSharper.Feature.Services.QuickFixes;
+﻿using JetBrains.ReSharper.Feature.Services.QuickFixes;
 using JetBrains.ReSharper.FeaturesTestFramework.Intentions;
 using JetBrains.ReSharper.TestFramework;
 
