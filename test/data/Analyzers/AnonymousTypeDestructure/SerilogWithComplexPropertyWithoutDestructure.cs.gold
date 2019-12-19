@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Serilog;
+﻿using Serilog;
+using System;
 
 namespace ConsoleApp
 {
@@ -8,10 +7,11 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-            Log.Logger.Information("|{$MyProperty}|(0)", new Dictionary<int, string>());
+            Log.Logger.Information("||{MyProperty}|(0)|(1)", new { Test = 1, Complex = new Random() });
         }
     }
 }
 
 ---------------------------------------------------------
 (0): ReSharper Format String Item: 
+(1): ReSharper Warning: Anonymous objects must be destructured

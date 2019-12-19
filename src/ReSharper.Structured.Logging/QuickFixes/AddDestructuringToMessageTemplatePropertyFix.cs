@@ -33,6 +33,13 @@ namespace ReSharper.Structured.Logging.QuickFixes
             _namedProperty = error.NamedProperty;
         }
 
+        public AddDestructuringToMessageTemplatePropertyFix([NotNull] ComplexObjectDestructuringWarning error)
+        {
+            _range = error.Range;
+            _stringLiteral = error.StringLiteral;
+            _namedProperty = error.NamedProperty;
+        }
+
         public override string Text => "Add destructuring to property";
 
         public override bool IsAvailable(IUserDataHolder cache)

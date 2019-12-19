@@ -8,11 +8,11 @@ namespace ConsoleApp
     {
 		public static void Main()
 		{
-			Log.Logger.Information("||{MyProperty}|(0)|(1)", new List<string>() { "test" });
+			IEnumerable list = new List<string>() { "test" };
+			Log.Logger.Information("|{MyProperty}|(0)", list);
 		}
     }
 }
 
 ---------------------------------------------------------
 (0): ReSharper Format String Item: 
-(1): ReSharper Warning: Complex objects with default ToString() implementation probably need to be destructured

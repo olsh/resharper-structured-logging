@@ -10,5 +10,7 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
         [Test] public void TestSerilogEscapedString() => DoNamedTest2();
 
         [Test] public void TestSerilogNewAnonymousObject() => DoNamedTest2();
+
+        [Test] public void TestSerilogNewComplexObject() => DoNamedTest2();
     }
 }

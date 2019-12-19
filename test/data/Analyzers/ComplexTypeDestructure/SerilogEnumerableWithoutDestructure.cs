@@ -8,7 +8,8 @@ namespace ConsoleApp
     {
 		public static void Main()
 		{
-			Log.Logger.Information("{MyProperty}", new List<string>() { "test" });
+			IEnumerable list = new List<string>() { "test" };
+			Log.Logger.Information("{MyProperty}", list);
 		}
     }
 }

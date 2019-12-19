@@ -1,6 +1,5 @@
+﻿using Serilog;
 using System;
-using System.Collections.Generic;
-using Serilog;
 
 namespace ConsoleApp
 {
@@ -8,7 +7,7 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-            Log.Logger.Information("{$MyProperty}", new Dictionary<int, string>());
+            Log.Logger.Information("{MyPro{caret}perty}", new Random());
         }
     }
 }

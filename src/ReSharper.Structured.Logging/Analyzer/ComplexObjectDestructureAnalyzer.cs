@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using JetBrains.Metadata.Reader.API;
+using JetBrains.Metadata.Reader.Impl;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
@@ -13,6 +15,8 @@ namespace ReSharper.Structured.Logging.Analyzer
     public class ComplexObjectDestructureAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
         private readonly MessageTemplateParser _messageTemplateParser;
+
+        public static readonly IClrTypeName GenericDictionaryFqn = new ClrTypeName("System.Collections.Generic.Dictionary`2");
 
         public ComplexObjectDestructureAnalyzer(MessageTemplateParser messageTemplateParser)
         {
@@ -122,15 +126,20 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return CheckIfBaseToStringUsed(nullable);
             }
 
-            if (iType.IsGenericIList())
+            if (iType is IDeclaredType declaredType)
             {
-                var enumerableUnderlyingType = iType.GetIEnumerableUnderlyingType();
-                if (enumerableUnderlyingType == null)
+                if (Equals(declaredType.GetClrName(), GenericDictionaryFqn))
                 {
-                    return false;
+                    var argumentType = declaredType.GetFirstGenericArgumentType();
+
+                    return argumentType != null && CheckIfBaseToStringUsed(argumentType);
                 }
 
-                return CheckIfBaseToStringUsed(enumerableUnderlyingType);
+                var genericType = CollectionTypeUtil.GetElementTypesForGenericEnumerable(declaredType);
+                if (genericType.Count == 1)
+                {
+                    return CheckIfBaseToStringUsed(genericType.Single());
+                }
             }
 
             return CheckIfBaseToStringUsed(iType);
