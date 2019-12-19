@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Information("|{$MyProperty}|(0)", new Dictionary<int, int>());
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Format String Item: 

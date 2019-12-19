@@ -2,6 +2,7 @@
 
 using JetBrains.ReSharper.Daemon.StringAnalysis;
 using JetBrains.ReSharper.Feature.Services.Daemon;
+using JetBrains.ReSharper.Feature.Services.Daemon.Attributes;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Util;
@@ -94,7 +95,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 consumer.AddHighlighting(
                     new StringEscapeCharacterHighlighting(
                         stringLiteral.GetTokenDocumentRange(token),
-                        HighlightingAttributeIds.FORMAT_STRING_ITEM));
+                        DefaultLanguageAttributeIds.FORMAT_STRING_ITEM));
             }
         }
 

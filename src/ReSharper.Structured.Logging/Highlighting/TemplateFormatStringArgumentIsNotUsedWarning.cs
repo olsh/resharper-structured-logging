@@ -1,5 +1,6 @@
 ﻿using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
+using JetBrains.ReSharper.Feature.Services.Daemon.Attributes;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 
@@ -8,7 +9,7 @@ namespace ReSharper.Structured.Logging.Highlighting
     [ConfigurableSeverityHighlighting(
         SeverityId,
         CSharpLanguage.Name,
-        AttributeId = HighlightingAttributeIds.DEADCODE_ATTRIBUTE,
+        AttributeId = AnalysisHighlightingAttributeIds.DEADCODE,
         OverlapResolve = OverlapResolveKind.DEADCODE,
         ToolTipFormatString = Message)]
     public class TemplateFormatStringArgumentIsNotUsedWarning : IHighlighting

@@ -1,0 +1,16 @@
+﻿using System;
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Information("|{$MyProperty}|(0)", new Random());
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Format String Item: 
