@@ -22,114 +22,12 @@ Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 
 ## Analyzers
 
-### Duplicate template property 
-
-Noncompliant Code Example:
-```csharp
-Log.Error("Disk quota {Quota} MB exceeded by {Quota}", quota, user);
-```
-
-Compliant Solution:
-```csharp
-Log.Error("Disk quota {Quota} MB exceeded by {User}", quota, user);
-```
-
-### Exception passed as a template argument
-
-Noncompliant Code Example:
-```csharp
-catch (Exception exception)
-{
-   Log.Error(ex, "Disk quota {Quota} MB exceeded {Exception}", quota, exception);
-}
-```
-
-Compliant Solution:
-```csharp
-catch (Exception exception)
-{
-   Log.Error(exception, "Disk quota {Quota} MB exceeded", quota);
-}
-```
-
-### Message template is not a compile time constant
-
-Noncompliant Code Examples:
-```csharp
-Log.Error($"Disk quota {quota} MB exceeded by {user}");
-```
-
-```csharp
-Log.Error(string.Format("Disk quota {0} MB exceeded by {1}", quota, user));
-```
-
-
-Compliant Solution:
-```csharp
-Log.Error("Disk quota {Quota} MB exceeded by {User}", quota, user);
-```
-
-### Anonymous objects must be destructured
-
-Noncompliant Code Examples:
-```csharp
-Log.Error("Processed {Position}", new { x = 4, y = 2});
-```
-
-Compliant Solution:
-```csharp
-Log.Error("Processed {@Position}", new { x = 4, y = 2});
-```
-
-### Incorrect type is used for contextual logger
-
-Noncompliant Code Examples:
-```csharp
-class A
-{
-    private static readonly ILogger Logger = Logger.ForContext<B>();
-}
-
-class B {} 
-```
-
-```csharp
-class A
-{
-	ILogger<B> _log;
-	
-	public A(ILogger<B> log)
-	{
-		_log = log;
-	}
-}
-
-class B { } 
-```
-
-Compliant Solution:
-```csharp
-class A
-{
-    private static readonly ILogger Logger = Logger.ForContext<A>();
-}
-
-class B {} 
-```
-
-```csharp
-class A
-{
-	ILogger<A> _log;
-	
-	public A(ILogger<A> log)
-	{
-		_log = log;
-	}
-}
-
-class B {} 
-```
+* [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md)           
+* [Complex object is not destructured](rules/ComplexObjectDestructuringProblem.md)               
+* [Contextual logger mismatch](rules/ContextualLoggerProblem.md)                                 
+* [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md)   
+* [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md)                
+* [Template should be a compile-time constant](rules/TemplateIsNotCompileTimeConstantProblem.md) 
 
 ## Credits
 

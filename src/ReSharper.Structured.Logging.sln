@@ -19,6 +19,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReSharper.Structured.Loggin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReSharper.Structured.Logging.Rider.Tests", "..\test\src\ReSharper.Structured.Logging.Rider.Tests.csproj", "{6BC99E0B-6362-4A62-84F1-103B93896294}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{D93C6901-5685-495B-A790-6C1467978205}"
+	ProjectSection(SolutionItems) = preProject
+		..\rules\AnonymousObjectDestructuringProblem.md = ..\rules\AnonymousObjectDestructuringProblem.md
+		..\rules\ComplexObjectDestructuringProblem.md = ..\rules\ComplexObjectDestructuringProblem.md
+		..\rules\ContextualLoggerProblem.md = ..\rules\ContextualLoggerProblem.md
+		..\rules\ExceptionPassedAsTemplateArgumentProblem.md = ..\rules\ExceptionPassedAsTemplateArgumentProblem.md
+		..\rules\TemplateDuplicatePropertyProblem.md = ..\rules\TemplateDuplicatePropertyProblem.md
+		..\rules\TemplateIsNotCompileTimeConstantProblem.md = ..\rules\TemplateIsNotCompileTimeConstantProblem.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

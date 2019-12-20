@@ -10,40 +10,42 @@ namespace ReSharper.Structured.Logging.Wiki
     [ShellComponent]
     public class StructuredLoggingWikiDataProvider : ICodeInspectionWikiDataProvider
     {
-        private const string BaseUrl = "https://github.com/olsh/resharper-structured-logging#";
-
         private static readonly IDictionary<string, string> AttributeUrlMap = new Dictionary<string, string>
                                                                                   {
                                                                                       {
-                                                                                          DuplicateTemplatePropertyWarning
-                                                                                              .SeverityId,
-                                                                                          $"{BaseUrl}duplicate-template-property"
+                                                                                          DuplicateTemplatePropertyWarning.SeverityId,
+                                                                                          CreateSeverityUrl(DuplicateTemplatePropertyWarning.SeverityId)
                                                                                       },
                                                                                       {
-                                                                                          ExceptionPassedAsTemplateArgumentWarning
-                                                                                              .SeverityId,
-                                                                                          $"{BaseUrl}exception-passed-as-a-template-argument"
+                                                                                          ExceptionPassedAsTemplateArgumentWarning.SeverityId,
+                                                                                          CreateSeverityUrl(ExceptionPassedAsTemplateArgumentWarning.SeverityId)
                                                                                       },
                                                                                       {
-                                                                                          TemplateIsNotCompileTimeConstantWarning
-                                                                                              .SeverityId,
-                                                                                          $"{BaseUrl}message-template-is-not-a-compile-time-constant"
+                                                                                          TemplateIsNotCompileTimeConstantWarning.SeverityId,
+                                                                                          CreateSeverityUrl(TemplateIsNotCompileTimeConstantWarning.SeverityId)
                                                                                       },
                                                                                       {
-                                                                                          AnonymousObjectDestructuringWarning
-                                                                                              .SeverityId,
-                                                                                          $"{BaseUrl}anonymous-objects-must-be-destructured"
+                                                                                          AnonymousObjectDestructuringWarning.SeverityId,
+                                                                                          CreateSeverityUrl(AnonymousObjectDestructuringWarning.SeverityId)
                                                                                       },
                                                                                       {
-                                                                                          ContextualLoggerWarning
-                                                                                              .SeverityId,
-                                                                                          $"{BaseUrl}incorrect-type-is-used-for-contextual-logger"
+                                                                                          ContextualLoggerWarning.SeverityId,
+                                                                                          CreateSeverityUrl(ContextualLoggerWarning.SeverityId)
+                                                                                      },
+                                                                                      {
+                                                                                          ComplexObjectDestructuringWarning.SeverityId,
+                                                                                          CreateSeverityUrl(ComplexObjectDestructuringWarning.SeverityId)
                                                                                       }
                                                                                   };
 
         public bool TryGetValue(string attributeId, out string url)
         {
             return AttributeUrlMap.TryGetValue(attributeId, out url);
+        }
+
+        private static string CreateSeverityUrl(string severityId)
+        {
+            return $"https://github.com/olsh/resharper-structured-logging/rules/{severityId}";
         }
     }
 }
