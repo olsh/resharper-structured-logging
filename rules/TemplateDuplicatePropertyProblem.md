@@ -1,4 +1,4 @@
-##### Duplicate template property 
+#### Duplicate template property 
 
 Noncompliant Code Example:
 ```csharp

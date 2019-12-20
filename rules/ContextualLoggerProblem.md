@@ -1,4 +1,4 @@
-##### Incorrect type is used for contextual logger
+#### Incorrect type is used for contextual logger
 
 Noncompliant Code Examples:
 ```csharp

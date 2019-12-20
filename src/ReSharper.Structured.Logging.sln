@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{D93C6901
 		..\rules\ComplexObjectDestructuringProblem.md = ..\rules\ComplexObjectDestructuringProblem.md
 		..\rules\ContextualLoggerProblem.md = ..\rules\ContextualLoggerProblem.md
 		..\rules\ExceptionPassedAsTemplateArgumentProblem.md = ..\rules\ExceptionPassedAsTemplateArgumentProblem.md
+		..\rules\PositionalPropertyUsedProblem.md = ..\rules\PositionalPropertyUsedProblem.md
 		..\rules\TemplateDuplicatePropertyProblem.md = ..\rules\TemplateDuplicatePropertyProblem.md
 		..\rules\TemplateIsNotCompileTimeConstantProblem.md = ..\rules\TemplateIsNotCompileTimeConstantProblem.md
 	EndProjectSection

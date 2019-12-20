@@ -1,4 +1,4 @@
-##### Message template is not a compile time constant
+#### Message template is not a compile time constant
 
 Noncompliant Code Examples:
 ```csharp

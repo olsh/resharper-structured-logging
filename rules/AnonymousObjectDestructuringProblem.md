@@ -1,4 +1,4 @@
-##### Anonymous objects must be destructured
+#### Anonymous objects must be destructured
 
 Noncompliant Code Examples:
 ```csharp

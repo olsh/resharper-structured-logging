@@ -1,4 +1,4 @@
-##### Complex objects with default `ToString()` implementation probably need to be destructured 
+#### Complex objects with default `ToString()` implementation probably need to be destructured 
 
 Noncompliant Code Example:
 ```csharp

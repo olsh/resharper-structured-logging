@@ -1,4 +1,4 @@
-##### Exception passed as a template argument
+#### Exception passed as a template argument
 
 Noncompliant Code Example:
 ```csharp
