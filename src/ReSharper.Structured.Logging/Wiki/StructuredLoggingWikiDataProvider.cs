@@ -45,7 +45,7 @@ namespace ReSharper.Structured.Logging.Wiki
 
         private static string CreateSeverityUrl(string severityId)
         {
-            return $"https://github.com/olsh/resharper-structured-logging/rules/{severityId}";
+            return $"https://github.com/olsh/resharper-structured-logging/blob/master/rules/{severityId}.md";
         }
     }
 }
