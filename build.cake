@@ -5,7 +5,9 @@
 
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");
-var waveVersion = Argument("wave", "[193.0]");
+
+var waveVersion = Argument("wave", "193");
+var waveNugetVersion = $"[{waveVersion}.0]";
 var host = Argument("Host", "Resharper");
 
 var solutionName = "ReSharper.Structured.Logging";
@@ -91,7 +93,7 @@ Task("NugetPack")
                                      NoPackageAnalysis       = true,
                                      Files                   = files,
                                      OutputDirectory         = ".",
-                                     Dependencies            = new [] { new NuSpecDependency() { Id = "Wave", Version = waveVersion } },
+                                     Dependencies            = new [] { new NuSpecDependency() { Id = "Wave", Version = waveNugetVersion } },
                                      ReleaseNotes            = new [] { "https://github.com/olsh/resharper-structured-logging/releases" }
                                  };
 
@@ -111,7 +113,11 @@ Task("NugetPack")
          var nugetPackage = string.Format("{0}.{1}.nupkg", projectName, extensionsVersion);
          CopyFile(nugetPackage, string.Format("{0}{1}", riderMetaFolderPath, nugetPackage));
 
-         XmlPoke(string.Format("{0}META-INF/plugin.xml", riderMetaFolderPath), "idea-plugin/version", extensionsVersion, new XmlPokeSettings { Encoding = new UTF8Encoding(false) });
+         var riderMetaFile = "{0}META-INF/plugin.xml";
+         var xmlSettings = new XmlPokeSettings { Encoding = new UTF8Encoding(false) };
+         XmlPoke(string.Format(riderMetaFile, riderMetaFolderPath), "idea-plugin/version", extensionsVersion, xmlSettings);
+         XmlPoke(string.Format(riderMetaFile, riderMetaFolderPath), "idea-plugin/idea-version/@since-build", waveVersion, xmlSettings);
+         XmlPoke(string.Format(riderMetaFile, riderMetaFolderPath), "idea-plugin/idea-version/@until-build", waveVersion + ".*", xmlSettings);
 
          Zip(tempDirectory, string.Format("./{0}.zip", riderMetaFolderName));
      }
