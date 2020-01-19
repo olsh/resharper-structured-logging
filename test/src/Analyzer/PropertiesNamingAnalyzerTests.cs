@@ -1,6 +1,4 @@
-﻿using JetBrains.Lifetimes;
-
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace ReSharper.Structured.Logging.Tests.Analyzer
 {

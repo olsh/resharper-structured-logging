@@ -14,9 +14,9 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IInvocationExpression))]
     public class ComplexObjectDestructureAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
-        private readonly MessageTemplateParser _messageTemplateParser;
+        private static readonly IClrTypeName GenericDictionaryFqn = new ClrTypeName("System.Collections.Generic.Dictionary`2");
 
-        public static readonly IClrTypeName GenericDictionaryFqn = new ClrTypeName("System.Collections.Generic.Dictionary`2");
+        private readonly MessageTemplateParser _messageTemplateParser;
 
         public ComplexObjectDestructureAnalyzer(MessageTemplateParser messageTemplateParser)
         {

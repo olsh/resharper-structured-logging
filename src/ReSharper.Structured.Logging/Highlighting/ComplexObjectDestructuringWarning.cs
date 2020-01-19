@@ -14,7 +14,6 @@ using ReSharper.Structured.Logging.Serilog.Parsing;
         ComplexObjectDestructuringWarning.Message,
         Severity.WARNING)]
 
-
 namespace ReSharper.Structured.Logging.Highlighting
 {
     [ConfigurableSeverityHighlighting(
