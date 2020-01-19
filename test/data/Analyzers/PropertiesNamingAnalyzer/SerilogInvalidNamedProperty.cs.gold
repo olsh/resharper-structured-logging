@@ -1,0 +1,16 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Information("||{myProperty}|(0)|(1)", 1);
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Format String Item: 
+(1): ReSharper Warning: Property name 'myProperty' does not naming rules'. Suggested name is 'MyProperty'.

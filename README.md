@@ -28,6 +28,7 @@ Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 * [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md)   
 * [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md)                
 * [Template should be a compile-time constant](rules/TemplateIsNotCompileTimeConstantProblem.md) 
+* [Inconsistent log property naming](rules/InconsistentLogPropertyNaming.md) 
 
 ## Credits
 

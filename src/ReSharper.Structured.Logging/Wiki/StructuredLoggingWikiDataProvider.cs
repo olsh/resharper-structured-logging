@@ -39,6 +39,10 @@ namespace ReSharper.Structured.Logging.Wiki
                                                                                       {
                                                                                           PositionalPropertyUsedWarning.SeverityId,
                                                                                           CreateSeverityUrl(PositionalPropertyUsedWarning.SeverityId)
+                                                                                      },
+                                                                                      {
+                                                                                          InconsistentLogPropertyNamingWarning.SeverityId,
+                                                                                          CreateSeverityUrl(InconsistentLogPropertyNamingWarning.SeverityId)
                                                                                       }
                                                                                   };
 
