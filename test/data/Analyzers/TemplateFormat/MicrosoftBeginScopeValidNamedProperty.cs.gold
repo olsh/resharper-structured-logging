@@ -1,0 +1,12 @@
+﻿using Microsoft.Extensions.Logging;
+
+class A
+{
+	public A(ILogger<A> log)
+	{
+		log.BeginScope("|{MyProperty}|(0)", 1);
+	}
+}
+
+---------------------------------------------------------
+(0): ReSharper Format String Item: 

@@ -109,6 +109,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return true;
             }
 
+            // ReSharper disable once StyleCop.SA1305
             var iType = argument.GetExpressionType().ToIType();
             if (iType == null)
             {

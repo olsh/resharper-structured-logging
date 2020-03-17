@@ -6,6 +6,8 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
     {
         protected override string SubPath => "TemplateFormat";
 
+        [Test] public void TestMicrosoftBeginScopeValidNamedProperty() => DoNamedTest2();
+
         [Test] public void TestNlogValidNamedPropertyFluentApi() => DoNamedTest2();
 
         [Test] public void TestSerilogInvalidNamedProperty() => DoNamedTest2();

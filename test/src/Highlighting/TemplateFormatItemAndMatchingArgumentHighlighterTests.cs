@@ -31,6 +31,7 @@ namespace ReSharper.Structured.Logging.Tests.Highlighting
 
         protected override CaretPositionsProcessor CreateCaretPositionProcessor(FileSystemPath temporaryDirectory)
         {
+            // ReSharper disable once ExceptionNotDocumented
             return new StructuredLoggingCaretPositionsProcessor(FileSystemPath.TryParse(Path.GetTempPath()));
         }
 

@@ -111,7 +111,7 @@ namespace ReSharper.Structured.Logging.Extensions
             var className = typeMember.GetContainingType()?.GetClrName().FullName;
             if (className == "Microsoft.Extensions.Logging.LoggerExtensions")
             {
-                return "message";
+                return typeMember.ShortName == "BeginScope" ? "messageFormat" : "message";
             }
 
             return null;
