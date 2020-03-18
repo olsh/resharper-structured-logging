@@ -5,12 +5,13 @@ using JetBrains.ReSharper.Psi.Util;
 
 using ReSharper.Structured.Logging.Highlighting;
 using ReSharper.Structured.Logging.Serilog.Parsing;
+using ReSharper.Structured.Logging.Settings;
 
 [assembly:
     RegisterConfigurableSeverity(
         InconsistentLogPropertyNamingWarning.SeverityId,
         null,
-        HighlightingGroupIds.CompilerWarnings,
+        StructuredLoggingGroup.Id,
         InconsistentLogPropertyNamingWarning.Message,
         InconsistentLogPropertyNamingWarning.Message,
         Severity.WARNING)]

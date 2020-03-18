@@ -3,12 +3,13 @@ using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
 
 using ReSharper.Structured.Logging.Highlighting;
+using ReSharper.Structured.Logging.Settings;
 
 [assembly:
     RegisterConfigurableSeverity(
         ContextualLoggerWarning.SeverityId,
         null,
-        HighlightingGroupIds.CompilerWarnings,
+        StructuredLoggingGroup.Id,
         ContextualLoggerWarning.Message,
         ContextualLoggerWarning.Message,
         Severity.WARNING)]

@@ -5,12 +5,13 @@ using JetBrains.ReSharper.Psi.Util;
 
 using ReSharper.Structured.Logging.Highlighting;
 using ReSharper.Structured.Logging.Serilog.Parsing;
+using ReSharper.Structured.Logging.Settings;
 
 [assembly:
     RegisterConfigurableSeverity(
         AnonymousObjectDestructuringWarning.SeverityId,
         null,
-        HighlightingGroupIds.CompilerWarnings,
+        StructuredLoggingGroup.Id,
         AnonymousObjectDestructuringWarning.Message,
         AnonymousObjectDestructuringWarning.Message,
         Severity.WARNING)]

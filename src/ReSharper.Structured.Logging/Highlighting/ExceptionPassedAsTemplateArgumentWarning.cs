@@ -3,10 +3,15 @@ using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
 
 using ReSharper.Structured.Logging.Highlighting;
+using ReSharper.Structured.Logging.Settings;
 
 [assembly:
-    RegisterConfigurableSeverity(ExceptionPassedAsTemplateArgumentWarning.SeverityId, null, HighlightingGroupIds.CompilerWarnings,
-        ExceptionPassedAsTemplateArgumentWarning.Message, ExceptionPassedAsTemplateArgumentWarning.Message,
+    RegisterConfigurableSeverity(
+        ExceptionPassedAsTemplateArgumentWarning.SeverityId,
+        null,
+        StructuredLoggingGroup.Id,
+        ExceptionPassedAsTemplateArgumentWarning.Message,
+        ExceptionPassedAsTemplateArgumentWarning.Message,
         Severity.WARNING)]
 
 namespace ReSharper.Structured.Logging.Highlighting
