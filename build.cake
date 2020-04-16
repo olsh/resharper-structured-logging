@@ -1,12 +1,12 @@
-#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.6.0"
-#tool "nuget:?package=NUnit.ConsoleRunner&version=3.10.0"
+#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.8.0"
+#tool "nuget:?package=NUnit.ConsoleRunner&version=3.11.1"
 
-#addin "nuget:?package=Cake.Sonar&version=1.1.22"
+#addin "nuget:?package=Cake.Sonar&version=1.1.25"
 
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");
 
-var waveVersion = Argument("wave", "193");
+var waveVersion = Argument("wave", "201");
 var waveNugetVersion = $"[{waveVersion}.0]";
 var host = Argument("Host", "Resharper");
 

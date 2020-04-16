@@ -17,8 +17,7 @@ namespace ReSharper.Structured.Logging.Extensions
         [CanBeNull]
         public static ICSharpArgument GetTemplateArgument(this IInvocationExpression invocationExpression)
         {
-            if (!(invocationExpression.Reference?.Resolve()
-                      .DeclaredElement is ITypeMember typeMember))
+            if (!(invocationExpression.Reference.Resolve().DeclaredElement is ITypeMember typeMember))
             {
                 return null;
             }
@@ -59,7 +58,7 @@ namespace ReSharper.Structured.Logging.Extensions
                 return false;
             }
 
-            var declaredElement = invocationExpression.Reference?.Resolve().DeclaredElement as IClrDeclaredElement;
+            var declaredElement = invocationExpression.Reference.Resolve().DeclaredElement as IClrDeclaredElement;
             var containingType = declaredElement?.GetContainingType();
             if (containingType == null)
             {
