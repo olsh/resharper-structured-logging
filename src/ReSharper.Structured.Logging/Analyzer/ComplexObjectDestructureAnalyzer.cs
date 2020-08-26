@@ -136,7 +136,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                     return argumentType != null && CheckIfBaseToStringUsed(argumentType);
                 }
 
-                var genericType = CollectionTypeUtil.GetElementTypesForGenericEnumerable(declaredType);
+                var genericType = CollectionTypeUtil.GetElementTypesForGenericEnumerable(declaredType, false);
                 if (genericType.Count == 1)
                 {
                     return CheckIfBaseToStringUsed(genericType.Single());

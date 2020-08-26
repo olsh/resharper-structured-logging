@@ -2,10 +2,9 @@
 
 using ReSharper.Structured.Logging.Settings;
 
-[assembly: RegisterConfigurableHighlightingsGroup(StructuredLoggingGroup.Id, StructuredLoggingGroup.Name)]
-
 namespace ReSharper.Structured.Logging.Settings
 {
+    [RegisterConfigurableHighlightingsGroup(Id, Name)]
     public class StructuredLoggingGroup
     {
         public const string Id = "StructuredLogging";

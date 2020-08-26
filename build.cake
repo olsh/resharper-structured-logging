@@ -6,7 +6,7 @@
 var target = Argument("target", "Default");
 var buildConfiguration = Argument("buildConfig", "Debug");
 
-var waveVersion = Argument("wave", "201");
+var waveVersion = Argument("wave", "202");
 var waveNugetVersion = $"[{waveVersion}.0]";
 var host = Argument("Host", "Resharper");
 

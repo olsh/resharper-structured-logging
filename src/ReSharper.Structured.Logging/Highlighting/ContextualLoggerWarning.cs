@@ -5,17 +5,15 @@ using JetBrains.ReSharper.Psi.CSharp;
 using ReSharper.Structured.Logging.Highlighting;
 using ReSharper.Structured.Logging.Settings;
 
-[assembly:
-    RegisterConfigurableSeverity(
-        ContextualLoggerWarning.SeverityId,
-        null,
-        StructuredLoggingGroup.Id,
-        ContextualLoggerWarning.Message,
-        ContextualLoggerWarning.Message,
-        Severity.WARNING)]
-
 namespace ReSharper.Structured.Logging.Highlighting
 {
+    [RegisterConfigurableSeverity(
+        SeverityId,
+        null,
+        StructuredLoggingGroup.Id,
+        Message,
+        Message,
+        Severity.WARNING)]
     [ConfigurableSeverityHighlighting(
         SeverityId,
         CSharpLanguage.Name,
