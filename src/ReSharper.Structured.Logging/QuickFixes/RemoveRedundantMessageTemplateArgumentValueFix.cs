@@ -28,6 +28,8 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         public override string Text => "Remove redundant argument(s) value";
 
+        public override ITreeNode ReanalysisDependencyRoot => _argument;
+
         public override void Execute()
         {
             var containingNode = _argument.GetContainingNode<ICSharpArgumentsOwner>(true);
