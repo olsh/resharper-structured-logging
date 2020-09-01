@@ -29,7 +29,7 @@ namespace ReSharper.Structured.Logging.Settings
                         switch (type)
                         {
                             case PropertyNamingType.PascalCase:
-                                return "PacalCase";
+                                return "PascalCase";
                             case PropertyNamingType.CamelCase:
                                 return "camelCase";
                             case PropertyNamingType.SnakeCase:
