@@ -33,4 +33,4 @@ Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 
 ## Credits
 
-Inpired by [SerilogAnalyzer](https://github.com/Suchiman/SerilogAnalyzer)
+Inspired by [SerilogAnalyzer](https://github.com/Suchiman/SerilogAnalyzer)
