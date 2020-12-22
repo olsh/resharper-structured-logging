@@ -1,9 +1,8 @@
-﻿using System.Linq;
+using System.Linq;
 
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Util;
 
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Highlighting;
@@ -40,13 +39,13 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var stringLiteral = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateArgument.Value);
-            if (stringLiteral == null)
+            var templateText = templateArgument.TryGetTemplateText();
+            if (templateText == null)
             {
                 return;
             }
 
-            var messageTemplate = _messageTemplateParser.Parse(stringLiteral.Expression.GetUnquotedText());
+            var messageTemplate = _messageTemplateParser.Parse(templateText);
             if (messageTemplate.NamedProperties == null)
             {
                 return;
@@ -64,7 +63,8 @@ namespace ReSharper.Structured.Logging.Analyzer
                         continue;
                     }
 
-                    consumer.AddHighlighting(new AnonymousObjectDestructuringWarning(stringLiteral, namedProperty, stringLiteral.GetTokenDocumentRange(namedProperty)));
+                    var tokenInformation = templateArgument.GetTokenInformation(namedProperty);
+                    consumer.AddHighlighting(new AnonymousObjectDestructuringWarning(tokenInformation));
                 }
             }
         }

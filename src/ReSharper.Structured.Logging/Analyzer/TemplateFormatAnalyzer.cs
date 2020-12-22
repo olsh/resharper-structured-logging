@@ -1,11 +1,10 @@
-﻿using System.Linq;
+using System.Linq;
 
 using JetBrains.ReSharper.Daemon.StringAnalysis;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Feature.Services.Daemon.Attributes;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Util;
 
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Highlighting;
@@ -30,20 +29,15 @@ namespace ReSharper.Structured.Logging.Analyzer
             IHighlightingConsumer consumer)
         {
             var templateArgument = element.GetTemplateArgument();
-            if (templateArgument == null)
+            var templateText = templateArgument?.TryGetTemplateText();
+            if (templateText == null)
             {
                 return;
             }
 
-            var stringLiteral = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateArgument.Value);
-            if (stringLiteral == null)
-            {
-                return;
-            }
+            var messageTemplate = _messageTemplateParser.Parse(templateText);
 
-            var messageTemplate = _messageTemplateParser.Parse(stringLiteral.Expression.GetUnquotedText());
-
-            HighlightTemplate(consumer, stringLiteral, messageTemplate);
+            HighlightTemplate(consumer, templateArgument, messageTemplate);
             HighlightUnusedArguments(element, consumer, templateArgument, messageTemplate);
 
             var argumentsCount = element.ArgumentList.Arguments.Count - templateArgument.IndexOf() - 1;
@@ -57,7 +51,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                     {
                         consumer.AddHighlighting(
                             new TemplateFormatStringUnexistingArgumentWarning(
-                                stringLiteral.GetTokenDocumentRange(property)));
+                                templateArgument.GetTokenInformation(property).DocumentRange));
                     }
                 }
             }
@@ -74,7 +68,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                     {
                         consumer.AddHighlighting(
                             new TemplateFormatStringUnexistingArgumentWarning(
-                                stringLiteral.GetTokenDocumentRange(property)));
+                                templateArgument.GetTokenInformation(property).DocumentRange));
                     }
                 }
             }
@@ -82,7 +76,7 @@ namespace ReSharper.Structured.Logging.Analyzer
 
         private static void HighlightTemplate(
             IHighlightingConsumer consumer,
-            IStringLiteralAlterer stringLiteral,
+            ICSharpArgument templateArgument,
             MessageTemplate messageTemplate)
         {
             foreach (var token in messageTemplate.Tokens)
@@ -94,7 +88,7 @@ namespace ReSharper.Structured.Logging.Analyzer
 
                 consumer.AddHighlighting(
                     new StringEscapeCharacterHighlighting(
-                        stringLiteral.GetTokenDocumentRange(token),
+                        templateArgument.GetTokenInformation(token).DocumentRange,
                         DefaultLanguageAttributeIds.FORMAT_STRING_ITEM));
             }
         }

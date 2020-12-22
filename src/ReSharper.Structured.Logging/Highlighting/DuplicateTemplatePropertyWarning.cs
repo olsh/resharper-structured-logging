@@ -1,8 +1,8 @@
-﻿using JetBrains.DocumentModel;
+using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
 
-using ReSharper.Structured.Logging.Highlighting;
+using ReSharper.Structured.Logging.Models;
 using ReSharper.Structured.Logging.Settings;
 
 namespace ReSharper.Structured.Logging.Highlighting
@@ -27,9 +27,9 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         private readonly DocumentRange _documentRange;
 
-        public DuplicateTemplatePropertyWarning(DocumentRange documentRange)
+        public DuplicateTemplatePropertyWarning(MessageTemplateTokenInformation tokenInformation)
         {
-            _documentRange = documentRange;
+            _documentRange = tokenInformation.DocumentRange;
         }
 
         public string ErrorStripeToolTip => ToolTip;

@@ -1,13 +1,15 @@
-﻿using System.Linq;
+using System.Collections.Generic;
+using System.Linq;
 
 using JetBrains.Annotations;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Psi.CSharp.Impl.Resolve;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Util;
 
+using ReSharper.Structured.Logging.Models;
 using ReSharper.Structured.Logging.Serilog.Parsing;
 
 namespace ReSharper.Structured.Logging.Extensions
@@ -32,18 +34,62 @@ namespace ReSharper.Structured.Logging.Extensions
                 a => a.MatchingParameter?.Element.ShortName == templateParameterName);
         }
 
-        public static DocumentRange GetTokenDocumentRange(this ICSharpArgument argument, MessageTemplateToken token)
+        public static MessageTemplateTokenInformation GetTokenInformation(this ICSharpArgument argument, MessageTemplateToken token)
         {
-            var documentRange = argument.GetDocumentRange();
+            var (tokenTextRange, tokenArgument) = FindTokenTextRange(argument, token);
+            var tokenDocument = argument.GetDocumentRange().Document;
+            var documentRange = new DocumentRange(tokenDocument, tokenTextRange);
 
-            return GetTokenDocumentRange(token, documentRange);
+            return new MessageTemplateTokenInformation(documentRange, tokenArgument);
         }
 
-        public static DocumentRange GetTokenDocumentRange(this IStringLiteralAlterer stringLiteralAlterer, MessageTemplateToken token)
+        private static (TextRange, IStringLiteralAlterer) FindTokenTextRange(this ICSharpArgument argument, MessageTemplateToken token)
         {
-            var documentRange = stringLiteralAlterer.Expression.GetDocumentRange();
+            var documentRange = argument.GetDocumentRange();
+            if (argument.Value is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
+            {
+                var arguments = new LinkedList<ExpressionArgumentInfo>();
+                FlattenAdditiveExpression(additiveExpression, arguments);
 
-            return GetTokenDocumentRange(token, documentRange);
+                var globalOffset = 0;
+                foreach (var additiveArgument in arguments)
+                {
+                    var range = additiveArgument.GetDocumentRange();
+                    var start = range.StartOffset.Offset;
+                    var end = range.EndOffset.Offset;
+
+                    // The token index is zero-based and we remove two quotes
+                    if (token.StartIndex < end - start - 3 + globalOffset)
+                    {
+                        var tokenStartIndex = start + token.StartIndex - globalOffset + 1;
+                        var tokenEndIndex = tokenStartIndex + token.Length;
+
+                        return (new TextRange(tokenStartIndex, end > tokenEndIndex ? tokenEndIndex : end), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(additiveArgument.Expression));
+                    }
+
+                    globalOffset += end - start - 2;
+                }
+            }
+
+            var startOffset = documentRange.TextRange.StartOffset + token.StartIndex + 1;
+
+            // ReSharper disable once AssignNullToNotNullAttribute
+            return (new TextRange(startOffset, startOffset + token.Length), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Expression));
+        }
+
+        public static string TryGetTemplateText(this ICSharpArgument argument)
+        {
+            if (argument.Value is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
+            {
+                var linkedList = new LinkedList<ExpressionArgumentInfo>();
+                FlattenAdditiveExpression(additiveExpression, linkedList);
+
+                return string.Join(string.Empty, linkedList.Select(l => StringLiteralAltererUtil
+                    .TryCreateStringLiteralByExpression(l.Expression)
+                    ?.Expression.GetUnquotedText()));
+            }
+
+            return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Value)?.Expression.GetUnquotedText();
         }
 
         public static bool IsGenericMicrosoftExtensionsLogger([NotNull]this IDeclaredType declared)
@@ -86,13 +132,19 @@ namespace ReSharper.Structured.Logging.Extensions
             return substitution.Apply(typeParameter);
         }
 
-        private static DocumentRange GetTokenDocumentRange(
-            MessageTemplateToken token,
-            DocumentRange documentRange)
+        private static void FlattenAdditiveExpression(IAdditiveExpression additiveExpression, LinkedList<ExpressionArgumentInfo> list)
         {
-            var startOffset = documentRange.TextRange.StartOffset + token.StartIndex + 1;
+            foreach (var argumentInfo in additiveExpression.Arguments)
+            {
+                if (argumentInfo is ExpressionArgumentInfo expressionArgumentInfo && expressionArgumentInfo.Expression is IAdditiveExpression additive)
+                {
+                    FlattenAdditiveExpression(additive, list);
 
-            return new DocumentRange(documentRange.Document, new TextRange(startOffset, startOffset + token.Length));
+                    continue;
+                }
+
+                list.AddLast((ExpressionArgumentInfo)argumentInfo);
+            }
         }
 
         private static string GetTemplateParameterName([NotNull] this ITypeMember typeMember)

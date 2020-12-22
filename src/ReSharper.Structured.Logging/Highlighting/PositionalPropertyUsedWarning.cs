@@ -1,10 +1,8 @@
-﻿using JetBrains.DocumentModel;
+using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
-using JetBrains.ReSharper.Psi.Util;
 
-using ReSharper.Structured.Logging.Highlighting;
-using ReSharper.Structured.Logging.Serilog.Parsing;
+using ReSharper.Structured.Logging.Models;
 using ReSharper.Structured.Logging.Settings;
 
 namespace ReSharper.Structured.Logging.Highlighting
@@ -27,34 +25,24 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         public const string SeverityId = "PositionalPropertyUsedProblem";
 
-        public PositionalPropertyUsedWarning(
-            IStringLiteralAlterer stringLiteral,
-            PropertyToken namedProperty,
-            DocumentRange documentRange)
+        public PositionalPropertyUsedWarning(MessageTemplateTokenInformation tokenInformation)
         {
-            StringLiteral = stringLiteral;
-            NamedProperty = namedProperty;
-            Range = documentRange;
+            TokenInformation = tokenInformation;
         }
 
         public string ErrorStripeToolTip => ToolTip;
-
-        public PropertyToken NamedProperty { get; }
-
-        public DocumentRange Range { get; }
-
-        public IStringLiteralAlterer StringLiteral { get; }
+        public MessageTemplateTokenInformation TokenInformation { get; }
 
         public string ToolTip => Message;
 
         public DocumentRange CalculateRange()
         {
-            return Range;
+            return TokenInformation.DocumentRange;
         }
 
         public bool IsValid()
         {
-            return Range.IsValid();
+            return TokenInformation.DocumentRange.IsValid();
         }
     }
 }

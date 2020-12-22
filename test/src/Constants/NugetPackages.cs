@@ -1,6 +1,6 @@
-﻿namespace ReSharper.Structured.Logging.Tests.Constants
+namespace ReSharper.Structured.Logging.Tests.Constants
 {
-    internal class NugetPackages
+    internal static class NugetPackages
     {
         public const string SerilogNugetPackage = "Serilog/2.7.1";
 

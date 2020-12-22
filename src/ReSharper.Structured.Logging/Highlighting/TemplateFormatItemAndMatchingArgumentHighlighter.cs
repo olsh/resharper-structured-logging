@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using JetBrains.Annotations;
 using JetBrains.ReSharper.Daemon.CaretDependentFeatures;
@@ -9,7 +9,6 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.DataContext;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.ReSharper.Psi.Util;
 
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Serilog.Events;
@@ -77,8 +76,7 @@ namespace ReSharper.Structured.Logging.Highlighting
                 return;
             }
 
-            var templateString = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateArgument.Value)
-                ?.Expression.GetUnquotedText();
+            var templateString = templateArgument.TryGetTemplateText();
             if (templateString == null)
             {
                 return;
@@ -139,7 +137,7 @@ namespace ReSharper.Structured.Logging.Highlighting
                 var property = namedProperties[argumentIndex];
                 consumer.ConsumeHighlighting(
                     GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                    templateArgument.GetTokenDocumentRange(property));
+                    templateArgument.GetTokenInformation(property).DocumentRange);
             }
             else if (positionalProperties != null)
             {
@@ -157,7 +155,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
                     consumer.ConsumeHighlighting(
                         GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                        templateArgument.GetTokenDocumentRange(property));
+                        templateArgument.GetTokenInformation(property).DocumentRange);
                 }
             }
 
@@ -189,7 +187,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
                 consumer.ConsumeHighlighting(
                     GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                    templateArgument.GetTokenDocumentRange(selectedToken));
+                    templateArgument.GetTokenInformation(selectedToken).DocumentRange);
                 consumer.ConsumeHighlighting(
                     GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
                     arguments[argumentIndex].GetDocumentRange());
@@ -221,7 +219,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
                     consumer.ConsumeHighlighting(
                         GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
-                        templateArgument.GetTokenDocumentRange(property));
+                        templateArgument.GetTokenInformation(property).DocumentRange);
                 }
 
                 var argumentIndex = templateArgument.IndexOf() + position + 1;

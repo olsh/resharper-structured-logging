@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using JetBrains.Metadata.Reader.API;
 using JetBrains.Metadata.Reader.Impl;
 using JetBrains.ReSharper.Feature.Services.Daemon;
@@ -42,13 +42,13 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var stringLiteral = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateArgument.Value);
-            if (stringLiteral == null)
+            var templateText = templateArgument.TryGetTemplateText();
+            if (templateText == null)
             {
                 return;
             }
 
-            var messageTemplate = _messageTemplateParser.Parse(stringLiteral.Expression.GetUnquotedText());
+            var messageTemplate = _messageTemplateParser.Parse(templateText);
             if (messageTemplate.NamedProperties == null)
             {
                 return;
@@ -66,7 +66,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                         continue;
                     }
 
-                    consumer.AddHighlighting(new ComplexObjectDestructuringWarning(stringLiteral, namedProperty, stringLiteral.GetTokenDocumentRange(namedProperty)));
+                    consumer.AddHighlighting(new ComplexObjectDestructuringWarning(templateArgument.GetTokenInformation(namedProperty)));
                 }
             }
         }

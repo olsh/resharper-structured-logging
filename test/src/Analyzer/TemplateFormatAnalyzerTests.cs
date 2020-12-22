@@ -16,6 +16,8 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
 
         [Test] public void TestSerilogTemplateWithEscapedSymbols() => DoNamedTest2();
 
+        [Test] public void TestSerilogTemplateWithConcatenations() => DoNamedTest2();
+
         [Test] public void TestSerilogValidNamedProperty() => DoNamedTest2();
 
         [Test] public void TestSerilogValidPositionProperty() => DoNamedTest2();

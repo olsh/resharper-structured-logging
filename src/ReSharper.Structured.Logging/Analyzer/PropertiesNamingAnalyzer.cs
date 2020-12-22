@@ -1,9 +1,8 @@
-﻿using JetBrains.Application.Settings;
+using JetBrains.Application.Settings;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Util;
 
 using ReSharper.Structured.Logging.Extensions;
@@ -29,18 +28,13 @@ namespace ReSharper.Structured.Logging.Analyzer
             IHighlightingConsumer consumer)
         {
             var templateArgument = element.GetTemplateArgument();
-            if (templateArgument == null)
+            var templateText = templateArgument?.TryGetTemplateText();
+            if (templateText == null)
             {
                 return;
             }
 
-            var stringLiteral = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateArgument.Value);
-            if (stringLiteral == null)
-            {
-                return;
-            }
-
-            var messageTemplate = _messageTemplateParser.Parse(stringLiteral.Expression.GetUnquotedText());
+            var messageTemplate = _messageTemplateParser.Parse(templateText);
             if (messageTemplate.NamedProperties == null)
             {
                 return;
@@ -78,7 +72,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                     continue;
                 }
 
-                consumer.AddHighlighting(new InconsistentLogPropertyNamingWarning(stringLiteral, suggestedName, property, stringLiteral.GetTokenDocumentRange(property)));
+                consumer.AddHighlighting(new InconsistentLogPropertyNamingWarning(templateArgument.GetTokenInformation(property), property, suggestedName));
             }
         }
     }

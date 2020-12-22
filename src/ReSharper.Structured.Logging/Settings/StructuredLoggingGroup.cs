@@ -1,6 +1,4 @@
-﻿using JetBrains.ReSharper.Feature.Services.Daemon;
-
-using ReSharper.Structured.Logging.Settings;
+using JetBrains.ReSharper.Feature.Services.Daemon;
 
 namespace ReSharper.Structured.Logging.Settings
 {

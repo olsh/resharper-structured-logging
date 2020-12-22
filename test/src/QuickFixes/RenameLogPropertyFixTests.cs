@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 
 using ReSharper.Structured.Logging.QuickFixes;
 
@@ -11,5 +11,7 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
         [Test] public void TestSerilogProperty() => DoNamedTest2();
 
         [Test] public void TestSerilogDestructuredProperty() => DoNamedTest2();
+
+        [Test] public void TestSerilogPropertyConcatenated() => DoNamedTest2();
     }
 }

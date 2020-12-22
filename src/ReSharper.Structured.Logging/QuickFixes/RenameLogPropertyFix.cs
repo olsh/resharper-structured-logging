@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 
 using JetBrains.Annotations;
 using JetBrains.Application.Progress;
-using JetBrains.DocumentModel;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.QuickFixes;
 using JetBrains.ReSharper.Psi.CSharp;
@@ -13,6 +12,7 @@ using JetBrains.TextControl;
 using JetBrains.Util;
 
 using ReSharper.Structured.Logging.Highlighting;
+using ReSharper.Structured.Logging.Models;
 using ReSharper.Structured.Logging.Serilog.Parsing;
 
 namespace ReSharper.Structured.Logging.QuickFixes
@@ -20,44 +20,42 @@ namespace ReSharper.Structured.Logging.QuickFixes
     [QuickFix]
     public class RenameLogPropertyFix : QuickFixBase
     {
-        private readonly DocumentRange _range;
-
-        private readonly IStringLiteralAlterer _stringLiteral;
-
         private readonly PropertyToken _namedProperty;
+
+        private readonly MessageTemplateTokenInformation _tokenInformation;
 
         private readonly string _suggestedName;
 
         public RenameLogPropertyFix([NotNull] InconsistentLogPropertyNamingWarning error)
         {
-            _range = error.Range;
-            _stringLiteral = error.StringLiteral;
             _namedProperty = error.NamedProperty;
             _suggestedName = error.SuggestedName;
+            _tokenInformation = error.TokenInformation;
         }
 
         public override string Text => $"Rename property to '{_suggestedName}'";
 
         public override bool IsAvailable(IUserDataHolder cache)
         {
-            return _range.IsValid();
+            return _tokenInformation.DocumentRange.IsValid();
         }
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             using (WriteLockCookie.Create())
             {
-                var factory = CSharpElementFactory.GetInstance(_stringLiteral.Expression, false);
+                var factory = CSharpElementFactory.GetInstance(_tokenInformation.StringLiteral.Expression, false);
+                var relativeStartIndex = _tokenInformation.RelativeStartIndex;
                 var startIndex = _namedProperty.Destructuring == Destructuring.Default
-                                     ? _namedProperty.StartIndex + 1
-                                     : _namedProperty.StartIndex + 2;
+                                     ? relativeStartIndex + 1
+                                     : relativeStartIndex + 2;
                 var length = _namedProperty.Destructuring == Destructuring.Default
                                  ? _namedProperty.Length - 2
                                  : _namedProperty.Length - 3;
 
                 var expression = factory.CreateExpression(
-                    $"\"{_stringLiteral.Expression.GetUnquotedText().Remove(startIndex, length).Insert(startIndex, _suggestedName)}\"");
-                ModificationUtil.ReplaceChild(_stringLiteral.Expression, expression);
+                    $"\"{_tokenInformation.StringLiteral.Expression.GetUnquotedText().Remove(startIndex, length).Insert(startIndex, _suggestedName)}\"");
+                ModificationUtil.ReplaceChild(_tokenInformation.StringLiteral.Expression, expression);
             }
 
             return null;

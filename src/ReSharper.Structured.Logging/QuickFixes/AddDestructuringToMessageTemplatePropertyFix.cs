@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 
 using JetBrains.Annotations;
 using JetBrains.Application.Progress;
-using JetBrains.DocumentModel;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.QuickFixes;
 using JetBrains.ReSharper.Psi.CSharp;
@@ -13,48 +12,43 @@ using JetBrains.TextControl;
 using JetBrains.Util;
 
 using ReSharper.Structured.Logging.Highlighting;
-using ReSharper.Structured.Logging.Serilog.Parsing;
+using ReSharper.Structured.Logging.Models;
 
 namespace ReSharper.Structured.Logging.QuickFixes
 {
     [QuickFix]
     public class AddDestructuringToMessageTemplatePropertyFix : QuickFixBase
     {
-        private readonly DocumentRange _range;
-
-        private readonly IStringLiteralAlterer _stringLiteral;
-
-        private readonly PropertyToken _namedProperty;
+        private readonly MessageTemplateTokenInformation _tokenInformation;
 
         public AddDestructuringToMessageTemplatePropertyFix([NotNull] AnonymousObjectDestructuringWarning error)
         {
-            _range = error.Range;
-            _stringLiteral = error.StringLiteral;
-            _namedProperty = error.NamedProperty;
+            _tokenInformation = error.TokenInformation;
         }
 
         public AddDestructuringToMessageTemplatePropertyFix([NotNull] ComplexObjectDestructuringWarning error)
         {
-            _range = error.Range;
-            _stringLiteral = error.StringLiteral;
-            _namedProperty = error.NamedProperty;
+            _tokenInformation = error.TokenInformation;
         }
 
         public override string Text => "Add destructuring to property";
 
         public override bool IsAvailable(IUserDataHolder cache)
         {
-            return _range.IsValid();
+            return _tokenInformation.DocumentRange.IsValid();
         }
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             using (WriteLockCookie.Create())
             {
-                var factory = CSharpElementFactory.GetInstance(_stringLiteral.Expression, false);
+                var factory = CSharpElementFactory.GetInstance(_tokenInformation.StringLiteral.Expression, false);
+                var startIndex = _tokenInformation.RelativeStartIndex;
                 var expression = factory.CreateExpression(
-                    $"\"{_stringLiteral.Expression.GetUnquotedText().Insert(_namedProperty.StartIndex + 1, "@")}\"");
-                ModificationUtil.ReplaceChild(_stringLiteral.Expression, expression);
+                    $"\"{_tokenInformation.StringLiteral.Expression.GetUnquotedText().Insert(startIndex + 1, "@")}\"");
+
+                // ReSharper disable once AssignNullToNotNullAttribute
+                ModificationUtil.ReplaceChild(_tokenInformation.StringLiteral.Expression, expression);
             }
 
             return null;
