@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
@@ -28,14 +30,20 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         private readonly DocumentRange _documentRange;
 
-        public LogMessageIsSentenceWarning(IStringLiteralAlterer stringLiteral)
+        public LogMessageIsSentenceWarning(IStringLiteralAlterer stringLiteral, Regex regex)
         {
+            StringLiteral = stringLiteral;
+            Regex = regex;
             _documentRange = stringLiteral.Expression.GetDocumentRange();
         }
 
         public string ErrorStripeToolTip => ToolTip;
 
         public string ToolTip => Message;
+
+        public IStringLiteralAlterer StringLiteral { get; }
+
+        public Regex Regex { get; }
 
         public DocumentRange CalculateRange()
         {

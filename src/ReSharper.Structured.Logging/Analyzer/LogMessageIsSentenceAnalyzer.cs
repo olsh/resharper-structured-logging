@@ -12,7 +12,7 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IInvocationExpression))]
     public class LogMessageIsSentenceAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
-        private static readonly Regex DotAtTheEnd = new Regex(@"\.+$", RegexOptions.Compiled);
+        private static readonly Regex DotAtTheEnd = new Regex(@"(?<!\.)\.$", RegexOptions.Compiled);
 
         protected override void Run(IInvocationExpression element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
         {
@@ -29,7 +29,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            consumer.AddHighlighting(new LogMessageIsSentenceWarning(lastFragmentExpression));
+            consumer.AddHighlighting(new LogMessageIsSentenceWarning(lastFragmentExpression, DotAtTheEnd));
         }
     }
 }

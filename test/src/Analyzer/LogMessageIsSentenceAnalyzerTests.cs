@@ -7,5 +7,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         protected override string SubPath => "LogMessageIsSentence";
 
         [Test] public void TestSerilogSentenceMessage() => DoNamedTest2();
+
+        [Test] public void TestSerilogNotSentenceMessage() => DoNamedTest2();
     }
 }
