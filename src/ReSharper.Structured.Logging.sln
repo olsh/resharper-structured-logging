@@ -24,6 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{D93C6901
 	ProjectSection(SolutionItems) = preProject
 		..\rules\AnonymousObjectDestructuringProblem.md = ..\rules\AnonymousObjectDestructuringProblem.md
 		..\rules\ComplexObjectDestructuringProblem.md = ..\rules\ComplexObjectDestructuringProblem.md
+		..\rules\ComplexObjectInContextDestructuringProblem.md = ..\rules\ComplexObjectInContextDestructuringProblem.md
 		..\rules\ContextualLoggerProblem.md = ..\rules\ContextualLoggerProblem.md
 		..\rules\ExceptionPassedAsTemplateArgumentProblem.md = ..\rules\ExceptionPassedAsTemplateArgumentProblem.md
 		..\rules\InconsistentLogPropertyNaming.md = ..\rules\InconsistentLogPropertyNaming.md

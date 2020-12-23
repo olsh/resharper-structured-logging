@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 
 namespace ReSharper.Structured.Logging.Tests.Analyzer
 {
@@ -17,5 +17,11 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestSerilogNullableWithoutDestructure() => DoNamedTest2();
 
         [Test] public void TestSerilogDictionaryWithoutDestructure() => DoNamedTest2();
+
+        [Test] public void TestSerilogContextWithoutDestructure() => DoNamedTest2();
+
+        [Test] public void TestSerilogContextNumericWithoutDestructure() => DoNamedTest2();
+
+        [Test] public void TestSerilogContextExplicitDestructure() => DoNamedTest2();
     }
 }

@@ -24,6 +24,7 @@ Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 
 * [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md)           
 * [Complex object is not destructured](rules/ComplexObjectDestructuringProblem.md)               
+* [Complex object is not destructured in context](rules/ComplexObjectInContextDestructuringProblem.md)               
 * [Contextual logger mismatch](rules/ContextualLoggerProblem.md)                                 
 * [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md)   
 * [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md)                

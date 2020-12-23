@@ -45,6 +45,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
                    || highlighting is ContextualLoggerWarning
                    || highlighting is ExceptionPassedAsTemplateArgumentWarning
                    || highlighting is ComplexObjectDestructuringWarning
+                   || highlighting is ComplexObjectDestructuringInContextWarning
                    || highlighting is PositionalPropertyUsedWarning
                    || highlighting is InconsistentLogPropertyNamingWarning
                    || highlighting is LogMessageIsSentenceWarning;

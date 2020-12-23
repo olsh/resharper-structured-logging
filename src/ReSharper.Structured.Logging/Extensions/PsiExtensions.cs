@@ -3,6 +3,8 @@ using System.Linq;
 
 using JetBrains.Annotations;
 using JetBrains.DocumentModel;
+using JetBrains.Metadata.Reader.API;
+using JetBrains.Metadata.Reader.Impl;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Impl.Resolve;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
@@ -16,6 +18,8 @@ namespace ReSharper.Structured.Logging.Extensions
 {
     public static class PsiExtensions
     {
+        private static readonly IClrTypeName LogContextFqn = new ClrTypeName("Serilog.Context.LogContext");
+
         [CanBeNull]
         public static ICSharpArgument GetTemplateArgument(this IInvocationExpression invocationExpression)
         {
@@ -141,6 +145,18 @@ namespace ReSharper.Structured.Logging.Extensions
             }
 
             return false;
+        }
+
+        public static bool IsSerilogContextPushPropertyMethod(this IInvocationExpression invocationExpression)
+        {
+            var typeMember = invocationExpression.Reference.Resolve().DeclaredElement as ITypeMember;
+            var containingType = typeMember?.GetContainingType();
+            if (containingType == null)
+            {
+                return false;
+            }
+
+            return LogContextFqn.Equals(containingType.GetClrName()) && typeMember.ShortName == "PushProperty";
         }
 
         [CanBeNull]

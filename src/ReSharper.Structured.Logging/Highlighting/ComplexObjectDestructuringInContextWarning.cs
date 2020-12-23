@@ -1,8 +1,9 @@
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
+using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.Tree;
 
-using ReSharper.Structured.Logging.Models;
 using ReSharper.Structured.Logging.Settings;
 
 namespace ReSharper.Structured.Logging.Highlighting
@@ -19,29 +20,29 @@ namespace ReSharper.Structured.Logging.Highlighting
         CSharpLanguage.Name,
         OverlapResolve = OverlapResolveKind.WARNING,
         ToolTipFormatString = Message)]
-    public class ComplexObjectDestructuringWarning : ComplexObjectDestructuringWarningBase, IHighlighting
+    public class ComplexObjectDestructuringInContextWarning : ComplexObjectDestructuringWarningBase, IHighlighting
     {
-        public const string SeverityId = "ComplexObjectDestructuringProblem";
+        public const string SeverityId = "ComplexObjectInContextDestructuringProblem";
 
-        public ComplexObjectDestructuringWarning(MessageTemplateTokenInformation tokenInformation)
+        private readonly IInvocationExpression _invocationExpression;
+
+        public ComplexObjectDestructuringInContextWarning(IInvocationExpression invocationExpression)
         {
-            TokenInformation = tokenInformation;
+            _invocationExpression = invocationExpression;
         }
 
         public string ErrorStripeToolTip => ToolTip;
-
-        public MessageTemplateTokenInformation TokenInformation { get; }
 
         public string ToolTip => Message;
 
         public DocumentRange CalculateRange()
         {
-            return TokenInformation.DocumentRange;
+            return _invocationExpression.GetDocumentRange();
         }
 
         public bool IsValid()
         {
-            return TokenInformation.DocumentRange.IsValid();
+            return _invocationExpression.GetDocumentRange().IsValid();
         }
     }
 }

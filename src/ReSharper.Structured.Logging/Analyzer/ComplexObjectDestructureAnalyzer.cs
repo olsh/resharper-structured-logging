@@ -1,10 +1,12 @@
 using System.Linq;
+
 using JetBrains.Metadata.Reader.API;
 using JetBrains.Metadata.Reader.Impl;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Util;
+
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Highlighting;
 using ReSharper.Structured.Logging.Serilog.Parsing;
@@ -27,6 +29,34 @@ namespace ReSharper.Structured.Logging.Analyzer
             IInvocationExpression element,
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
+        {
+            CheckComplexObjectInTemplate(element, consumer);
+            CheckComplexObjectInContext(element, consumer);
+        }
+
+        private void CheckComplexObjectInContext(IInvocationExpression element, IHighlightingConsumer consumer)
+        {
+            if (!element.IsSerilogContextPushPropertyMethod())
+            {
+                return;
+            }
+
+            // Skip the analysis if explicit destructuring specified > 2 parameters
+            if (element.ArgumentList.Arguments.Count != 2)
+            {
+                return;
+            }
+
+            var valueArgument = element.ArgumentList.Arguments[1];
+            if (!CheckIfDestructureNeeded(valueArgument))
+            {
+                return;
+            }
+
+            consumer.AddHighlighting(new ComplexObjectDestructuringInContextWarning(element));
+        }
+
+        private void CheckComplexObjectInTemplate(IInvocationExpression element, IHighlightingConsumer consumer)
         {
             var templateArgument = element.GetTemplateArgument();
             if (templateArgument == null)
@@ -66,7 +96,8 @@ namespace ReSharper.Structured.Logging.Analyzer
                         continue;
                     }
 
-                    consumer.AddHighlighting(new ComplexObjectDestructuringWarning(templateArgument.GetTokenInformation(namedProperty)));
+                    consumer.AddHighlighting(
+                        new ComplexObjectDestructuringWarning(templateArgument.GetTokenInformation(namedProperty)));
                 }
             }
         }
