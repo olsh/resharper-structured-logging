@@ -30,8 +30,15 @@ namespace ReSharper.Structured.Logging.Extensions
                 return null;
             }
 
-            return invocationExpression.ArgumentList.Arguments.FirstOrDefault(
-                a => a.MatchingParameter?.Element.ShortName == templateParameterName);
+            foreach (var argument in invocationExpression.ArgumentList.Arguments)
+            {
+                if (argument.MatchingParameter?.Element.ShortName == templateParameterName)
+                {
+                    return argument;
+                }
+            }
+
+            return null;
         }
 
         public static MessageTemplateTokenInformation GetTokenInformation(this ICSharpArgument argument, MessageTemplateToken token)
