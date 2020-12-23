@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 
 using JetBrains.Annotations;
 using JetBrains.ReSharper.FeaturesTestFramework.ContextHighlighters;
@@ -17,17 +17,11 @@ namespace ReSharper.Structured.Logging.Tests.Highlighting
     {
         protected override string ExtraPath => string.Empty;
 
-        [Test]
-        public void TestSerilogMatchingHighlighting()
-        {
-            DoNamedTest2();
-        }
+        [Test] public void TestSerilogMatchingHighlighting() => DoNamedTest2();
 
-        [Test]
-        public void TestNlogMatchingHighlighting()
-        {
-            DoNamedTest2();
-        }
+        [Test] public void TestNlogMatchingHighlighting() => DoNamedTest2();
+
+        [Test] public void TestSerilogMethodArgumentMatchingHighlighting() => DoNamedTest2();
 
         protected override CaretPositionsProcessor CreateCaretPositionProcessor(FileSystemPath temporaryDirectory)
         {

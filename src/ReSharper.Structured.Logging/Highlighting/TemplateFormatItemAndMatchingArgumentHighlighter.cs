@@ -9,6 +9,8 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.DataContext;
 using JetBrains.ReSharper.Psi.Tree;
+using JetBrains.ReSharper.Psi.Util;
+using JetBrains.Util;
 
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Serilog.Events;
@@ -64,37 +66,40 @@ namespace ReSharper.Structured.Logging.Highlighting
                 return;
             }
 
-            var invocationExpression = psiView.GetSelectedTreeNode<IInvocationExpression>();
-            var templateArgument = invocationExpression?.GetTemplateArgument();
-            if (templateArgument == null)
+            var invocationExpressions = psiView.ContainingNodes<IInvocationExpression>();
+            foreach (var invocationExpression in invocationExpressions)
             {
-                return;
-            }
+                var templateArgument = invocationExpression?.GetTemplateArgument();
+                if (templateArgument == null)
+                {
+                    continue;
+                }
 
-            if (templateArgument.IndexOf() > selectedArgument.IndexOf())
-            {
-                return;
-            }
+                if (templateArgument.IndexOf() > selectedArgument.IndexOf())
+                {
+                    continue;
+                }
 
-            var templateString = templateArgument.TryGetTemplateText();
-            if (templateString == null)
-            {
-                return;
-            }
+                var templateString = templateArgument.TryGetTemplateText();
+                if (templateString == null)
+                {
+                    continue;
+                }
 
-            var messageTemplate = _messageTemplate.Parse(templateString);
-            if (selectedArgument == templateArgument)
-            {
-                HighlightByNamedPlaceholder(
-                    consumer,
-                    psiView,
-                    templateArgument,
-                    messageTemplate,
-                    invocationExpression.ArgumentList.Arguments);
-            }
-            else
-            {
-                HighlightByArgument(consumer, selectedArgument, templateArgument, messageTemplate);
+                var messageTemplate = _messageTemplate.Parse(templateString);
+                if (selectedArgument == templateArgument)
+                {
+                    HighlightByNamedPlaceholder(
+                        consumer,
+                        psiView,
+                        templateArgument,
+                        messageTemplate,
+                        invocationExpression.ArgumentList.Arguments);
+                }
+                else
+                {
+                    HighlightByArgument(consumer, selectedArgument, templateArgument, messageTemplate);
+                }
             }
         }
 
@@ -103,16 +108,15 @@ namespace ReSharper.Structured.Logging.Highlighting
             ICSharpArgument templateArgument,
             PropertyToken[] properties)
         {
-            var documentRange = templateArgument.GetDocumentRange();
             var selectedTreeRange = psiView.GetSelectedTreeRange(templateArgument);
 
-            var startSelectedIndex = selectedTreeRange.StartOffset.Offset - documentRange.StartOffset.Offset;
-            var endSelectedIndex = selectedTreeRange.EndOffset.Offset - documentRange.StartOffset.Offset - 1;
             var propertyIndex = 0;
             foreach (var property in properties)
             {
-                if (property.StartIndex < startSelectedIndex
-                    && property.StartIndex + property.Length >= endSelectedIndex)
+                var documentRange = templateArgument.GetTokenInformation(property).DocumentRange;
+
+                if (documentRange.StartOffset.Offset <= selectedTreeRange.StartOffset.Offset
+                    && documentRange.EndOffset.Offset >= selectedTreeRange.EndOffset.Offset)
                 {
                     return (property, propertyIndex);
                 }
