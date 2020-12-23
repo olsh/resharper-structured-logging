@@ -21,7 +21,7 @@ namespace ReSharper.Structured.Logging.Highlighting
         ToolTipFormatString = Message)]
     public class ComplexObjectDestructuringWarning : IHighlighting
     {
-        public const string Message = "Complex objects with default ToString() implementation probably need to be destructured";
+        private const string Message = "Complex objects with default ToString() implementation probably need to be destructured";
 
         public const string SeverityId = "ComplexObjectDestructuringProblem";
 

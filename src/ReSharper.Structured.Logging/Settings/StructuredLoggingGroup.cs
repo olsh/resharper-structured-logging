@@ -7,6 +7,6 @@ namespace ReSharper.Structured.Logging.Settings
     {
         public const string Id = "StructuredLogging";
 
-        public const string Name = "Structured Logging Misuse";
+        private const string Name = "Structured Logging Misuse";
     }
 }

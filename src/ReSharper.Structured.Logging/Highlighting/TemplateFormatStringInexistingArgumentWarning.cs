@@ -20,9 +20,9 @@ namespace ReSharper.Structured.Logging.Highlighting
         ToolTipFormatString = Message)]
     public class TemplateFormatStringUnexistingArgumentWarning : IHighlighting
     {
-        public const string SeverityId = "TemplateFormatStringProblem";
+        private const string SeverityId = "TemplateFormatStringProblem";
 
-        public const string Message = "Non-existing argument in message template";
+        private const string Message = "Non-existing argument in message template";
 
         private readonly DocumentRange _documentRange;
 

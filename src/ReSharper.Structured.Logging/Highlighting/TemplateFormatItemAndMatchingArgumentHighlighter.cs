@@ -9,8 +9,6 @@ using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.DataContext;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.ReSharper.Psi.Util;
-using JetBrains.Util;
 
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Serilog.Events;
@@ -69,7 +67,7 @@ namespace ReSharper.Structured.Logging.Highlighting
             var invocationExpressions = psiView.ContainingNodes<IInvocationExpression>();
             foreach (var invocationExpression in invocationExpressions)
             {
-                var templateArgument = invocationExpression?.GetTemplateArgument();
+                var templateArgument = invocationExpression.GetTemplateArgument();
                 if (templateArgument == null)
                 {
                     continue;

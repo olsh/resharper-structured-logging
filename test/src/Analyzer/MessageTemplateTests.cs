@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+using JetBrains.Annotations;
 using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Daemon.StringAnalysis;
 using JetBrains.ReSharper.Feature.Services.Daemon;
@@ -46,7 +46,8 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
                    || highlighting is ExceptionPassedAsTemplateArgumentWarning
                    || highlighting is ComplexObjectDestructuringWarning
                    || highlighting is PositionalPropertyUsedWarning
-                   || highlighting is InconsistentLogPropertyNamingWarning;
+                   || highlighting is InconsistentLogPropertyNamingWarning
+                   || highlighting is LogMessageIsSentenceWarning;
         }
     }
 }

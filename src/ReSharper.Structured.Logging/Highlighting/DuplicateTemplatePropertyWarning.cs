@@ -21,7 +21,7 @@ namespace ReSharper.Structured.Logging.Highlighting
         ToolTipFormatString = Message)]
     public class DuplicateTemplatePropertyWarning : IHighlighting
     {
-        public const string Message = "Duplicate properties in message template";
+        private const string Message = "Duplicate properties in message template";
 
         public const string SeverityId = "TemplateDuplicatePropertyProblem";
 

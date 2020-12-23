@@ -99,6 +99,23 @@ namespace ReSharper.Structured.Logging.Extensions
             return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Value)?.Expression.GetUnquotedText();
         }
 
+        [CanBeNull]
+        public static IStringLiteralAlterer TryCreateLastTemplateFragmentExpression(this ICSharpArgument argument)
+        {
+            if (argument.Value is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
+            {
+                var argumentInfo = additiveExpression.Arguments.Last();
+                if (argumentInfo is ExpressionArgumentInfo expressionArgumentInfo)
+                {
+                    return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(expressionArgumentInfo.Expression);
+                }
+
+                return null;
+            }
+
+            return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Value);
+        }
+
         public static bool IsGenericMicrosoftExtensionsLogger([NotNull]this IDeclaredType declared)
         {
             return declared.GetClrName().FullName == "Microsoft.Extensions.Logging.ILogger`1";

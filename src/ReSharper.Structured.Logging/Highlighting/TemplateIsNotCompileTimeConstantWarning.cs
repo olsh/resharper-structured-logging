@@ -22,7 +22,7 @@ namespace ReSharper.Structured.Logging.Highlighting
     {
         public const string SeverityId = "TemplateIsNotCompileTimeConstantProblem";
 
-        public const string Message = "Message template should be compile time constant";
+        private const string Message = "Message template should be compile time constant";
 
         private readonly DocumentRange _documentRange;
 

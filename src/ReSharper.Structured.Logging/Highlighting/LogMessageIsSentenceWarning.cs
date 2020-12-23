@@ -1,8 +1,9 @@
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
+using JetBrains.ReSharper.Psi.Tree;
+using JetBrains.ReSharper.Psi.Util;
 
-using ReSharper.Structured.Logging.Models;
 using ReSharper.Structured.Logging.Settings;
 
 namespace ReSharper.Structured.Logging.Highlighting
@@ -19,17 +20,17 @@ namespace ReSharper.Structured.Logging.Highlighting
         CSharpLanguage.Name,
         OverlapResolve = OverlapResolveKind.WARNING,
         ToolTipFormatString = Message)]
-    public class PositionalPropertyUsedWarning : IHighlighting
+    public class LogMessageIsSentenceWarning : IHighlighting
     {
-        private readonly MessageTemplateTokenInformation _tokenInformation;
+        private const string Message = "Log event messages should be fragments, not sentences. Avoid a trailing period/full stop.";
 
-        private const string Message = "Prefer named properties instead of positional ones";
+        public const string SeverityId = "LogMessageIsSentenceProblem";
 
-        public const string SeverityId = "PositionalPropertyUsedProblem";
+        private readonly DocumentRange _documentRange;
 
-        public PositionalPropertyUsedWarning(MessageTemplateTokenInformation tokenInformation)
+        public LogMessageIsSentenceWarning(IStringLiteralAlterer stringLiteral)
         {
-            _tokenInformation = tokenInformation;
+            _documentRange = stringLiteral.Expression.GetDocumentRange();
         }
 
         public string ErrorStripeToolTip => ToolTip;
@@ -38,12 +39,12 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         public DocumentRange CalculateRange()
         {
-            return _tokenInformation.DocumentRange;
+            return _documentRange;
         }
 
         public bool IsValid()
         {
-            return _tokenInformation.DocumentRange.IsValid();
+            return _documentRange.IsValid();
         }
     }
 }

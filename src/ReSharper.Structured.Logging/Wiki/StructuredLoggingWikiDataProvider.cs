@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using JetBrains.Application;
 using JetBrains.ReSharper.Feature.Services.Explanatory;
@@ -43,6 +43,10 @@ namespace ReSharper.Structured.Logging.Wiki
                                                                                       {
                                                                                           InconsistentLogPropertyNamingWarning.SeverityId,
                                                                                           CreateSeverityUrl(InconsistentLogPropertyNamingWarning.SeverityId)
+                                                                                      },
+                                                                                      {
+                                                                                          LogMessageIsSentenceWarning.SeverityId,
+                                                                                          CreateSeverityUrl(LogMessageIsSentenceWarning.SeverityId)
                                                                                       }
                                                                                   };
 

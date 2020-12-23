@@ -20,7 +20,7 @@ namespace ReSharper.Structured.Logging.Highlighting
         ToolTipFormatString = Message)]
     public class ContextualLoggerWarning : IHighlighting
     {
-        public const string Message = "Incorrect type is used for contextual logger";
+        private const string Message = "Incorrect type is used for contextual logger";
 
         public const string SeverityId = "ContextualLoggerProblem";
 

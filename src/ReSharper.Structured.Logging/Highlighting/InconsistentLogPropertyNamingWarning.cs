@@ -22,7 +22,7 @@ namespace ReSharper.Structured.Logging.Highlighting
         ToolTipFormatString = Message)]
     public class InconsistentLogPropertyNamingWarning : IHighlighting
     {
-        public const string Message = "Property name '{0}' does not naming rules'. Suggested name is '{1}'.";
+        private const string Message = "Property name '{0}' does not naming rules'. Suggested name is '{1}'.";
 
         public const string SeverityId = "InconsistentLogPropertyNaming";
 

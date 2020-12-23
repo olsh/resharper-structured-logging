@@ -22,7 +22,7 @@ namespace ReSharper.Structured.Logging.Highlighting
     {
         public const string SeverityId = "ExceptionPassedAsTemplateArgumentProblem";
 
-        public const string Message = "Exception should be passed to the exception argument";
+        private const string Message = "Exception should be passed to the exception argument";
 
         private readonly DocumentRange _documentRange;
 

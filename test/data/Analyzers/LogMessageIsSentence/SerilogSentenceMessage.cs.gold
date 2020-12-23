@@ -1,0 +1,16 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Information(|"Hello |{Name}|(1)."|(0), "World");
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Log event messages should be fragments, not sentences. Avoid a trailing period/full stop.
+(1): ReSharper Format String Item: 
