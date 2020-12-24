@@ -1,0 +1,16 @@
+﻿using Serilog;
+using Serilog.Context;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            LogContext.PushProperty(|"test"|(0), 1);
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Property name 'test' does not match naming rules'. Suggested name is 'Test'.

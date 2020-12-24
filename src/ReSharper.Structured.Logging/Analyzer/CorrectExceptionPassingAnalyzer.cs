@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using JetBrains.Metadata.Reader.API;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
@@ -24,36 +24,13 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var templateArgumentIndex = templateArgument.IndexOf();
             var exceptionType = element.PsiModule.GetPredefinedType().TryGetType(PredefinedType.EXCEPTION_FQN, NullableAnnotation.Unknown);
             if (exceptionType == null)
             {
                 return;
             }
 
-            ICSharpArgument invalidExceptionArgument = null;
-            foreach (var argument in element.ArgumentList.Arguments)
-            {
-                var argumentType = argument.Value?.Type();
-                if (!(argumentType is IDeclaredType declaredType))
-                {
-                    continue;
-                }
-
-                if (!declaredType.IsSubtypeOf(exceptionType))
-                {
-                    continue;
-                }
-
-                if (templateArgumentIndex > argument.IndexOf())
-                {
-                    return;
-                }
-
-                invalidExceptionArgument = argument;
-                break;
-            }
-
+            ICSharpArgument invalidExceptionArgument = FindInvalidExceptionArgument(element, templateArgument, exceptionType);
             if (invalidExceptionArgument == null)
             {
                 return;
@@ -95,6 +72,33 @@ namespace ReSharper.Structured.Logging.Analyzer
             }
 
             consumer.AddHighlighting(new ExceptionPassedAsTemplateArgumentWarning(invalidExceptionArgument.GetDocumentRange()));
+        }
+
+        private ICSharpArgument FindInvalidExceptionArgument(IInvocationExpression invocationExpression, ICSharpArgument templateArgument, IDeclaredType exceptionType)
+        {
+            var templateArgumentIndex = templateArgument.IndexOf();
+            foreach (var argument in invocationExpression.ArgumentList.Arguments)
+            {
+                var argumentType = argument.Value?.Type();
+                if (!(argumentType is IDeclaredType declaredType))
+                {
+                    continue;
+                }
+
+                if (!declaredType.IsSubtypeOf(exceptionType))
+                {
+                    continue;
+                }
+
+                if (templateArgumentIndex > argument.IndexOf())
+                {
+                    return null;
+                }
+
+                return argument;
+            }
+
+            return null;
         }
     }
 }

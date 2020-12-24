@@ -27,6 +27,21 @@ namespace ReSharper.Structured.Logging.Analyzer
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
+            var namingType = element.GetProject()
+                                 ?.GetSolution()
+                                 .GetSettingsStore()
+                                 .GetValue(StructuredLoggingSettingsAccessor.PropertyNamingType)
+                             ?? PropertyNamingType.PascalCase;
+
+            CheckPropertiesInTemplate(element, consumer, namingType);
+            CheckPropertiesInContext(element, consumer, namingType);
+        }
+
+        private void CheckPropertiesInTemplate(
+            IInvocationExpression element,
+            IHighlightingConsumer consumer,
+            PropertyNamingType namingType)
+        {
             var templateArgument = element.GetTemplateArgument();
             var templateText = templateArgument?.TryGetTemplateText();
             if (templateText == null)
@@ -40,12 +55,6 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var namingType = element.GetProject()
-                                 ?.GetSolution()
-                                 .GetSettingsStore()
-                                 .GetValue(StructuredLoggingSettingsAccessor.PropertyNamingType)
-                             ?? PropertyNamingType.PascalCase;
-
             foreach (var property in messageTemplate.NamedProperties)
             {
                 if (string.IsNullOrEmpty(property.PropertyName))
@@ -53,26 +62,61 @@ namespace ReSharper.Structured.Logging.Analyzer
                     continue;
                 }
 
-                string suggestedName = property.PropertyName;
-                switch (namingType)
-                {
-                    case PropertyNamingType.PascalCase:
-                        suggestedName = StringUtil.MakeUpperCamelCaseName(property.PropertyName);
-                        break;
-                    case PropertyNamingType.CamelCase:
-                        suggestedName = StringUtil.MakeUpperCamelCaseName(property.PropertyName).Decapitalize();
-                        break;
-                    case PropertyNamingType.SnakeCase:
-                        suggestedName = StringUtil.MakeUnderscoreCaseName(property.PropertyName);
-                        break;
-                }
-
+                var suggestedName = GetSuggestedName(property.PropertyName, namingType);
                 if (string.Equals(suggestedName, property.PropertyName))
                 {
                     continue;
                 }
 
-                consumer.AddHighlighting(new InconsistentLogPropertyNamingWarning(templateArgument.GetTokenInformation(property), property, suggestedName));
+                consumer.AddHighlighting(
+                    new InconsistentLogPropertyNamingWarning(templateArgument.GetTokenInformation(property), property,
+                        suggestedName));
+            }
+        }
+
+        private void CheckPropertiesInContext(
+            IInvocationExpression element,
+            IHighlightingConsumer consumer,
+            PropertyNamingType namingType)
+        {
+            if (!element.IsSerilogContextPushPropertyMethod())
+            {
+                return;
+            }
+
+            if (element.ArgumentList.Arguments.Count < 1)
+            {
+                return;
+            }
+
+            var propertyArgument = element.ArgumentList.Arguments[0];
+            var propertyName = propertyArgument.Value.ConstantValue.Value as string;
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                return;
+            }
+
+            var suggestedName = GetSuggestedName(propertyName, namingType);
+            if (string.Equals(propertyName, suggestedName))
+            {
+                return;
+            }
+
+            consumer.AddHighlighting(new InconsistentContextLogPropertyNamingWarning(propertyArgument, propertyName, suggestedName));
+        }
+
+        private string GetSuggestedName(string propertyName, PropertyNamingType namingType)
+        {
+            switch (namingType)
+            {
+                case PropertyNamingType.PascalCase:
+                    return StringUtil.MakeUpperCamelCaseName(propertyName);
+                case PropertyNamingType.CamelCase:
+                    return StringUtil.MakeUpperCamelCaseName(propertyName).Decapitalize();
+                case PropertyNamingType.SnakeCase:
+                    return StringUtil.MakeUnderscoreCaseName(propertyName);
+                default:
+                    return propertyName;
             }
         }
     }

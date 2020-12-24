@@ -38,7 +38,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
             IContextBoundSettingsStore settingsStore)
         {
             return highlighting is TemplateFormatStringArgumentIsNotUsedWarning
-                   || highlighting is TemplateFormatStringUnexistingArgumentWarning
+                   || highlighting is TemplateFormatStringNonExistingArgumentWarning
                    || highlighting is StringEscapeCharacterHighlighting
                    || highlighting is DuplicateTemplatePropertyWarning
                    || highlighting is AnonymousObjectDestructuringWarning
@@ -48,6 +48,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
                    || highlighting is ComplexObjectDestructuringInContextWarning
                    || highlighting is PositionalPropertyUsedWarning
                    || highlighting is InconsistentLogPropertyNamingWarning
+                   || highlighting is InconsistentContextLogPropertyNamingWarning
                    || highlighting is LogMessageIsSentenceWarning;
         }
     }

@@ -51,6 +51,10 @@ namespace ReSharper.Structured.Logging.Wiki
                                                                                       {
                                                                                           ComplexObjectDestructuringInContextWarning.SeverityId,
                                                                                           CreateSeverityUrl(ComplexObjectDestructuringInContextWarning.SeverityId)
+                                                                                      },
+                                                                                      {
+                                                                                          InconsistentContextLogPropertyNamingWarning.SeverityId,
+                                                                                          CreateSeverityUrl(InconsistentContextLogPropertyNamingWarning.SeverityId)
                                                                                       }
                                                                                   };
 

@@ -50,7 +50,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                     if (argumentsCount < 0)
                     {
                         consumer.AddHighlighting(
-                            new TemplateFormatStringUnexistingArgumentWarning(
+                            new TemplateFormatStringNonExistingArgumentWarning(
                                 templateArgument.GetTokenInformation(property).DocumentRange));
                     }
                 }
@@ -67,7 +67,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                     if (position >= argumentsCount)
                     {
                         consumer.AddHighlighting(
-                            new TemplateFormatStringUnexistingArgumentWarning(
+                            new TemplateFormatStringNonExistingArgumentWarning(
                                 templateArgument.GetTokenInformation(property).DocumentRange));
                     }
                 }

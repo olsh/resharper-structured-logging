@@ -20,10 +20,8 @@ namespace ReSharper.Structured.Logging.Highlighting
         CSharpLanguage.Name,
         OverlapResolve = OverlapResolveKind.WARNING,
         ToolTipFormatString = Message)]
-    public class InconsistentLogPropertyNamingWarning : IHighlighting
+    public class InconsistentLogPropertyNamingWarning : InconsistentLogPropertyNamingWarningBase, IHighlighting
     {
-        private const string Message = "Property name '{0}' does not naming rules'. Suggested name is '{1}'.";
-
         public const string SeverityId = "InconsistentLogPropertyNaming";
 
         public InconsistentLogPropertyNamingWarning(
@@ -44,7 +42,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         public string SuggestedName { get; }
 
-        public string ToolTip => $"Property name '{NamedProperty.PropertyName}' does not naming rules'. Suggested name is '{SuggestedName}'.";
+        public string ToolTip => GetToolTipMessage(NamedProperty.PropertyName, SuggestedName);
 
         public DocumentRange CalculateRange()
         {

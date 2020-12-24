@@ -18,7 +18,7 @@ namespace ReSharper.Structured.Logging.Highlighting
         CSharpLanguage.Name,
         OverlapResolve = OverlapResolveKind.WARNING,
         ToolTipFormatString = Message)]
-    public class TemplateFormatStringUnexistingArgumentWarning : IHighlighting
+    public class TemplateFormatStringNonExistingArgumentWarning : IHighlighting
     {
         private const string SeverityId = "TemplateFormatStringProblem";
 
@@ -26,7 +26,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         private readonly DocumentRange _documentRange;
 
-        public TemplateFormatStringUnexistingArgumentWarning(DocumentRange documentRange)
+        public TemplateFormatStringNonExistingArgumentWarning(DocumentRange documentRange)
         {
             _documentRange = documentRange;
         }
