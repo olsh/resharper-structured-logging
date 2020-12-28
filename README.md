@@ -32,7 +32,7 @@ Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 * [Prefer named properties instead of positional ones](rules/PositionalPropertyUsedProblem.md) 
 * [Inconsistent log property naming](rules/InconsistentLogPropertyNaming.md) 
 * [Inconsistent log property naming in context](rules/InconsistentContextLogPropertyNaming.md) 
-* [Log event messages should be fragments, not sentences](rules/InconsistentLogPropertyNaming.md) 
+* [Log event messages should be fragments, not sentences](rules/LogMessageIsSentenceProblem.md) 
 
 ## Credits
 
