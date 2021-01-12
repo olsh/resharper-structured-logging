@@ -13,4 +13,4 @@ namespace ConsoleApp
 }
 
 ---------------------------------------------------------
-(0): ReSharper Warning: Property name 'test' does not match naming rules'. Suggested name is 'Test'.
+(0): ReSharper Warning: Property name 'test' does not match naming rules. Suggested name is 'Test'.

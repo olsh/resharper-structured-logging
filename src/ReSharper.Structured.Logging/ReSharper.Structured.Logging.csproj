@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
-    <VersionPrefix>2020.3.0</VersionPrefix>
+    <VersionPrefix>2020.3.2</VersionPrefix>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.ReSharper.SDK" Version="2020.3.0" />
+    <PackageReference Include="JetBrains.ReSharper.SDK" Version="2020.3.2" />
   </ItemGroup>
   <PropertyGroup>
     <OutputPath>bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>

@@ -13,4 +13,4 @@ namespace ConsoleApp
 
 ---------------------------------------------------------
 (0): ReSharper Format String Item: 
-(1): ReSharper Warning: Property name 'myProperty' does not match naming rules'. Suggested name is 'MyProperty'.
+(1): ReSharper Warning: Property name 'myProperty' does not match naming rules. Suggested name is 'MyProperty'.

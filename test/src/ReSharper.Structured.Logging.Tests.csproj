@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.ReSharper.SDK.Tests" Version="2020.3.0" />
+    <PackageReference Include="JetBrains.ReSharper.SDK.Tests" Version="2020.3.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ReSharper.Structured.Logging\ReSharper.Structured.Logging.csproj" />
