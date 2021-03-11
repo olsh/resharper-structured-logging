@@ -10,7 +10,10 @@
     <RootNamespace>ReSharper.Structured.Logging</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Rider.SDK" Version="2020.3.2" />
+    <PackageReference Include="JetBrains.Rider.SDK" Version="2021.1.0-eap06">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
   <PropertyGroup>
     <OutputPath>bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>

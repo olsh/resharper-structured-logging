@@ -4,7 +4,10 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.ReSharper.SDK.Tests" Version="2020.3.2" />
+    <PackageReference Include="JetBrains.ReSharper.SDK.Tests" Version="2021.1.0-eap06">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ReSharper.Structured.Logging\ReSharper.Structured.Logging.csproj" />
