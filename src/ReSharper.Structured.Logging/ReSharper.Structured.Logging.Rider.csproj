@@ -10,7 +10,7 @@
     <RootNamespace>ReSharper.Structured.Logging</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Rider.SDK" Version="2021.1.0-eap06">
+    <PackageReference Include="JetBrains.Rider.SDK" Version="2021.1.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
