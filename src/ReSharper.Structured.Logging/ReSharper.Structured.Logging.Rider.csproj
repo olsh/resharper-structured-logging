@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
-    <VersionPrefix>2020.3.2</VersionPrefix>
+    <VersionPrefix>2021.1.0</VersionPrefix>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <PropertyGroup>
@@ -10,7 +10,7 @@
     <RootNamespace>ReSharper.Structured.Logging</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Rider.SDK" Version="2020.3.2" />
+    <PackageReference Include="JetBrains.Rider.SDK" Version="2021.1.0" />
   </ItemGroup>
   <PropertyGroup>
     <OutputPath>bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>

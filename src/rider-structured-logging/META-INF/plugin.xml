@@ -4,7 +4,7 @@
   <description>Provides highlighting for structured logging message templates and contains some useful analyzers. Supports Serilog, NLog, and Microsoft.Extensions.Logging.</description>
   <version>2019.1.1.0</version>
   <vendor url="https://github.com/olsh/resharper-structured-logging">Oleg Shevchenko</vendor>
-  <idea-version since-build="202" until-build="202.*"/>
+  <idea-version since-build="211" until-build="211.*"/>
   <extensions defaultExtensionNs="com.intellij" />
   <depends>com.intellij.modules.rider</depends>
 </idea-plugin>
