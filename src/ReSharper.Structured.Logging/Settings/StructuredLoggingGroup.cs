@@ -3,7 +3,7 @@ using JetBrains.ReSharper.Feature.Services.Daemon;
 namespace ReSharper.Structured.Logging.Settings
 {
     [RegisterConfigurableHighlightingsGroup(Id, Name)]
-    public class StructuredLoggingGroup
+    public static class StructuredLoggingGroup
     {
         public const string Id = "StructuredLogging";
 

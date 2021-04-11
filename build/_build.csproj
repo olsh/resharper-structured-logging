@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace></RootNamespace>
+    <NoWarn>CS0649;CS0169</NoWarn>
+    <NukeRootDirectory>..</NukeRootDirectory>
+    <NukeScriptDirectory>..</NukeScriptDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nuke.Common" Version="5.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageDownload Include="dotnet-sonarscanner" Version="[5.2.0]" />
+    <PackageDownload Include="NuGet.CommandLine" Version="[5.8.1]" />
+    <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.12.0]" />
+  </ItemGroup>
+
+</Project>

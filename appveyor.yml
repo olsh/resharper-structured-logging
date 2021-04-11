@@ -1,17 +1,20 @@
-version: 1.0.{build}
 image: Visual Studio 2019
+
+skip_branch_with_pr: true
+skip_tags: true
+
 install:
-  - dotnet tool install -g Cake.Tool --version 0.37.0
   - SET JAVA_HOME=C:\Program Files\Java\jdk11
   - SET PATH=%JAVA_HOME%\bin;%PATH%
 build_script:
 - cmd: >-
-    dotnet cake -Target=CreateArtifact -buildConfig=Release
+    build.cmd update-build-version
 
-    dotnet cake -Host="Rider" -Target=CreateArtifact -buildConfig=Release
+    build.cmd test upload-artifact --configuration=Release
 
-    dotnet cake -Target=Sonar -buildConfig=Release
+    build.cmd test upload-artifact --configuration=Release --is-rider-host
+
+    nuke sonar --configuration=Release
 test: off
 cache:
   - '%USERPROFILE%\.nuget\packages -> **\*.csproj'
-  - 'tools -> build.cake'

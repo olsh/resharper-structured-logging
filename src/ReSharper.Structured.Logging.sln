@@ -10,8 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8F7509A6-86AF-48A9-BD71-464ED879D8FA}"
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
-		..\appveyor.yml = ..\appveyor.yml
-		..\build.cake = ..\build.cake
 		rider-structured-logging\META-INF\plugin.xml = rider-structured-logging\META-INF\plugin.xml
 		..\README.md = ..\README.md
 	EndProjectSection
@@ -35,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{D93C6901
 		..\rules\TemplateIsNotCompileTimeConstantProblem.md = ..\rules\TemplateIsNotCompileTimeConstantProblem.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.csproj", "{A7717BDB-133B-433E-97CF-624B746FDDC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +57,8 @@ Global
 		{6BC99E0B-6362-4A62-84F1-103B93896294}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BC99E0B-6362-4A62-84F1-103B93896294}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BC99E0B-6362-4A62-84F1-103B93896294}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7717BDB-133B-433E-97CF-624B746FDDC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7717BDB-133B-433E-97CF-624B746FDDC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
