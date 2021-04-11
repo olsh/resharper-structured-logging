@@ -10,11 +10,11 @@ build_script:
 - cmd: >-
     build.cmd update-build-version
 
-    build.cmd test upload-artifact --configuration=Release
+    build.cmd test upload-artifact --configuration Release
 
-    build.cmd test upload-artifact --configuration=Release --is-rider-host
+    build.cmd test upload-artifact --configuration Release --is-rider-host
 
-    nuke sonar --configuration=Release
+    build.cmd sonar --configuration Release
 test: off
 cache:
   - '%USERPROFILE%\.nuget\packages -> **\*.csproj'
