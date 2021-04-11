@@ -16,5 +16,3 @@ build_script:
 
     build.cmd sonar --configuration Release
 test: off
-cache:
-  - '%USERPROFILE%\.nuget\packages -> **\*.csproj'
