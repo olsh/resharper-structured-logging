@@ -66,15 +66,11 @@ class Build : NukeBuild
         ? Solution.GetProject("ReSharper.Structured.Logging.Rider")
         : Solution.GetProject("ReSharper.Structured.Logging");
 
-    Project TestProject => IsRiderHost
-        ? Solution.GetProject("ReSharper.Structured.Logging.Rider.Tests")
-        : Solution.GetProject("ReSharper.Structured.Logging.Tests");
+    Project TestProject => Solution.GetProject($"{Project.Name}.Tests");
 
-    AbsolutePath ProjectFilePath => Project.Path;
+    AbsolutePath OutputDirectory => Project.Directory / "bin" / Project.Name / Configuration;
 
-    AbsolutePath OutputDirectory => Project.Directory / "bin" / Configuration;
-
-    AbsolutePath TestProjectOutputDirectory => TestProject.Directory / "bin" / Configuration;
+    AbsolutePath TestProjectOutputDirectory => TestProject.Directory / "bin" / TestProject.Name / Configuration;
 
     string ExtensionVersion { get; set; }
 
@@ -94,7 +90,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetBuild(s => s
-                .SetProjectFile(ProjectFilePath)
+                .SetProjectFile(Project.Path)
                 .SetConfiguration(Configuration)
                 .SetVersionPrefix(ExtensionVersion)
                 .SetOutputDirectory(OutputDirectory));
