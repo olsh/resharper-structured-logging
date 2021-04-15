@@ -138,14 +138,7 @@ class Build : NukeBuild
                     // Gradle writes warnings to stderr
                     // By default logger will write stderr as errors
                     // AppVeyor writes errors as special messages and stops the build if such messages more than 500
-                    if (type == OutputType.Err)
-                    {
-                        Logger.Warn(s);
-                    }
-                    else
-                    {
-                        Logger.Info(s);
-                    }
+                    Logger.Normal(s);
                 });
         });
 
