@@ -8,6 +8,7 @@ using Nuke.Common.CI.AppVeyor;
 using Nuke.Common.Execution;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
+using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Tools.NUnit;
@@ -31,13 +32,13 @@ class Build : NukeBuild
     protected override void OnBuildInitialized()
     {
         var sdkNuGetPackage = IsRiderHost ? "JetBrains.Rider.SDK" : "JetBrains.ReSharper.SDK";
-        var sdkVersion = XmlPeekSingle(
+        SdkVersion = XmlPeekSingle(
             Project.Path,
             $"//PackageReference[@Include='{sdkNuGetPackage}']/@Version");
-        sdkVersion.NotNull("Unable to detect SDK version");
+        SdkVersion.NotNull("Unable to detect SDK version");
 
-        ExtensionVersion = AppVeyor == null ? sdkVersion : $"{sdkVersion}.{AppVeyor.BuildNumber}";
-        var sdkMatch = Regex.Match(sdkVersion, @"\d{2}(\d{2}).(\d).*");
+        ExtensionVersion = AppVeyor == null ? SdkVersion : $"{SdkVersion}.{AppVeyor.BuildNumber}";
+        var sdkMatch = Regex.Match(SdkVersion, @"\d{2}(\d{2}).(\d).*");
         WaveMajorVersion = int.Parse(sdkMatch.Groups[1]
             .Value + sdkMatch.Groups[2]
             .Value);
@@ -53,6 +54,8 @@ class Build : NukeBuild
     [Parameter] readonly bool IsRiderHost;
 
     [Solution] readonly Solution Solution;
+
+    [LocalExecutable("./gradlew.bat")] readonly Tool Gradle;
 
     string NuGetPackageFileName => $"{Project.Name}.{ExtensionVersion}.nupkg";
 
@@ -73,6 +76,8 @@ class Build : NukeBuild
     AbsolutePath TestProjectOutputDirectory => TestProject.Directory / "bin" / TestProject.Name / Configuration;
 
     string ExtensionVersion { get; set; }
+
+    string SdkVersion { get; set; }
 
     string WaveVersionsRange { get; set; }
 
@@ -121,9 +126,17 @@ class Build : NukeBuild
                 .SetOutputDirectory(RootDirectory));
         });
 
+    Target BuildRiderFrontend => _ => _
+        .Unlisted()
+        .Executes(() =>
+        {
+            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion}");
+        });
+
     Target PackRiderPlugin => _ => _
         .Unlisted()
         .TriggeredBy(Pack)
+        .DependsOn(BuildRiderFrontend)
         .OnlyWhenStatic(() => IsRiderHost)
         .Executes(() =>
         {
@@ -133,21 +146,15 @@ class Build : NukeBuild
                 DeleteDirectory(tempDirectory);
             }
 
-            var riderMetaDirectoryName = "rider-structured-logging";
-            var sourceMetaFolder = RootDirectory / "src" / riderMetaDirectoryName;
-            var targetMetaFolder = tempDirectory / riderMetaDirectoryName;
-            CopyDirectoryRecursively(sourceMetaFolder, targetMetaFolder);
-            CopyFile(NuGetPackagePath, tempDirectory / riderMetaDirectoryName / NuGetPackageFileName);
+            var gradleBuildDirectory = RootDirectory / "gradle-build";
+            var pluginXmlFilePath = gradleBuildDirectory / "patchedPluginXmlFiles"  / "plugin.xml";
+            var pluginRootDirectory = tempDirectory / "rider-structured-logging";
+            CopyFile(pluginXmlFilePath, pluginRootDirectory / "META-INF"  / "plugin.xml" );
 
-            var riderMetaFile = targetMetaFolder / "META-INF" / "plugin.xml";
-            XmlPoke(riderMetaFile, "idea-plugin/version", ExtensionVersion);
-            XmlPoke(riderMetaFile, "idea-plugin/idea-version/@since-build", WaveMajorVersion);
-            XmlPoke(riderMetaFile, "idea-plugin/idea-version/@until-build", WaveMajorVersion + ".*");
+            var pluginJarFile = gradleBuildDirectory / "libs" / "rider-StructuredLogging-2021.1.1.jar";
+            CopyFile(pluginJarFile, pluginRootDirectory / "lib"  / "rider-structured-logging.jar" );
 
-            // We should re-save wile with UTF-8 without BOM, otherwise Rider fails to install plugin
-            // This workaround can be removed when the feature will be released https://github.com/nuke-build/nuke/pull/734
-            File.WriteAllText(riderMetaFile, File.ReadAllText(riderMetaFile), new UTF8Encoding(false));
-
+            CopyFile(NuGetPackagePath, pluginRootDirectory / NuGetPackageFileName);
             CompressZip(tempDirectory, RiderPackagePath, fileMode: FileMode.Create);
             DeleteFile(NuGetPackagePath);
         });

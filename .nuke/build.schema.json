@@ -62,6 +62,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "BuildRiderFrontend",
               "Compile",
               "Pack",
               "PackRiderPlugin",
@@ -83,6 +84,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "BuildRiderFrontend",
               "Compile",
               "Pack",
               "PackRiderPlugin",

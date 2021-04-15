@@ -344,3 +344,9 @@ temp/
 
 # Nuke temp files
 .nuke/temp
+
+# Gradle
+.gradle/
+gradle-build/
+build/idea-sandbox/
+build/searchableOptions/
