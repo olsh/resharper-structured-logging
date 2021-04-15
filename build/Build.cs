@@ -160,7 +160,7 @@ class Build : NukeBuild
             var pluginRootDirectory = tempDirectory / "rider-structured-logging";
             CopyFile(pluginXmlFilePath, pluginRootDirectory / "META-INF"  / "plugin.xml" );
 
-            var pluginJarFile = gradleBuildDirectory / "libs" / "rider-StructuredLogging-2021.1.1.jar";
+            var pluginJarFile = gradleBuildDirectory / "libs" / $"rider-structured-logging-{ExtensionVersion}.jar";
             CopyFile(pluginJarFile, pluginRootDirectory / "lib"  / "rider-structured-logging.jar" );
 
             CopyFile(NuGetPackagePath, pluginRootDirectory / NuGetPackageFileName);
