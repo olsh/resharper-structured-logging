@@ -13,7 +13,7 @@ namespace ConsoleApp
 }
 
 ---------------------------------------------------------
-(0:a): ReSharper Usage of element under cursor
-(1:a): ReSharper Usage of element under cursor
-(2:b): ReSharper Usage of element under cursor
-(3:b): ReSharper Usage of element under cursor
+(0:a): ReSharper Matched Format String Item
+(1:a): ReSharper Matched Format String Item
+(2:b): ReSharper Matched Format String Item
+(3:b): ReSharper Matched Format String Item
