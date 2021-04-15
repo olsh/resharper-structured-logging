@@ -2,6 +2,8 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using Colorful;
+
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.AppVeyor;
@@ -130,7 +132,21 @@ class Build : NukeBuild
         .Unlisted()
         .Executes(() =>
         {
-            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion}");
+            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion}", customLogger:
+                (type, s) =>
+                {
+                    // Gradle writes warnings to stderr
+                    // By default logger will write stderr as errors
+                    // AppVeyor writes errors as special messages and stops the build if such messages more than 500
+                    if (type == OutputType.Err)
+                    {
+                        Logger.Warn(s);
+                    }
+                    else
+                    {
+                        Logger.Info(s);
+                    }
+                });
         });
 
     Target PackRiderPlugin => _ => _
