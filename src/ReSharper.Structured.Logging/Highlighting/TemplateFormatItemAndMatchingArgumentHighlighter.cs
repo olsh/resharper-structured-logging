@@ -19,6 +19,8 @@ namespace ReSharper.Structured.Logging.Highlighting
     [ContainsContextConsumer]
     public class TemplateFormatItemAndMatchingArgumentHighlighter : ContextHighlighterBase
     {
+        private const string MatchedElementHighlightingAttribute = DefaultLanguageAttributeIds.MATCHED_FORMAT_STRING_ITEM;
+
         private readonly MessageTemplateParser _messageTemplate;
 
         private TemplateFormatItemAndMatchingArgumentHighlighter(MessageTemplateParser messageTemplate)
@@ -138,7 +140,7 @@ namespace ReSharper.Structured.Logging.Highlighting
             {
                 var property = namedProperties[argumentIndex];
                 consumer.ConsumeHighlighting(
-                    GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                    MatchedElementHighlightingAttribute,
                     templateArgument.GetTokenInformation(property).DocumentRange);
             }
             else if (positionalProperties != null)
@@ -156,13 +158,13 @@ namespace ReSharper.Structured.Logging.Highlighting
                     }
 
                     consumer.ConsumeHighlighting(
-                        GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                        MatchedElementHighlightingAttribute,
                         templateArgument.GetTokenInformation(property).DocumentRange);
                 }
             }
 
             consumer.ConsumeHighlighting(
-                GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                MatchedElementHighlightingAttribute,
                 selectedArgument.GetDocumentRange());
         }
 
@@ -188,10 +190,10 @@ namespace ReSharper.Structured.Logging.Highlighting
                 }
 
                 consumer.ConsumeHighlighting(
-                    GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                    MatchedElementHighlightingAttribute,
                     templateArgument.GetTokenInformation(selectedToken).DocumentRange);
                 consumer.ConsumeHighlighting(
-                    GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                    MatchedElementHighlightingAttribute,
                     arguments[argumentIndex].GetDocumentRange());
             }
             else if (messageTemplate.PositionalProperties != null)
@@ -220,7 +222,7 @@ namespace ReSharper.Structured.Logging.Highlighting
                     }
 
                     consumer.ConsumeHighlighting(
-                        GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                        MatchedElementHighlightingAttribute,
                         templateArgument.GetTokenInformation(property).DocumentRange);
                 }
 
@@ -231,7 +233,7 @@ namespace ReSharper.Structured.Logging.Highlighting
                 }
 
                 consumer.ConsumeHighlighting(
-                    GeneralHighlightingAttributeIds.USAGE_OF_ELEMENT_UNDER_CURSOR,
+                    MatchedElementHighlightingAttribute,
                     arguments[argumentIndex].GetDocumentRange());
             }
         }
