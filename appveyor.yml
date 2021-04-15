@@ -10,9 +10,9 @@ build_script:
 - cmd: >-
     build.cmd update-build-version
 
-    build.cmd test upload-artifact --configuration Release
+    build.cmd test upload-resharper-artifact --configuration Release
 
-    build.cmd test upload-artifact --configuration Release --is-rider-host
+    build.cmd test upload-rider-artifact --configuration Release --is-rider-host
 
     build.cmd sonar --configuration Release
 test: off
