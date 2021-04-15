@@ -32,6 +32,25 @@ repositories {
     maven { url 'https://cache-redirector.jetbrains.com/maven-central' }
 }
 
+prepareSandbox {
+    def dotNetFiles = [
+            "${DotNetOutputDirectory}/${DotNetProjectName}.dll",
+            "${DotNetOutputDirectory}/${DotNetProjectName}.pdb",
+    ]
+
+    dotNetFiles.forEach({ f ->
+        def file = file(f)
+        from(file, { into "${intellij.pluginName}/dotnet" })
+    })
+
+    doLast {
+        dotNetFiles.forEach({ f ->
+            def file = file(f)
+            if (!file.exists()) throw new RuntimeException("File ${file} does not exist")
+        })
+    }
+}
+
 wrapper {
     gradleVersion = '6.1.1'
     distributionType = Wrapper.DistributionType.ALL

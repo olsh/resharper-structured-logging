@@ -1,8 +1,4 @@
-using System.IO;
-using System.Text;
 using System.Text.RegularExpressions;
-
-using Colorful;
 
 using Nuke.Common;
 using Nuke.Common.CI;
@@ -16,8 +12,6 @@ using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Tools.NUnit;
 using Nuke.Common.Tools.SonarScanner;
 
-using static Nuke.Common.IO.XmlTasks;
-using static Nuke.Common.IO.CompressionTasks;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.Tools.NUnit.NUnitTasks;
@@ -33,10 +27,7 @@ class Build : NukeBuild
 
     protected override void OnBuildInitialized()
     {
-        var sdkNuGetPackage = IsRiderHost ? "JetBrains.Rider.SDK" : "JetBrains.ReSharper.SDK";
-        SdkVersion = XmlPeekSingle(
-            Project.Path,
-            $"//PackageReference[@Include='{sdkNuGetPackage}']/@Version");
+        SdkVersion = Project.GetProperty("SdkVersion");
         SdkVersion.NotNull("Unable to detect SDK version");
 
         ExtensionVersion = AppVeyor == null ? SdkVersion : $"{SdkVersion}.{AppVeyor.BuildNumber}";
@@ -116,7 +107,6 @@ class Build : NukeBuild
 
     Target Pack => _ => _
         .DependsOn(Compile)
-        .After(Test)
         .Executes(() =>
         {
             NuGetPack(s => s
@@ -128,44 +118,22 @@ class Build : NukeBuild
                 .SetOutputDirectory(RootDirectory));
         });
 
-    Target BuildRiderFrontend => _ => _
-        .Unlisted()
+    Target PackRiderPlugin => _ => _
+        .DependsOn(Compile)
+        .OnlyWhenStatic(() => IsRiderHost)
         .Executes(() =>
         {
-            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion}", customLogger:
-                (type, s) =>
+
+            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", customLogger:
+                (_, s) =>
                 {
                     // Gradle writes warnings to stderr
                     // By default logger will write stderr as errors
                     // AppVeyor writes errors as special messages and stops the build if such messages more than 500
                     Logger.Normal(s);
                 });
-        });
 
-    Target PackRiderPlugin => _ => _
-        .Unlisted()
-        .TriggeredBy(Pack)
-        .DependsOn(BuildRiderFrontend)
-        .OnlyWhenStatic(() => IsRiderHost)
-        .Executes(() =>
-        {
-            var tempDirectory = RootDirectory / "temp";
-            if (DirectoryExists(tempDirectory))
-            {
-                DeleteDirectory(tempDirectory);
-            }
-
-            var gradleBuildDirectory = RootDirectory / "gradle-build";
-            var pluginXmlFilePath = gradleBuildDirectory / "patchedPluginXmlFiles"  / "plugin.xml";
-            var pluginRootDirectory = tempDirectory / "rider-structured-logging";
-            CopyFile(pluginXmlFilePath, pluginRootDirectory / "META-INF"  / "plugin.xml" );
-
-            var pluginJarFile = gradleBuildDirectory / "libs" / $"rider-structured-logging-{ExtensionVersion}.jar";
-            CopyFile(pluginJarFile, pluginRootDirectory / "lib"  / "rider-structured-logging.jar" );
-
-            CopyFile(NuGetPackagePath, pluginRootDirectory / NuGetPackageFileName);
-            CompressZip(tempDirectory, RiderPackagePath, fileMode: FileMode.Create);
-            DeleteFile(NuGetPackagePath);
+            CopyFile(RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip", RiderPackagePath, FileExistsPolicy.Overwrite);
         });
 
     Target SonarBegin => _ => _
@@ -193,14 +161,21 @@ class Build : NukeBuild
                 .SetFramework("net5.0"));
         });
 
-    Target UploadArtifact => _ => _
-        .DependsOn(Pack)
-        .After(PackRiderPlugin)
+    Target UploadReSharperArtifact => _ => _
+        .DependsOn(Test, Pack)
         .Requires(() => AppVeyor)
+        .Requires(() => !IsRiderHost)
         .Executes(() =>
         {
-            AppVeyor.PushArtifact(IsRiderHost
-                ? RiderPackagePath
-                : NuGetPackagePath);
+            AppVeyor.PushArtifact(NuGetPackagePath);
+        });
+
+    Target UploadRiderArtifact => _ => _
+        .DependsOn(Test, PackRiderPlugin)
+        .Requires(() => AppVeyor)
+        .Requires(() => IsRiderHost)
+        .Executes(() =>
+        {
+            AppVeyor.PushArtifact(RiderPackagePath);
         });
 }

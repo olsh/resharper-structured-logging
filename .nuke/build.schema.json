@@ -62,7 +62,6 @@
           "items": {
             "type": "string",
             "enum": [
-              "BuildRiderFrontend",
               "Compile",
               "Pack",
               "PackRiderPlugin",
@@ -70,7 +69,8 @@
               "SonarBegin",
               "Test",
               "UpdateBuildVersion",
-              "UploadArtifact"
+              "UploadReSharperArtifact",
+              "UploadRiderArtifact"
             ]
           }
         },
@@ -84,7 +84,6 @@
           "items": {
             "type": "string",
             "enum": [
-              "BuildRiderFrontend",
               "Compile",
               "Pack",
               "PackRiderPlugin",
@@ -92,7 +91,8 @@
               "SonarBegin",
               "Test",
               "UpdateBuildVersion",
-              "UploadArtifact"
+              "UploadReSharperArtifact",
+              "UploadRiderArtifact"
             ]
           }
         },

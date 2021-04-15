@@ -10,7 +10,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8F7509A6-86AF-48A9-BD71-464ED879D8FA}"
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
-		rider-structured-logging\META-INF\plugin.xml = rider-structured-logging\META-INF\plugin.xml
+		..\Directory.Build.props = ..\Directory.Build.props
+		rider\main\resources\META-INF\plugin.xml = rider\main\resources\META-INF\plugin.xml
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
