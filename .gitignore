@@ -348,5 +348,3 @@ temp/
 # Gradle
 .gradle/
 gradle-build/
-build/idea-sandbox/
-build/searchableOptions/

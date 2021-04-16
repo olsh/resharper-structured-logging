@@ -10,11 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="idea-sandbox\**" />
-    <None Remove="searchableOptions\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Nuke.Common" Version="5.1.0" />
   </ItemGroup>
 
