@@ -124,14 +124,7 @@ class Build : NukeBuild
         .Requires(() => IsRiderHost)
         .Executes(() =>
         {
-            var gradleArguments = $"-PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}";
-            if (IsServerBuild)
-            {
-                // We should shutdown gradle daemon if the build runs on a build server
-                gradleArguments += " -Porg.gradle.daemon=false";
-            }
-
-            Gradle($"buildPlugin {gradleArguments}", customLogger:
+            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", customLogger:
                 (_, s) =>
                 {
                     // Gradle writes warnings to stderr
