@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "nuget"
+    directory: "/build/"
+    schedule:
+      interval: "monthly"
