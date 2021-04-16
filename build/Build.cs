@@ -107,6 +107,7 @@ class Build : NukeBuild
 
     Target Pack => _ => _
         .DependsOn(Compile)
+        .Requires(() => !IsRiderHost)
         .Executes(() =>
         {
             NuGetPack(s => s
@@ -120,7 +121,7 @@ class Build : NukeBuild
 
     Target PackRiderPlugin => _ => _
         .DependsOn(Compile)
-        .OnlyWhenStatic(() => IsRiderHost)
+        .Requires(() => IsRiderHost)
         .Executes(() =>
         {
 
