@@ -1,4 +1,4 @@
-﻿// Copyright 2013-2015 Serilog Contributors
+// Copyright 2013-2015 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,10 +38,11 @@ namespace ReSharper.Structured.Logging.Serilog.Parsing
         /// is not syntactically valid, text tokens will be returned. The parser
         /// will make a best effort to extract valid property tokens even in the
         /// presence of parsing issues.</returns>
+        /// <exception cref="ArgumentNullException">When <paramref name="messageTemplate"/> is <code>null</code></exception>
         public MessageTemplate Parse(string messageTemplate)
         {
-            if (messageTemplate == null)
-                throw new ArgumentNullException(nameof(messageTemplate));
+            if (messageTemplate == null) throw new ArgumentNullException(nameof(messageTemplate));
+
             return new MessageTemplate(messageTemplate, Tokenize(messageTemplate));
         }
 
@@ -94,8 +95,7 @@ namespace ReSharper.Structured.Logging.Serilog.Parsing
             if (tagContent.Length == 0)
                 return new TextToken(rawText, first);
 
-            string propertyNameAndDestructuring, format, alignment;
-            if (!TrySplitTagContent(tagContent, out propertyNameAndDestructuring, out format, out alignment))
+            if (!TrySplitTagContent(tagContent, out var propertyNameAndDestructuring, out var format, out var alignment))
                 return new TextToken(rawText, first);
 
             var propertyName = propertyNameAndDestructuring;
@@ -217,10 +217,7 @@ namespace ReSharper.Structured.Logging.Serilog.Parsing
                 c == ':';
         }
 
-        static bool IsValidInPropertyName(char c)
-        {
-            return char.IsLetterOrDigit(c) || c == '_';
-        }
+        static bool IsValidInPropertyName(char c) => char.IsLetterOrDigit(c) || c == '_';
 
         static bool TryGetDestructuringHint(char c, out Destructuring destructuring)
         {
@@ -261,7 +258,8 @@ namespace ReSharper.Structured.Logging.Serilog.Parsing
             return c != '}' &&
                 (char.IsLetterOrDigit(c) ||
                  char.IsPunctuation(c) ||
-                 c == ' ');
+                 c == ' ' ||
+                 c == '+');
         }
 
         static TextToken ParseTextToken(int startAt, string messageTemplate, out int next)

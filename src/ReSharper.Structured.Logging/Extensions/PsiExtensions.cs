@@ -7,7 +7,9 @@ using JetBrains.Metadata.Reader.API;
 using JetBrains.Metadata.Reader.Impl;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Impl.Resolve;
+using JetBrains.ReSharper.Psi.CSharp.Parsing;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Util;
 
@@ -56,7 +58,6 @@ namespace ReSharper.Structured.Logging.Extensions
 
         private static (TextRange, IStringLiteralAlterer) FindTokenTextRange(this ICSharpArgument argument, MessageTemplateToken token)
         {
-            var documentRange = argument.GetDocumentRange();
             if (argument.Value is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
             {
                 var arguments = new LinkedList<ExpressionArgumentInfo>();
@@ -69,20 +70,34 @@ namespace ReSharper.Structured.Logging.Extensions
                     var start = range.StartOffset.Offset;
                     var end = range.EndOffset.Offset;
 
-                    // The token index is zero-based and we remove two quotes
-                    if (token.StartIndex < end - start - 3 + globalOffset)
+                    // Usually there are two quotes in the string expression
+                    // But if it's a verbatim string, we should count @ symbol as well
+                    var isVerbatimString = additiveArgument.Expression.IsVerbatimString();
+                    var nonTemplateTokenCount = isVerbatimString ? 3 : 2;
+
+                    // The token index is zero-based so we need to subtract 1
+                    if (token.StartIndex < end - start - 1 - nonTemplateTokenCount + globalOffset)
                     {
                         var tokenStartIndex = start + token.StartIndex - globalOffset + 1;
+                        if (isVerbatimString)
+                        {
+                            tokenStartIndex++;
+                        }
+
                         var tokenEndIndex = tokenStartIndex + token.Length;
 
                         return (new TextRange(tokenStartIndex, end > tokenEndIndex ? tokenEndIndex : end), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(additiveArgument.Expression));
                     }
 
-                    globalOffset += end - start - 2;
+                    globalOffset += end - start - nonTemplateTokenCount;
                 }
             }
 
-            var startOffset = documentRange.TextRange.StartOffset + token.StartIndex + 1;
+            var startOffset = argument.GetDocumentRange().TextRange.StartOffset + token.StartIndex + 1;
+            if (argument.Expression.IsVerbatimString())
+            {
+                startOffset++;
+            }
 
             // ReSharper disable once AssignNullToNotNullAttribute
             return (new TextRange(startOffset, startOffset + token.Length), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Expression));
@@ -95,12 +110,27 @@ namespace ReSharper.Structured.Logging.Extensions
                 var linkedList = new LinkedList<ExpressionArgumentInfo>();
                 FlattenAdditiveExpression(additiveExpression, linkedList);
 
-                return string.Join(string.Empty, linkedList.Select(l => StringLiteralAltererUtil
-                    .TryCreateStringLiteralByExpression(l.Expression)
-                    ?.Expression.GetUnquotedText()));
+                return string.Join(string.Empty, linkedList.Select(l => l.Expression.GetExpressionText()));
             }
 
-            return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Value)?.Expression.GetUnquotedText();
+            return argument.Value.GetExpressionText();
+        }
+
+        public static string GetExpressionText(this ICSharpExpression expression)
+        {
+            var stringLiteral = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(expression);
+            if (stringLiteral == null)
+            {
+                return null;
+            }
+
+            var expressionText = stringLiteral.Expression.GetText();
+            if (expressionText.StartsWith("@"))
+            {
+                expressionText = expressionText.Substring(1);
+            }
+
+            return StringUtil.Unquote(expressionText);
         }
 
         [CanBeNull]
@@ -157,6 +187,11 @@ namespace ReSharper.Structured.Logging.Extensions
             }
 
             return LogContextFqn.Equals(containingType.GetClrName()) && typeMember.ShortName == "PushProperty";
+        }
+
+        public static bool IsVerbatimString([CanBeNull]this IExpression expression)
+        {
+            return expression?.FirstChild?.NodeType == CSharpTokenType.STRING_LITERAL_VERBATIM;
         }
 
         [CanBeNull]

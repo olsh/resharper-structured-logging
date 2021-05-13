@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 
 namespace ReSharper.Structured.Logging.Tests.Analyzer
 {
@@ -17,6 +17,10 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestSerilogTemplateWithEscapedSymbols() => DoNamedTest2();
 
         [Test] public void TestSerilogTemplateWithConcatenations() => DoNamedTest2();
+
+        [Test] public void TestSerilogVerbatimStringValidNamedProperty() => DoNamedTest2();
+
+        [Test] public void TestSerilogVerbatimWithConcatenations() => DoNamedTest2();
 
         [Test] public void TestSerilogValidNamedProperty() => DoNamedTest2();
 

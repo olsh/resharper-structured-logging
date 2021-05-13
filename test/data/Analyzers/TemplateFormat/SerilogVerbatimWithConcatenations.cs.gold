@@ -1,0 +1,24 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Information(@"This |{MyProperty}|(0) \r\n"
+            	+ " |\r|(1)|\n|(2) + |{OtherProperty}|(3) and |\r|(4)|\n|(5)"
+                + @" \r\n + ||{OneMore}|(6)|(7) last \r\n", 1, 2);
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Format String Item: 
+(1): ReSharper C# Escape Character 1: 
+(2): ReSharper C# Escape Character 2: 
+(3): ReSharper Format String Item: 
+(4): ReSharper C# Escape Character 1: 
+(5): ReSharper C# Escape Character 2: 
+(6): ReSharper Format String Item: 
+(7): ReSharper Warning: Non-existing argument in message template
