@@ -6,8 +6,9 @@ using JetBrains.TestFramework.Application.Zones;
 using NUnit.Framework;
 
 #if RIDER
-using JetBrains.ReSharper.Host.Env;
+using JetBrains.Rider.Backend.Env;
 #endif
+
 
 [assembly: RequiresThread(System.Threading.ApartmentState.STA)]
 
@@ -16,7 +17,7 @@ namespace ReSharper.Structured.Logging.Tests
     [ZoneDefinition]
     public interface IReSharperSerilog : ITestsEnvZone, IRequire<PsiFeatureTestZone>
 #if RIDER
-                                         , IRequire<IRiderPlatformZone>
+        , IRequire<IRiderPlatformZone>
 #endif
     {
     }
