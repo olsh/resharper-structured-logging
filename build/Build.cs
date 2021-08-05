@@ -124,7 +124,11 @@ class Build : NukeBuild
         .Requires(() => IsRiderHost)
         .Executes(() =>
         {
-            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", customLogger:
+            var productVersion = SdkVersion.TrimEnd('0','.');
+
+            Gradle(
+                $"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={productVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}",
+                customLogger:
                 (_, s) =>
                 {
                     // Gradle writes warnings to stderr
@@ -133,7 +137,9 @@ class Build : NukeBuild
                     Logger.Normal(s);
                 });
 
-            CopyFile(RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip", RiderPackagePath, FileExistsPolicy.Overwrite);
+            CopyFile(
+                RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip",
+                RiderPackagePath, FileExistsPolicy.Overwrite);
         });
 
     Target SonarBegin => _ => _
