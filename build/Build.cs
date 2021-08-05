@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 
 using Nuke.Common;
@@ -124,7 +125,7 @@ class Build : NukeBuild
         .Requires(() => IsRiderHost)
         .Executes(() =>
         {
-            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", customLogger:
+            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion.Trim('0', '.')} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", customLogger:
                 (_, s) =>
                 {
                     // Gradle writes warnings to stderr
