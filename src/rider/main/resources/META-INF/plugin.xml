@@ -1,7 +1,7 @@
 <idea-plugin require-restart="true">
   <id>com.intellij.resharper.StructuredLogging</id>
   <name>Structured Logging</name>
-  <description>Provides highlighting for structured logging message templates and contains some useful analyzers. Supports Serilog, NLog, and Microsoft.Extensions.Logging.</description>
+  <description>Contains some useful analyzers for structured logging. Supports Serilog, NLog, and Microsoft.Extensions.Logging.</description>
   <change-notes>https://github.com/olsh/resharper-structured-logging/releases</change-notes>
   <version></version>
   <vendor url="https://github.com/olsh/resharper-structured-logging">Oleg Shevchenko</vendor>

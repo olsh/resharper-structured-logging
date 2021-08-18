@@ -7,12 +7,10 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-            Log.Logger.Information("|{One}|(0) |{Exc}|(1)", 1, |new Exception()|(2));
+            Log.Logger.Information("{One} {Exc}", 1, |new Exception()|(0));
         }
     }
 }
 
 ---------------------------------------------------------
-(0): ReSharper Format String Item: 
-(1): ReSharper Format String Item: 
-(2): ReSharper Warning: Exception should be passed to the exception argument
+(0): ReSharper Warning: Exception should be passed to the exception argument

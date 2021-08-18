@@ -124,7 +124,11 @@ class Build : NukeBuild
         .Requires(() => IsRiderHost)
         .Executes(() =>
         {
-            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={SdkVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", customLogger:
+            // JetBrains is not very consistent in versioning
+            // https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-892764206
+            var productVersion = SdkVersion == "2021.2.0" ? "2021.2" : SdkVersion;
+
+            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={productVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", customLogger:
                 (_, s) =>
                 {
                     // Gradle writes warnings to stderr

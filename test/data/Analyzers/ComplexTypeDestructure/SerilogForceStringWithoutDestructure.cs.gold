@@ -7,10 +7,9 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-            Log.Logger.Information("|{$MyProperty}|(0)", new Random());
+            Log.Logger.Information("{$MyProperty}", new Random());
         }
     }
 }
 
 ---------------------------------------------------------
-(0): ReSharper Format String Item: 

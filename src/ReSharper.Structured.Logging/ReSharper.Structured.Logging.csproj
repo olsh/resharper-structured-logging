@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <SonarQubeTestProject>false</SonarQubeTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.ReSharper.SDK" Version="$(SdkVersion)" />
+    <PackageReference Include="JetBrains.ReSharper.SDK" Version="$(SdkVersion)" PrivateAssets="all" />
   </ItemGroup>
   <PropertyGroup>
     <OutputPath>bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>

@@ -9,10 +9,9 @@ namespace ConsoleApp
 		public static void Main()
 		{
 			IEnumerable list = new List<string>() { "test" };
-			Log.Logger.Information("|{MyProperty}|(0)", list);
+			Log.Logger.Information("{MyProperty}", list);
 		}
     }
 }
 
 ---------------------------------------------------------
-(0): ReSharper Format String Item: 

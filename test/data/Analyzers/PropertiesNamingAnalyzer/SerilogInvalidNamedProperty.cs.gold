@@ -6,11 +6,10 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-            Log.Logger.Information("||{myProperty}|(0)|(1)", 1);
+            Log.Logger.Information("|{myProperty}|(0)", 1);
         }
     }
 }
 
 ---------------------------------------------------------
-(0): ReSharper Format String Item: 
-(1): ReSharper Warning: Property name 'myProperty' does not match naming rules. Suggested name is 'MyProperty'.
+(0): ReSharper Warning: Property name 'myProperty' does not match naming rules. Suggested name is 'MyProperty'.

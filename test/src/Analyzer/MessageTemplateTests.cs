@@ -37,8 +37,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
             IPsiSourceFile sourceFile,
             IContextBoundSettingsStore settingsStore)
         {
-            return highlighting is TemplateFormatStringArgumentIsNotUsedWarning
-                   || highlighting is TemplateFormatStringNonExistingArgumentWarning
+            return highlighting is TemplateFormatStringNonExistingArgumentWarning
                    || highlighting is StringEscapeCharacterHighlighting
                    || highlighting is DuplicateTemplatePropertyWarning
                    || highlighting is AnonymousObjectDestructuringWarning

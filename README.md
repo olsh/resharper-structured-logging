@@ -4,6 +4,9 @@
 
 An extension for ReSharper and Rider IDE that highlights structured logging templates and contains some useful analyzers
 
+> [The highlighting is a built-in feature starting from R#/Rider 2021.2](https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-900883583), 
+> but the extension still contains some useful analyzers that are not (yet) implemented by JetBrains team
+
 At the moment it supports Serilog, NLog, and Microsoft.Extensions.Logging
 
 ## Installation ReSharper

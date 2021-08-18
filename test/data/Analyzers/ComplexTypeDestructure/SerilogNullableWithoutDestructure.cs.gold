@@ -8,10 +8,9 @@ namespace ConsoleApp
         public static void Main()
         {
         	int? a = 1;
-            Log.Logger.Information("|{$MyProperty}|(0)", a);
+            Log.Logger.Information("{$MyProperty}", a);
         }
     }
 }
 
 ---------------------------------------------------------
-(0): ReSharper Format String Item: 

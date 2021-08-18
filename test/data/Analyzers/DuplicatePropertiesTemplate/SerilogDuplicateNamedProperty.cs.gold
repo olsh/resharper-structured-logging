@@ -6,13 +6,11 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-            Log.Logger.Information("||{Test}|(0)|(1) ||{Test}|(2)|(3)", 1, 2);
+            Log.Logger.Information("|{Test}|(0) |{Test}|(1)", 1, 2);
         }
     }
 }
 
 ---------------------------------------------------------
-(0): ReSharper Format String Item: 
+(0): ReSharper Warning: Duplicate properties in message template
 (1): ReSharper Warning: Duplicate properties in message template
-(2): ReSharper Format String Item: 
-(3): ReSharper Warning: Duplicate properties in message template

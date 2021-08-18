@@ -7,11 +7,9 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-            Log.Logger.Information(new Exception(), "|{One}|(0) |{OtherException}|(1)", 1, new Exception());
+            Log.Logger.Information(new Exception(), "{One} {OtherException}", 1, new Exception());
         }
     }
 }
 
 ---------------------------------------------------------
-(0): ReSharper Format String Item: 
-(1): ReSharper Format String Item: 
