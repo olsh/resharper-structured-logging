@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 using JetBrains.Metadata.Reader.API;
@@ -64,14 +65,6 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var complexObject = element.ArgumentList.Arguments
-                .Where(CheckIfDestructureNeeded)
-                .ToArray();
-            if (complexObject.Length == 0)
-            {
-                return;
-            }
-
             var templateText = templateArgument.TryGetTemplateText();
             if (templateText == null)
             {
@@ -85,6 +78,16 @@ namespace ReSharper.Structured.Logging.Analyzer
             }
 
             var templateArgumentIndex = templateArgument.IndexOf();
+            var complexObject = element.ArgumentList.Arguments
+                .Where(a => a.IndexOf() > templateArgumentIndex)
+                .Where(CheckIfDestructureNeeded)
+                .ToArray();
+
+            if (complexObject.Length == 0)
+            {
+                return;
+            }
+
             foreach (var argument in complexObject)
             {
                 var index = argument.IndexOf() - templateArgumentIndex - 1;

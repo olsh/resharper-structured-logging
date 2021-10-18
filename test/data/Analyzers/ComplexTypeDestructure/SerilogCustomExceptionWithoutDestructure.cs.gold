@@ -1,0 +1,20 @@
+﻿using System;
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            Log.Logger.Error(new MyException(), "|{MyProperty}|(0)", new Random());
+        }
+    }
+
+    public class MyException : Exception
+    {
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Complex objects with default ToString() implementation probably need to be destructured

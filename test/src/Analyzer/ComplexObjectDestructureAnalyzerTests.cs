@@ -23,5 +23,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestSerilogContextNumericWithoutDestructure() => DoNamedTest2();
 
         [Test] public void TestSerilogContextExplicitDestructure() => DoNamedTest2();
+
+        [Test] public void TestSerilogCustomExceptionWithoutDestructure() => DoNamedTest2();
     }
 }
