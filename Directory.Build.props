@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <SdkVersion>2021.3.0-eap04</SdkVersion>
+    <SdkVersion>2021.3.0</SdkVersion>
   </PropertyGroup>
   <!-- https://jetbrains.slack.com/archives/CBZ36NH7C/p1628090127002200 -->
   <PropertyGroup>

@@ -1,4 +1,4 @@
-﻿using JetBrains.ReSharper.Feature.Services.Daemon;
+using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Tree;
 
@@ -16,7 +16,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             IHighlightingConsumer consumer)
         {
             var templateArgument = element.GetTemplateArgument();
-            if (templateArgument == null)
+            if (templateArgument?.Value == null)
             {
                 return;
             }

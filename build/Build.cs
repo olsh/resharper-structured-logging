@@ -135,8 +135,7 @@ class Build : NukeBuild
         {
             // JetBrains is not very consistent in versioning
             // https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-892764206
-            string productVersion = null;
-            productVersion = SdkVersionWithoutSuffix is "2021.2.0" or "2021.3.0" ? SdkVersionWithoutSuffix.TrimEnd('.', '0') : SdkVersionWithoutSuffix;
+            var productVersion = SdkVersionWithoutSuffix is "2021.2.0" or "2021.3.0" ? SdkVersionWithoutSuffix.TrimEnd('.', '0') : SdkVersionWithoutSuffix;
             if (!string.IsNullOrEmpty(SdkVersionSuffix))
             {
                 productVersion += $"{SdkVersionSuffix.Replace("0", string.Empty).ToUpper()}-SNAPSHOT";
