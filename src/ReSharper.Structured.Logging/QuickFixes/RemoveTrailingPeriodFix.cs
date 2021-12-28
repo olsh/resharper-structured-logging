@@ -18,7 +18,7 @@ using ReSharper.Structured.Logging.Highlighting;
 namespace ReSharper.Structured.Logging.QuickFixes
 {
     [QuickFix]
-    public class RemoveTrailingPeriodFix : QuickFixBase
+    public class RemoveTrailingPeriodFix : ScopedQuickFixBase
     {
         private readonly IStringLiteralAlterer _stringLiteral;
 
@@ -35,6 +35,12 @@ namespace ReSharper.Structured.Logging.QuickFixes
         public override bool IsAvailable(IUserDataHolder cache)
         {
             return _stringLiteral.Expression.GetDocumentRange().IsValid();
+        }
+
+        /// <inheritdoc />
+        protected override ITreeNode TryGetContextTreeNode()
+        {
+            return _stringLiteral.Expression;
         }
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
