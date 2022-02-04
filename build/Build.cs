@@ -147,7 +147,8 @@ class Build : NukeBuild
                     // Gradle writes warnings to stderr
                     // By default logger will write stderr as errors
                     // AppVeyor writes errors as special messages and stops the build if such messages more than 500
-                    Logger.Normal(s);
+                    // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+                    Serilog.Log.Debug(s);
                 });
 
             CopyFile(RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip", RiderPackagePath, FileExistsPolicy.Overwrite);
