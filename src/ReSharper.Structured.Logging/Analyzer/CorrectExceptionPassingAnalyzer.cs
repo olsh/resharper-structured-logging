@@ -2,9 +2,11 @@ using System.Linq;
 using JetBrains.Metadata.Reader.API;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Psi.CodeAnnotations;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Util;
 
+using ReSharper.Structured.Logging.Caching;
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Highlighting;
 
@@ -13,12 +15,19 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IInvocationExpression))]
     public class CorrectExceptionPassingAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
+        private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;
+
+        public CorrectExceptionPassingAnalyzer(CodeAnnotationsCache codeAnnotationsCache)
+        {
+            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
+        }
+
         protected override void Run(
             IInvocationExpression element,
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument();
+            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
             if (templateArgument == null)
             {
                 return;

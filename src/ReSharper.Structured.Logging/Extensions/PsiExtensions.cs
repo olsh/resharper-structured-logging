@@ -13,6 +13,7 @@ using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Util;
 
+using ReSharper.Structured.Logging.Caching;
 using ReSharper.Structured.Logging.Models;
 using ReSharper.Structured.Logging.Serilog.Parsing;
 
@@ -23,14 +24,14 @@ namespace ReSharper.Structured.Logging.Extensions
         private static readonly IClrTypeName LogContextFqn = new ClrTypeName("Serilog.Context.LogContext");
 
         [CanBeNull]
-        public static ICSharpArgument GetTemplateArgument(this IInvocationExpression invocationExpression)
+        public static ICSharpArgument GetTemplateArgument(this IInvocationExpression invocationExpression, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
         {
             if (!(invocationExpression.Reference.Resolve().DeclaredElement is ITypeMember typeMember))
             {
                 return null;
             }
 
-            var templateParameterName = typeMember.GetTemplateParameterName();
+            var templateParameterName = templateParameterNameAttributeProvider.GetInfo(typeMember);
             if (string.IsNullOrEmpty(templateParameterName))
             {
                 return null;
@@ -220,27 +221,6 @@ namespace ReSharper.Structured.Logging.Extensions
 
                 list.AddLast((ExpressionArgumentInfo)argumentInfo);
             }
-        }
-
-        private static string GetTemplateParameterName([NotNull] this ITypeMember typeMember)
-        {
-            var templateFormatAttribute = typeMember.GetAttributeInstances(AttributesSource.All)
-                .FirstOrDefault(a => a.GetAttributeShortName() == "MessageTemplateFormatMethodAttribute");
-
-            if (templateFormatAttribute != null)
-            {
-                return templateFormatAttribute.PositionParameters()
-                    .FirstOrDefault()
-                    ?.ConstantValue.Value?.ToString();
-            }
-
-            var className = typeMember.GetContainingType()?.GetClrName().FullName;
-            if (className == "Microsoft.Extensions.Logging.LoggerExtensions")
-            {
-                return typeMember.ShortName == "BeginScope" ? "messageFormat" : "message";
-            }
-
-            return null;
         }
     }
 }

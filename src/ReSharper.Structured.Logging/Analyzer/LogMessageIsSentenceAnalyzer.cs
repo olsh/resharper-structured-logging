@@ -1,9 +1,11 @@
 using System.Text.RegularExpressions;
 
 using JetBrains.ReSharper.Feature.Services.Daemon;
+using JetBrains.ReSharper.Psi.CodeAnnotations;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Util;
 
+using ReSharper.Structured.Logging.Caching;
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Highlighting;
 
@@ -12,11 +14,18 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IInvocationExpression))]
     public class LogMessageIsSentenceAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
+        private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;
+
         private static readonly Regex DotAtTheEnd = new Regex(@"(?<!\.)\.$", RegexOptions.Compiled);
+
+        public LogMessageIsSentenceAnalyzer(CodeAnnotationsCache codeAnnotationsCache)
+        {
+            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
+        }
 
         protected override void Run(IInvocationExpression element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument();
+            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
             var lastFragmentExpression = templateArgument?.TryCreateLastTemplateFragmentExpression();
             if (lastFragmentExpression == null)
             {

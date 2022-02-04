@@ -2,8 +2,10 @@ using System.Linq;
 
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Psi.CodeAnnotations;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 
+using ReSharper.Structured.Logging.Caching;
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Highlighting;
 using ReSharper.Structured.Logging.Serilog.Parsing;
@@ -15,9 +17,12 @@ namespace ReSharper.Structured.Logging.Analyzer
     {
         private readonly MessageTemplateParser _messageTemplateParser;
 
-        public AnonymousTypeDestructureAnalyzer(MessageTemplateParser messageTemplateParser)
+        private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;
+
+        public AnonymousTypeDestructureAnalyzer(MessageTemplateParser messageTemplateParser, CodeAnnotationsCache codeAnnotationsCache)
         {
             _messageTemplateParser = messageTemplateParser;
+            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
         }
 
         protected override void Run(
@@ -25,7 +30,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument();
+            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
             if (templateArgument == null)
             {
                 return;

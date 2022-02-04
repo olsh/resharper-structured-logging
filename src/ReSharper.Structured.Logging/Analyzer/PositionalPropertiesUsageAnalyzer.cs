@@ -1,6 +1,8 @@
 using JetBrains.ReSharper.Feature.Services.Daemon;
+using JetBrains.ReSharper.Psi.CodeAnnotations;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 
+using ReSharper.Structured.Logging.Caching;
 using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Highlighting;
 using ReSharper.Structured.Logging.Serilog.Parsing;
@@ -12,9 +14,12 @@ namespace ReSharper.Structured.Logging.Analyzer
     {
         private readonly MessageTemplateParser _messageTemplateParser;
 
-        public PositionalPropertiesUsageAnalyzer(MessageTemplateParser messageTemplateParser)
+        private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;
+
+        public PositionalPropertiesUsageAnalyzer(MessageTemplateParser messageTemplateParser, CodeAnnotationsCache codeAnnotationsCache)
         {
             _messageTemplateParser = messageTemplateParser;
+            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
         }
 
         protected override void Run(
@@ -22,7 +27,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument();
+            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
             var templateText = templateArgument?.TryGetTemplateText();
             if (templateText == null)
             {
