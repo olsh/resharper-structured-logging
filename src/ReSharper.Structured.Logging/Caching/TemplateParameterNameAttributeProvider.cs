@@ -19,7 +19,7 @@ namespace ReSharper.Structured.Logging.Caching
 
         protected override string CalculateInfo(ITypeMember attributesOwner, IEnumerable<IAttributeInstance> attributeInstances)
         {
-            var templateFormatAttribute = attributesOwner.GetAttributeInstances(AttributesSource.All)
+            var templateFormatAttribute = attributeInstances
                 .FirstOrDefault(a => string.Equals(a.GetAttributeShortName(), "MessageTemplateFormatMethodAttribute", StringComparison.Ordinal));
 
             if (templateFormatAttribute != null)
