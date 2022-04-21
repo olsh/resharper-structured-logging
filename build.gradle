@@ -1,16 +1,12 @@
 plugins {
-    id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.5.20'
-    id 'org.jetbrains.intellij' version '0.7.3' apply false
+    id 'org.jetbrains.intellij' version '1.5.3'
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 buildDir = 'gradle-build'
 version = ext.PluginVersion
-
-// Workaround this issue https://github.com/JetBrains/gradle-intellij-plugin/issues/630
-apply plugin: 'org.jetbrains.intellij'
 
 compileKotlin {
     kotlinOptions { jvmTarget = "1.8" }
@@ -43,7 +39,7 @@ prepareSandbox {
 
     dotNetFiles.forEach({ f ->
         def file = file(f)
-        from(file, { into "${intellij.pluginName}/dotnet" })
+        from(file, { into "${rootProject.name}/dotnet" })
     })
 
     doLast {
@@ -55,7 +51,7 @@ prepareSandbox {
 }
 
 wrapper {
-    gradleVersion = '6.8.3'
+    gradleVersion = '7.4.2'
     distributionType = Wrapper.DistributionType.ALL
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29025.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReSharper.Structured.Logging", "ReSharper.Structured.Logging\ReSharper.Structured.Logging.csproj", "{0B29307F-4E38-4611-BA0D-408A4B4F4E15}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8F7509A6-86AF-48A9-BD71-464ED879D8FA}"
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
+		..\appveyor.yml = ..\appveyor.yml
+		..\build.gradle = ..\build.gradle
 		..\Directory.Build.props = ..\Directory.Build.props
 		rider\main\resources\META-INF\plugin.xml = rider\main\resources\META-INF\plugin.xml
 		..\README.md = ..\README.md
