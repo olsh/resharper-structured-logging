@@ -107,27 +107,6 @@ namespace ReSharper.Structured.Logging.QuickFixes
                         ElementKindOfElementType.PROPERTY);
                     var namesSuggestion = namesCollection.Prepare(defaultRule, ScopeKind.Common, suggestionOptions);
 
-                    // var suggestions = ((List<string>)typeof(IntroduceVariableUtil).InvokeMember(
-                    //     "SuggestVariableNames",
-                    //     BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.NonPublic,
-                    //     null,
-                    //     null,
-                    //     new object[]
-                    //     {
-                    //         // solution
-                    //         interpolatedExpression.GetSolution(),
-                    //         // context
-                    //         interpolatedExpression,
-                    //         // expressions
-                    //         new List<ICSharpExpression> { insert.Expression },
-                    //         // possibleTypes
-                    //         new List<IType> { insert.Expression.Type() },
-                    //         // constOnly
-                    //         false,
-                    //         // uniqueNameContext
-                    //         null
-                    //     })).Select(x => x.Capitalize()).ToList();
-
                     hotspots.Add((
                         builder.Length + 1,
                         builder.Length + 1 + namesSuggestion.FirstName().Length,

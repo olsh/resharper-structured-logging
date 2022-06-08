@@ -1,10 +1,10 @@
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 skip_branch_with_pr: true
 skip_tags: true
 
 install:
-  - SET JAVA_HOME=C:\Program Files\Java\jdk11
+  - SET JAVA_HOME=C:\Program Files\Java\jdk17
   - SET PATH=%JAVA_HOME%\bin;%PATH%
 build_script:
 - cmd: >-
