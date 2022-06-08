@@ -1,6 +1,8 @@
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
+using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.Tree;
 
 using ReSharper.Structured.Logging.Settings;
 
@@ -24,12 +26,16 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         private const string Message = "Message template should be compile time constant";
 
-        private readonly DocumentRange _documentRange;
-
-        public TemplateIsNotCompileTimeConstantWarning(DocumentRange documentRange)
+        public TemplateIsNotCompileTimeConstantWarning(
+            IInvocationExpression invocationExpression,
+            ICSharpArgument messageTemplateArgument)
         {
-            _documentRange = documentRange;
+            InvocationExpression = invocationExpression;
+            MessageTemplateArgument = messageTemplateArgument;
         }
+
+        public IInvocationExpression InvocationExpression { get; }
+        public ICSharpArgument MessageTemplateArgument { get; }
 
         public string ErrorStripeToolTip => ToolTip;
 
@@ -37,12 +43,12 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         public DocumentRange CalculateRange()
         {
-            return _documentRange;
+            return MessageTemplateArgument.Expression.GetDocumentRange();
         }
 
         public bool IsValid()
         {
-            return _documentRange.IsValid();
+            return MessageTemplateArgument.IsValid();
         }
     }
 }
