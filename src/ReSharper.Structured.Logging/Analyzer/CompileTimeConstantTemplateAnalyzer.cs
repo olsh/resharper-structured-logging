@@ -35,7 +35,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            consumer.AddHighlighting(new TemplateIsNotCompileTimeConstantWarning(templateArgument.Expression.GetDocumentRange()));
+            consumer.AddHighlighting(new TemplateIsNotCompileTimeConstantWarning(element, templateArgument));
         }
     }
 }
