@@ -1,7 +1,6 @@
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CodeAnnotations;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Tree;
 
 using ReSharper.Structured.Logging.Caching;
 using ReSharper.Structured.Logging.Extensions;

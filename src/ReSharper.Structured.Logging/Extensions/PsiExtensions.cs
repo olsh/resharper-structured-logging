@@ -148,7 +148,7 @@ namespace ReSharper.Structured.Logging.Extensions
                 return null;
             }
 
-            return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Value);
+            return argument.Value == null ? null : StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Value);
         }
 
         public static bool IsGenericMicrosoftExtensionsLogger([NotNull]this IDeclaredType declared)
