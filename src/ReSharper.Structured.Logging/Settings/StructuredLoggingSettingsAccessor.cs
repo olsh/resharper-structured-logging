@@ -9,5 +9,8 @@ namespace ReSharper.Structured.Logging.Settings
     {
         [NotNull]
         public static readonly Expression<Func<StructuredLoggingSettings, PropertyNamingType>> PropertyNamingType = x => x.PropertyNamingType;
+
+        [NotNull]
+        public static readonly Expression<Func<StructuredLoggingSettings, string>> IgnoredPropertiesRegex = x => x.IgnoredPropertiesRegex;
     }
 }

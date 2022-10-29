@@ -1,8 +1,12 @@
 ﻿using System;
 
+using JetBrains.Application.Settings;
+using JetBrains.Application.Settings.Calculated.Extensions;
 using JetBrains.Application.UI.Options;
 using JetBrains.Application.UI.Options.OptionPages;
 using JetBrains.Application.UI.Options.OptionsDialog;
+using JetBrains.DataFlow;
+using JetBrains.IDE.UI.Extensions;
 using JetBrains.IDE.UI.Options;
 using JetBrains.Lifetimes;
 using JetBrains.ReSharper.Feature.Services.Resources;
@@ -40,6 +44,12 @@ namespace ReSharper.Structured.Logging.Settings
                                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
                         }
                     });
+
+            AddHeader("Ignored properties naming");
+            AddCommentText("You may specify a regular expression here and if a property matches this expression, then it will be skipped during naming analysis.");
+            var ignoredRegex = OptionsSettingsSmartContext
+                .GetValueProperty(lifetime, StructuredLoggingSettingsAccessor.IgnoredPropertiesRegex);
+            AddControl(ignoredRegex.GetBeTextBox(lifetime));
         }
     }
 }
