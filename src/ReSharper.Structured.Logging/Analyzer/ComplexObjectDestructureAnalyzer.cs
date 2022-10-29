@@ -111,11 +111,13 @@ namespace ReSharper.Structured.Logging.Analyzer
 
         private static bool CheckIfDestructureNeeded(ICSharpArgument argument)
         {
-            bool CheckIfBaseToStringUsed(IType type)
+            bool CheckIfBaseToStringUsed(IType type, bool initialCheck = true)
             {
+                // If we go through entire hierarchy and if didn't find overriden `ToString()` then this is an issue.
+                // But if the analyzed class is `object` itself, then this is not an issue.
                 if (type.IsObject())
                 {
-                    return false;
+                    return !initialCheck;
                 }
 
                 if (type.IsPredefinedNumeric())
@@ -144,7 +146,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                     return false;
                 }
 
-                return true;
+                return CheckIfBaseToStringUsed(classType.GetBaseClassType(), false);
             }
 
             // ReSharper disable once StyleCop.SA1305
