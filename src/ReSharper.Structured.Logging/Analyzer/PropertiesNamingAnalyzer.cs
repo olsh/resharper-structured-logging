@@ -120,6 +120,8 @@ namespace ReSharper.Structured.Logging.Analyzer
                     return StringUtil.MakeUpperCamelCaseName(propertyName).Decapitalize();
                 case PropertyNamingType.SnakeCase:
                     return StringUtil.MakeUnderscoreCaseName(propertyName);
+                case PropertyNamingType.ElasticNaming:
+                    return StringUtil.MakeUnderscoreCaseName(propertyName).Replace('_', '.');
                 default:
                     return propertyName;
             }

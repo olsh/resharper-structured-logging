@@ -27,7 +27,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
             ExecuteWithinSettingsTransaction(
                 settingsStore =>
                     {
-                        RunGuarded(() => { });
+                        RunGuarded(() => MutateSettings(settingsStore));
                         base.DoTestSolution(fileSet);
                     });
         }
@@ -49,6 +49,10 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
                    || highlighting is InconsistentLogPropertyNamingWarning
                    || highlighting is InconsistentContextLogPropertyNamingWarning
                    || highlighting is LogMessageIsSentenceWarning;
+        }
+
+        protected virtual void MutateSettings([NotNull] IContextBoundSettingsStore settingsStore)
+        {
         }
     }
 }
