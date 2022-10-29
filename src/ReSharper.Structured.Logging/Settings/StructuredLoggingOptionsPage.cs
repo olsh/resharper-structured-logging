@@ -34,6 +34,8 @@ namespace ReSharper.Structured.Logging.Settings
                                 return "camelCase";
                             case PropertyNamingType.SnakeCase:
                                 return "snake_case";
+                            case PropertyNamingType.ElasticNaming:
+                                return "elastic.naming";
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
                         }
