@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using JetBrains.Application.Settings;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
@@ -32,20 +34,25 @@ namespace ReSharper.Structured.Logging.Analyzer
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
-            var namingType = element.GetProject()
-                                 ?.GetSolution()
-                                 .GetSettingsStore()
-                                 .GetValue(StructuredLoggingSettingsAccessor.PropertyNamingType)
+            var settingsStore = element.GetProject()
+                ?.GetSolution()
+                .GetSettingsStore();
+
+            var namingType = settingsStore
+                                 ?.GetValue(StructuredLoggingSettingsAccessor.PropertyNamingType)
                              ?? PropertyNamingType.PascalCase;
 
-            CheckPropertiesInTemplate(element, consumer, namingType);
-            CheckPropertiesInContext(element, consumer, namingType);
+            var ignoreRegexString = settingsStore?.GetValue(StructuredLoggingSettingsAccessor.IgnoredPropertiesRegex);
+            var ignoredPropertiesRegex = string.IsNullOrWhiteSpace(ignoreRegexString) ? null : new Regex(ignoreRegexString);
+
+            CheckPropertiesInTemplate(element, consumer, namingType, ignoredPropertiesRegex);
+            CheckPropertiesInContext(element, consumer, namingType, ignoredPropertiesRegex);
         }
 
-        private void CheckPropertiesInTemplate(
-            IInvocationExpression element,
+        private void CheckPropertiesInTemplate(IInvocationExpression element,
             IHighlightingConsumer consumer,
-            PropertyNamingType namingType)
+            PropertyNamingType namingType,
+            Regex ignoredPropertiesRegex)
         {
             var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
             var templateText = templateArgument?.TryGetTemplateText();
@@ -67,7 +74,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                     continue;
                 }
 
-                var suggestedName = GetSuggestedName(property.PropertyName, namingType);
+                var suggestedName = GetSuggestedName(property.PropertyName, namingType, ignoredPropertiesRegex);
                 if (string.Equals(suggestedName, property.PropertyName))
                 {
                     continue;
@@ -79,10 +86,10 @@ namespace ReSharper.Structured.Logging.Analyzer
             }
         }
 
-        private void CheckPropertiesInContext(
-            IInvocationExpression element,
+        private void CheckPropertiesInContext(IInvocationExpression element,
             IHighlightingConsumer consumer,
-            PropertyNamingType namingType)
+            PropertyNamingType namingType,
+            Regex ignoredPropertiesRegex)
         {
             if (!element.IsSerilogContextPushPropertyMethod())
             {
@@ -101,7 +108,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var suggestedName = GetSuggestedName(propertyName, namingType);
+            var suggestedName = GetSuggestedName(propertyName, namingType, ignoredPropertiesRegex);
             if (string.Equals(propertyName, suggestedName))
             {
                 return;
@@ -110,8 +117,13 @@ namespace ReSharper.Structured.Logging.Analyzer
             consumer.AddHighlighting(new InconsistentContextLogPropertyNamingWarning(propertyArgument, propertyName, suggestedName));
         }
 
-        private string GetSuggestedName(string propertyName, PropertyNamingType namingType)
+        private string GetSuggestedName(string propertyName, PropertyNamingType namingType, Regex ignoredPropertiesRegex)
         {
+            if (ignoredPropertiesRegex != null && ignoredPropertiesRegex.IsMatch(propertyName))
+            {
+                return propertyName;
+            }
+
             switch (namingType)
             {
                 case PropertyNamingType.PascalCase:
