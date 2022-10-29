@@ -11,7 +11,7 @@ using ReSharper.Structured.Logging.Highlighting;
 
 namespace ReSharper.Structured.Logging.Analyzer
 {
-    [ElementProblemAnalyzer(typeof(IInvocationExpression))]
+    [ElementProblemAnalyzer(typeof(IInvocationExpression), HighlightingTypes = new[] { typeof(LogMessageIsSentenceWarning) })]
     public class LogMessageIsSentenceAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
         private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;

@@ -9,9 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ReSharper.Structured.Logging\ReSharper.Structured.Logging.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Highlighting\" />
-  </ItemGroup>
   <PropertyGroup>
     <OutputPath>bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
   </PropertyGroup>
