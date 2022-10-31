@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package>
-    <metadata>
-        <id>$project$</id>
-        <version>1.0.0</version>
-        <title>Structured Logging</title>
-        <authors>Oleg Shevchenko</authors>
-        <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <license type="expression">MIT</license>
-        <projectUrl>https://github.com/olsh/resharper-structured-logging</projectUrl>
-        <description>Provides autocomplete and validation for App settings and Connections strings</description>
-        <releaseNotes>https://github.com/olsh/resharper-structured-logging/releases</releaseNotes>
-        <tags>resharper serilog nlog templates logging structuredlogging</tags>
-        <dependencies>
-            <dependency id="Wave" version="$waveVersion$" />
-        </dependencies>
-    </metadata>
 
-    <files>
-        <file src="$project$.dll" target="dotFiles" />
-        <file src="$project$.pdb" target="dotFiles" />
-    </files>
+<package>
+  <metadata>
+    <id>$project$</id>
+    <version>1.0.0</version>
+    <title>Structured Logging</title>
+    <authors>Oleg Shevchenko</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/olsh/resharper-structured-logging</projectUrl>
+    <description>Contains some useful analyzers for structured logging. Supports Serilog, NLog, and Microsoft.Extensions.Logging.</description>
+    <releaseNotes>https://github.com/olsh/resharper-structured-logging/releases</releaseNotes>
+    <tags>resharper serilog nlog templates logging structuredlogging</tags>
+    <dependencies>
+      <dependency id="Wave" version="$waveVersion$" />
+    </dependencies>
+  </metadata>
+
+  <files>
+    <file src="$project$.dll" target="dotFiles" />
+    <file src="$project$.pdb" target="dotFiles" />
+  </files>
 </package>
