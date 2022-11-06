@@ -24,6 +24,7 @@ using JetBrains.ReSharper.TestRunner.Abstractions.Extensions;
 using JetBrains.TextControl;
 using JetBrains.Util;
 using ReSharper.Structured.Logging.Highlighting;
+using ReSharper.Structured.Logging.Services;
 
 namespace ReSharper.Structured.Logging.QuickFixes
 {
@@ -106,12 +107,13 @@ namespace ReSharper.Structured.Logging.QuickFixes
                         NamedElementKinds.Property,
                         ElementKindOfElementType.PROPERTY);
                     var namesSuggestion = namesCollection.Prepare(defaultRule, ScopeKind.Common, suggestionOptions);
+                    var firstName = PropertyNameProvider.GetSuggestedName(namesSuggestion.FirstName(), settingsStore);
 
                     hotspots.Add((
                         builder.Length + 1,
-                        builder.Length + 1 + namesSuggestion.FirstName().Length,
-                        namesSuggestion.AllNames().ToList()));
-                    builder.Append(namesSuggestion.FirstName());
+                        builder.Length + 1 + firstName.Length,
+                        namesSuggestion.AllNames().Select(c => PropertyNameProvider.GetSuggestedName(c, settingsStore)).ToList()));
+                    builder.Append(firstName);
 
                     var argument = elementFactory.CreateArgument(ParameterKind.VALUE, insert.Expression);
                     InvocationExpression.AddArgumentAfter(argument, InvocationExpression.Arguments.Last());
