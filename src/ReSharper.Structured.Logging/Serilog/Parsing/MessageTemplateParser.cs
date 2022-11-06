@@ -217,7 +217,7 @@ namespace ReSharper.Structured.Logging.Serilog.Parsing
                 c == ':';
         }
 
-        static bool IsValidInPropertyName(char c) => char.IsLetterOrDigit(c) || c == '_';
+        static bool IsValidInPropertyName(char c) => char.IsLetterOrDigit(c) || c == '_' || c == '.' || c == ' ';
 
         static bool TryGetDestructuringHint(char c, out Destructuring destructuring)
         {
