@@ -10,6 +10,9 @@
   <ItemGroup>
     <PackageReference Include="JetBrains.ReSharper.SDK" Version="$(SdkVersion)" PrivateAssets="all" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utils\" />
+  </ItemGroup>
   <PropertyGroup>
     <OutputPath>bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
   </PropertyGroup>
