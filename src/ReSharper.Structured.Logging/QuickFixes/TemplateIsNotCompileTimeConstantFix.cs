@@ -46,6 +46,7 @@ namespace ReSharper.Structured.Logging.QuickFixes
             return InvocationExpression.IsValid() && MessageTemplateArgument.Expression is IInterpolatedStringExpression;
         }
 
+        // ReSharper disable once CognitiveComplexity
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             var interpolatedExpression = (IInterpolatedStringExpression)MessageTemplateArgument.Expression.NotNull();

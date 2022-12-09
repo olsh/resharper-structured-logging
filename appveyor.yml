@@ -15,7 +15,7 @@ build_script:
     build.cmd upload-rider-artifact --configuration Release --is-rider-host
 
     build.cmd sonar --configuration Release
-test: off
+test: false
 
 cache:
   - '%USERPROFILE%\.sonar\cache'

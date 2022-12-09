@@ -57,6 +57,7 @@ namespace ReSharper.Structured.Logging.Extensions
             return new MessageTemplateTokenInformation(documentRange, tokenArgument);
         }
 
+        // ReSharper disable once CognitiveComplexity
         private static (TextRange, IStringLiteralAlterer) FindTokenTextRange(this ICSharpArgument argument, MessageTemplateToken token)
         {
             if (argument.Value is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
