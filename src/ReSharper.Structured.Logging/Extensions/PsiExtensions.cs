@@ -57,6 +57,7 @@ namespace ReSharper.Structured.Logging.Extensions
             return new MessageTemplateTokenInformation(documentRange, tokenArgument);
         }
 
+        // ReSharper disable once CognitiveComplexity
         private static (TextRange, IStringLiteralAlterer) FindTokenTextRange(this ICSharpArgument argument, MessageTemplateToken token)
         {
             if (argument.Value is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
@@ -148,7 +149,7 @@ namespace ReSharper.Structured.Logging.Extensions
                 return null;
             }
 
-            return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Value);
+            return argument.Value == null ? null : StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Value);
         }
 
         public static bool IsGenericMicrosoftExtensionsLogger([NotNull]this IDeclaredType declared)

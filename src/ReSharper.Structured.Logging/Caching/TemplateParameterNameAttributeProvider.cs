@@ -26,10 +26,10 @@ namespace ReSharper.Structured.Logging.Caching
             {
                 return templateFormatAttribute.PositionParameters()
                     .FirstOrDefault()
-                    ?.ConstantValue.Value?.ToString();
+                    ?.ConstantValue.StringValue;
             }
 
-            var className = attributesOwner.GetContainingType()?.GetClrName().FullName;
+            var className = attributesOwner.ContainingType?.GetClrName().FullName;
             if (className == "Microsoft.Extensions.Logging.LoggerExtensions")
             {
                 return attributesOwner.ShortName == "BeginScope" ? "messageFormat" : "message";

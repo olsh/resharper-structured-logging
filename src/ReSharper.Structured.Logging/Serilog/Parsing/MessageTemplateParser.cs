@@ -75,6 +75,7 @@ namespace ReSharper.Structured.Logging.Serilog.Parsing
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
         static MessageTemplateToken ParsePropertyToken(int startAt, string messageTemplate, out int next)
         {
             var first = startAt;
@@ -156,6 +157,7 @@ namespace ReSharper.Structured.Logging.Serilog.Parsing
                 first);
         }
 
+        // ReSharper disable once CognitiveComplexity
         static bool TrySplitTagContent(string tagContent, out string propertyNameAndDestructuring, out string format, out string alignment)
         {
             var formatDelim = tagContent.IndexOf(':');
@@ -262,7 +264,8 @@ namespace ReSharper.Structured.Logging.Serilog.Parsing
                  c == '+');
         }
 
-        static TextToken ParseTextToken(int startAt, string messageTemplate, out int next)
+        // ReSharper disable once CognitiveComplexity
+        private static TextToken ParseTextToken(int startAt, string messageTemplate, out int next)
         {
             var first = startAt;
 

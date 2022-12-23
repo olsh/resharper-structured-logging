@@ -22,6 +22,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
         }
 
+        // ReSharper disable once CognitiveComplexity
         protected override void Run(
             IInvocationExpression element,
             ElementProblemAnalyzerData data,

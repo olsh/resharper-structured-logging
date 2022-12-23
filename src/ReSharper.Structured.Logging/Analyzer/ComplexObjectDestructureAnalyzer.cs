@@ -109,6 +109,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
         private static bool CheckIfDestructureNeeded(ICSharpArgument argument)
         {
             bool CheckIfBaseToStringUsed(IType type, bool initialCheck = true)

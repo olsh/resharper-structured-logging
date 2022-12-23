@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.AppVeyor;
-using Nuke.Common.Execution;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
@@ -19,7 +18,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.SonarScanner.SonarScannerTasks;
 using static Nuke.Common.Tools.NuGet.NuGetTasks;
 
-[CheckBuildProjectConfigurations]
 [ShutdownDotNetAfterServerBuild]
 class Build : NukeBuild
 {

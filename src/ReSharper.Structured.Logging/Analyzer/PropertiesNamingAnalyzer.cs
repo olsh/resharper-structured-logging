@@ -100,7 +100,7 @@ public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<IInvocationExpres
         }
 
         var propertyArgument = element.ArgumentList.Arguments[0];
-        var propertyName = propertyArgument.Value.ConstantValue.Value as string;
+        var propertyName = propertyArgument.Value?.ConstantValue.StringValue;
         if (string.IsNullOrEmpty(propertyName))
         {
             return;

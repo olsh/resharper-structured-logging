@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169</NoWarn>
     <NukeRootDirectory>..</NukeRootDirectory>
@@ -15,9 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageDownload Include="dotnet-sonarscanner" Version="[5.5.3]" />
-    <PackageDownload Include="NuGet.CommandLine" Version="[6.0.0]" />
-    <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.15.0]" />
+    <PackageDownload Include="dotnet-sonarscanner" Version="[5.9.1]" />
+    <PackageDownload Include="NuGet.CommandLine" Version="[6.3.1]" />
+    <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.16.0]" />
   </ItemGroup>
 
 </Project>

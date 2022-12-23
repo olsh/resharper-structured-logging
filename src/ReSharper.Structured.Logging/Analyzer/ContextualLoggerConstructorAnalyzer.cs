@@ -12,6 +12,7 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IConstructorDeclaration))]
     public class ContextualLoggerConstructorAnalyzer : ElementProblemAnalyzer<IConstructorDeclaration>
     {
+        // ReSharper disable once CognitiveComplexity
         protected override void Run(IConstructorDeclaration element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
         {
             if (element.Params?.ParameterDeclarations == null)

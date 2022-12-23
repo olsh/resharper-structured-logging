@@ -1,11 +1,9 @@
-﻿using System;
+using System;
 
 using JetBrains.Application.Settings;
-using JetBrains.Application.Settings.Calculated.Extensions;
 using JetBrains.Application.UI.Options;
 using JetBrains.Application.UI.Options.OptionPages;
 using JetBrains.Application.UI.Options.OptionsDialog;
-using JetBrains.DataFlow;
 using JetBrains.IDE.UI.Extensions;
 using JetBrains.IDE.UI.Options;
 using JetBrains.Lifetimes;
