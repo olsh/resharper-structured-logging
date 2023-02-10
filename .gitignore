@@ -291,10 +291,6 @@ paket-files/
 # FAKE - F# Make
 .fake/
 
-# JetBrains Rider
-.idea/
-*.sln.iml
-
 # CodeRush
 .cr/
 
@@ -349,3 +345,6 @@ temp/
 .gradle/
 gradle-build/
 build/classes/
+
+# Test data
+/test/data/NuGetLocks/
