@@ -18,6 +18,8 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
 
         [Test] public void TestSerilogInvalidNamedPropertyWithDot() => DoNamedTest2();
 
+        [Test] public void TestSerilogInvalidSyntax() => DoNamedTest2();
+
         [Test] public void TestSerilogInvalidNamedPropertyWithSpace() => DoNamedTest2();
     }
 }
