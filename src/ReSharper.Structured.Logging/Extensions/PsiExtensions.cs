@@ -118,23 +118,6 @@ namespace ReSharper.Structured.Logging.Extensions
             return argument.Value.GetExpressionText();
         }
 
-        public static string GetExpressionText(this ICSharpExpression expression)
-        {
-            var stringLiteral = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(expression);
-            if (stringLiteral == null)
-            {
-                return null;
-            }
-
-            var expressionText = stringLiteral.Expression.GetText();
-            if (expressionText.StartsWith("@"))
-            {
-                expressionText = expressionText.Substring(1);
-            }
-
-            return StringUtil.Unquote(expressionText);
-        }
-
         [CanBeNull]
         public static IStringLiteralAlterer TryCreateLastTemplateFragmentExpression(this ICSharpArgument argument)
         {
@@ -191,11 +174,6 @@ namespace ReSharper.Structured.Logging.Extensions
             return LogContextFqn.Equals(containingType.GetClrName()) && typeMember.ShortName == "PushProperty";
         }
 
-        public static bool IsVerbatimString([CanBeNull]this IExpression expression)
-        {
-            return expression?.FirstChild?.NodeType == CSharpTokenType.STRING_LITERAL_VERBATIM;
-        }
-
         [CanBeNull]
         public static IType GetFirstGenericArgumentType([NotNull]this IDeclaredType declared)
         {
@@ -207,6 +185,33 @@ namespace ReSharper.Structured.Logging.Extensions
             }
 
             return substitution.Apply(typeParameter);
+        }
+
+        private static bool IsVerbatimString([CanBeNull]this IExpression expression)
+        {
+            return expression?.FirstChild?.NodeType == CSharpTokenType.STRING_LITERAL_VERBATIM;
+        }
+
+        private static string GetExpressionText(this ICSharpExpression expression)
+        {
+            if (expression == null)
+            {
+                return null;
+            }
+
+            var stringLiteral = StringLiteralAltererUtil.TryCreateStringLiteralByExpression(expression);
+            if (stringLiteral == null)
+            {
+                return null;
+            }
+
+            var expressionText = stringLiteral.Expression.GetText();
+            if (expressionText.StartsWith("@"))
+            {
+                expressionText = expressionText.Substring(1);
+            }
+
+            return StringUtil.Unquote(expressionText);
         }
 
         private static void FlattenAdditiveExpression(IAdditiveExpression additiveExpression, LinkedList<ExpressionArgumentInfo> list)
