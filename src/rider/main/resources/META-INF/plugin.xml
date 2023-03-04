@@ -10,7 +10,7 @@
     <br/>
     <a href="https://github.com/olsh/resharper-structured-logging/releases">Release notes</a>
   ]]></description>
-  <change-notes>https://github.com/olsh/resharper-structured-logging</change-notes>
+  <change-notes>https://github.com/olsh/resharper-structured-logging/releases</change-notes>
   <version></version>
   <vendor url="https://github.com/olsh/resharper-structured-logging">Oleg Shevchenko</vendor>
   <idea-version since-build="" until-build=""/>
