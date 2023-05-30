@@ -38,7 +38,7 @@ class Build : NukeBuild
         WaveMajorVersion = int.Parse(sdkMatch.Groups[1]
             .Value + sdkMatch.Groups[2]
             .Value);
-        WaveVersionsRange = $"[{WaveMajorVersion}.0, {WaveMajorVersion + 1}.0)";
+        WaveVersionsRange = $"{WaveMajorVersion}.0";
 
         base.OnBuildInitialized();
     }
@@ -51,7 +51,7 @@ class Build : NukeBuild
 
     [Solution] readonly Solution Solution;
 
-    [LocalExecutable("./gradlew.bat")] readonly Tool Gradle;
+    [LocalPath("./gradlew.bat")] readonly Tool Gradle;
 
     string NuGetPackageFileName => $"{Project.Name}.{ExtensionVersion}.nupkg";
 
@@ -139,7 +139,7 @@ class Build : NukeBuild
                 productVersion += $"{SdkVersionSuffix.Replace("0", string.Empty).ToUpper()}-SNAPSHOT";
             }
 
-            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={productVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", customLogger:
+            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={productVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", logger:
                 (_, s) =>
                 {
                     // Gradle writes warnings to stderr
