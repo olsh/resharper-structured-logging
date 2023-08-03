@@ -18,6 +18,7 @@
     <PackageDownload Include="dotnet-sonarscanner" Version="[5.9.1]" />
     <PackageDownload Include="NuGet.CommandLine" Version="[6.3.1]" />
     <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.16.0]" />
+    <PackageDownload Include="dotnet-cleanup" Version="[0.6.1]" />
   </ItemGroup>
 
 </Project>

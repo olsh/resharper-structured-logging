@@ -53,6 +53,11 @@ class Build : NukeBuild
 
     [LocalPath("./gradlew.bat")] readonly Tool Gradle;
 
+    [NuGetPackage(
+        packageId: "dotnet-cleanup",
+        packageExecutable: "cleanup.dll")]
+    readonly Tool DotNetCleanup;
+
     string NuGetPackageFileName => $"{Project.Name}.{ExtensionVersion}.nupkg";
 
     string NuGetPackagePath => RootDirectory / NuGetPackageFileName;
@@ -88,6 +93,12 @@ class Build : NukeBuild
         .Executes(() =>
         {
             AppVeyor.Instance.UpdateBuildVersion(ExtensionVersion);
+        });
+
+    Target Clean => _ => _
+        .Executes(() =>
+        {
+            DotNetCleanup($"{Solution.Path} -y -v");
         });
 
     Target Compile => _ => _
