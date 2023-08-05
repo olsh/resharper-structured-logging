@@ -70,6 +70,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "Clean",
               "Compile",
               "Pack",
               "PackRiderPlugin",
@@ -92,6 +93,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "Clean",
               "Compile",
               "Pack",
               "PackRiderPlugin",

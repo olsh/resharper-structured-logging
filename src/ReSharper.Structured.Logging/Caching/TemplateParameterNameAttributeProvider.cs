@@ -35,6 +35,11 @@ namespace ReSharper.Structured.Logging.Caching
                 return attributesOwner.ShortName == "BeginScope" ? "messageFormat" : "message";
             }
 
+            if (className == "ZLogger.ZLoggerExtensions")
+            {
+                return "format";
+            }
+
             return null;
         }
 
