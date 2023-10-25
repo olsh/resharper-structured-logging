@@ -10,6 +10,8 @@ namespace ReSharper.Structured.Logging.Caching
     [CodeAnnotationProvider]
     public class TemplateParameterNameAttributeProvider : CodeAnnotationInfoProvider<ITypeMember, string>
     {
+        private const string MessageTemplateFormatMethodAttribute = "MessageTemplateFormatMethodAttribute";
+
         public TemplateParameterNameAttributeProvider(
             AttributeInstancesProvider attributeInstancesProvider,
             CodeAnnotationsConfiguration codeAnnotationsConfiguration)
@@ -20,7 +22,7 @@ namespace ReSharper.Structured.Logging.Caching
         protected override string CalculateInfo(ITypeMember attributesOwner, IEnumerable<IAttributeInstance> attributeInstances)
         {
             var templateFormatAttribute = attributeInstances
-                .FirstOrDefault(a => string.Equals(a.GetAttributeShortName(), "MessageTemplateFormatMethodAttribute", StringComparison.Ordinal));
+                .FirstOrDefault(a => string.Equals(a.GetAttributeShortName(), MessageTemplateFormatMethodAttribute, StringComparison.Ordinal));
 
             if (templateFormatAttribute != null)
             {
@@ -47,5 +49,7 @@ namespace ReSharper.Structured.Logging.Caching
         {
             return null;
         }
+
+        public override string[] AttributeShortNames { get; } = { MessageTemplateFormatMethodAttribute };
     }
 }
