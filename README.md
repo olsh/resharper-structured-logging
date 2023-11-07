@@ -37,6 +37,30 @@ Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 * [Inconsistent log property naming in context](rules/InconsistentContextLogPropertyNaming.md) 
 * [Log event messages should be fragments, not sentences](rules/LogMessageIsSentenceProblem.md) 
 
+## Turning Off Analyzers
+
+Individual analyzers can be disabled as needed either through code comments or by adding a line to a project's
+`.editorconfig` file.
+
+### Turning Off Via Comments
+
+The analyzer name can be used as-is in a ReSharper comment to disable an analyzer on a per-file or per-line basis.
+For example:
+
+```csharp
+// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+```
+
+### Turning Off Via `.editorconfig`
+
+To disable an analyzer for an entire directory, you can add a line to a `.editorconfig` file
+([learn more](https://editorconfig.org)). In this case, the analyzer name needs to be converted to `snake_case`, prefixed
+with `resharper_` and suffixed with `_highlighting`. For example:
+
+```editorconfig
+resharper_template_is_not_compile_time_constant_problem_highlighting = none
+```
+
 ## Credits
 
 Inspired by [SerilogAnalyzer](https://github.com/Suchiman/SerilogAnalyzer)
