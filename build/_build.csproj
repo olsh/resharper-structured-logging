@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169</NoWarn>
     <NukeRootDirectory>..</NukeRootDirectory>
@@ -11,13 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="7.0.6" />
+    <PackageReference Include="Nuke.Common" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageDownload Include="dotnet-sonarscanner" Version="[5.9.1]" />
-    <PackageDownload Include="NuGet.CommandLine" Version="[6.3.1]" />
-    <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.16.0]" />
+    <PackageDownload Include="dotnet-sonarscanner" Version="[6.2.0]" />
+    <PackageDownload Include="NuGet.CommandLine" Version="[6.9.1]" />
+    <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.17.0]" />
     <PackageDownload Include="dotnet-cleanup" Version="[0.6.1]" />
   </ItemGroup>
 
