@@ -1,7 +1,10 @@
-﻿using NUnit.Framework;
+﻿using JetBrains.ReSharper.TestFramework;
+
+using NUnit.Framework;
 
 namespace ReSharper.Structured.Logging.Tests.Analyzer
 {
+    [TestNet60]
     public class ContextualLoggerConstructorAnalyzerTests : MessageTemplateAnalyzerTestBase
     {
         protected override string SubPath => "ContextualLoggerConstructor";
