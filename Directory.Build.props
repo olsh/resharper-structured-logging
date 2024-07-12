@@ -2,7 +2,7 @@
 
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <SdkVersion>2024.2.0-eap06</SdkVersion>
+    <SdkVersion>2024.2.0-eap07</SdkVersion>
   </PropertyGroup>
   <!-- https://jetbrains.slack.com/archives/CBZ36NH7C/p1628090127002200 -->
   <PropertyGroup>
