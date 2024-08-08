@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 
 using JetBrains.Application;
+using JetBrains.Application.Parts;
 using JetBrains.ReSharper.Feature.Services.Explanatory;
 
 using ReSharper.Structured.Logging.Highlighting;
 
 namespace ReSharper.Structured.Logging.Wiki
 {
-    [ShellComponent]
+    [ShellComponent(Instantiation.DemandAnyThreadSafe)]
     public class StructuredLoggingWikiDataProvider : ICodeInspectionWikiDataProvider
     {
         private static readonly IDictionary<string, string> AttributeUrlMap = new Dictionary<string, string>
