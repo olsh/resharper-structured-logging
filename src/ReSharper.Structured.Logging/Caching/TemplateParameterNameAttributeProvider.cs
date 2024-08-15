@@ -5,51 +5,44 @@ using System.Linq;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CodeAnnotations;
 
-namespace ReSharper.Structured.Logging.Caching
+namespace ReSharper.Structured.Logging.Caching;
+
+[CodeAnnotationProvider]
+public class TemplateParameterNameAttributeProvider(
+    AttributeInstancesProvider attributeInstancesProvider,
+    CodeAnnotationsConfiguration codeAnnotationsConfiguration)
+    : CodeAnnotationInfoProvider<ITypeMember, string>(attributeInstancesProvider, codeAnnotationsConfiguration, true)
 {
-    [CodeAnnotationProvider]
-    public class TemplateParameterNameAttributeProvider : CodeAnnotationInfoProvider<ITypeMember, string>
+    private const string MessageTemplateFormatMethodAttribute = "MessageTemplateFormatMethodAttribute";
+
+    protected override string CalculateInfo(ITypeMember attributesOwner, IEnumerable<IAttributeInstance> attributeInstances)
     {
-        private const string MessageTemplateFormatMethodAttribute = "MessageTemplateFormatMethodAttribute";
+        var templateFormatAttribute = attributeInstances
+            .FirstOrDefault(a => string.Equals(a.GetAttributeShortName(), MessageTemplateFormatMethodAttribute, StringComparison.Ordinal));
 
-        public TemplateParameterNameAttributeProvider(
-            AttributeInstancesProvider attributeInstancesProvider,
-            CodeAnnotationsConfiguration codeAnnotationsConfiguration)
-            : base(attributeInstancesProvider, codeAnnotationsConfiguration, true)
+        if (templateFormatAttribute != null)
         {
+            return templateFormatAttribute.PositionParameters()
+                .FirstOrDefault()
+                ?.ConstantValue.StringValue;
         }
 
-        protected override string CalculateInfo(ITypeMember attributesOwner, IEnumerable<IAttributeInstance> attributeInstances)
+        var className = attributesOwner.ContainingType?.GetClrName().FullName;
+        if (className == "Microsoft.Extensions.Logging.LoggerExtensions")
         {
-            var templateFormatAttribute = attributeInstances
-                .FirstOrDefault(a => string.Equals(a.GetAttributeShortName(), MessageTemplateFormatMethodAttribute, StringComparison.Ordinal));
-
-            if (templateFormatAttribute != null)
-            {
-                return templateFormatAttribute.PositionParameters()
-                    .FirstOrDefault()
-                    ?.ConstantValue.StringValue;
-            }
-
-            var className = attributesOwner.ContainingType?.GetClrName().FullName;
-            if (className == "Microsoft.Extensions.Logging.LoggerExtensions")
-            {
-                return attributesOwner.ShortName == "BeginScope" ? "messageFormat" : "message";
-            }
-
-            if (className == "ZLogger.ZLoggerExtensions")
-            {
-                return "format";
-            }
-
-            return null;
+            return attributesOwner.ShortName == "BeginScope" ? "messageFormat" : "message";
         }
 
-        protected override string GetDefaultInfo(ITypeMember attributesOwner)
+        if (className == "ZLogger.ZLoggerExtensions")
         {
-            return null;
+            return "format";
         }
 
-        public override string[] AttributeShortNames { get; } = { MessageTemplateFormatMethodAttribute };
+        return null;
+    }
+
+    protected override string GetDefaultInfo(ITypeMember attributesOwner)
+    {
+        return null;
     }
 }
