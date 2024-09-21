@@ -11,7 +11,7 @@ namespace ReSharper.Structured.Logging.Caching;
 #if RIDER
 [CodeAnnotationProvider]
 #else
-[CodeAnnotationProvider(Instantiation.DemandAnyThreadSafe)]
+[CodeAnnotationProvider(Instantiation.DemandAnyThreadUnsafe)]
 #endif
 public class TemplateParameterNameAttributeProvider(
     AttributeInstancesProvider attributeInstancesProvider,
