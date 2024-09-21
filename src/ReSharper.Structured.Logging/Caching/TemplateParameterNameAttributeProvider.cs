@@ -2,12 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using JetBrains.Application.Parts;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CodeAnnotations;
 
 namespace ReSharper.Structured.Logging.Caching;
 
+#if RIDER
 [CodeAnnotationProvider]
+#else
+[CodeAnnotationProvider(Instantiation.DemandAnyThreadSafe)]
+#endif
 public class TemplateParameterNameAttributeProvider(
     AttributeInstancesProvider attributeInstancesProvider,
     CodeAnnotationsConfiguration codeAnnotationsConfiguration)
