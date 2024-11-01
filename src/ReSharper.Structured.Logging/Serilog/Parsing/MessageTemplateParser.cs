@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using JetBrains.Application.Parts;
 using JetBrains.ProjectModel;
 
 using ReSharper.Structured.Logging.Serilog.Core;
@@ -27,7 +28,11 @@ namespace ReSharper.Structured.Logging.Serilog.Parsing
     /// Parses message template strings into sequences of text or property
     /// tokens.
     /// </summary>
+    #if RIDER
     [SolutionComponent]
+    #else
+    [SolutionComponent(Instantiation.DemandAnyThreadSafe)]
+    #endif
     public class MessageTemplateParser : IMessageTemplateParser
     {
         /// <summary>
