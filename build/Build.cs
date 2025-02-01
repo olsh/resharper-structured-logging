@@ -11,7 +11,6 @@ using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Tools.NUnit;
 using Nuke.Common.Tools.SonarScanner;
 
-using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.Tools.NUnit.NUnitTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -160,7 +159,7 @@ class Build : NukeBuild
                     Serilog.Log.Debug(s);
                 });
 
-            CopyFile(RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip", RiderPackagePath, FileExistsPolicy.Overwrite);
+            (RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip").Copy(RiderPackagePath, ExistsPolicy.FileOverwrite);
         });
 
     Target SonarBegin => _ => _
