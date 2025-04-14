@@ -8,11 +8,7 @@ using JetBrains.ReSharper.Psi.CodeAnnotations;
 
 namespace ReSharper.Structured.Logging.Caching;
 
-#if RIDER
-[CodeAnnotationProvider]
-#else
 [CodeAnnotationProvider(Instantiation.DemandAnyThreadUnsafe)]
-#endif
 public class TemplateParameterNameAttributeProvider(
     AttributeInstancesProvider attributeInstancesProvider,
     CodeAnnotationsConfiguration codeAnnotationsConfiguration)

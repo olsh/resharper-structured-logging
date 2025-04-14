@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 
 using JetBrains.ReSharper.Feature.Services.Daemon;
@@ -14,18 +15,18 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IInvocationExpression), HighlightingTypes = new[] { typeof(LogMessageIsSentenceWarning) })]
     public class LogMessageIsSentenceAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
-        private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;
+        private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
         private static readonly Regex DotAtTheEnd = new Regex(@"(?<!\.)\.$", RegexOptions.Compiled);
 
         public LogMessageIsSentenceAnalyzer(CodeAnnotationsCache codeAnnotationsCache)
         {
-            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
+            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
         }
 
         protected override void Run(IInvocationExpression element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
+            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider.Value);
             var lastFragmentExpression = templateArgument?.TryCreateLastTemplateFragmentExpression();
             if (lastFragmentExpression == null)
             {

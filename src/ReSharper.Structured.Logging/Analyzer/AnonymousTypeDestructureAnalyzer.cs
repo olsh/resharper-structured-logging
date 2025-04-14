@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 using JetBrains.ReSharper.Feature.Services.Daemon;
@@ -17,12 +18,12 @@ namespace ReSharper.Structured.Logging.Analyzer
     {
         private readonly MessageTemplateParser _messageTemplateParser;
 
-        private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;
+        private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
         public AnonymousTypeDestructureAnalyzer(MessageTemplateParser messageTemplateParser, CodeAnnotationsCache codeAnnotationsCache)
         {
             _messageTemplateParser = messageTemplateParser;
-            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
+            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
         }
 
         protected override void Run(
@@ -30,7 +31,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
+            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider.Value);
             if (templateArgument == null)
             {
                 return;
