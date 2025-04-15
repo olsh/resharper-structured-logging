@@ -75,12 +75,12 @@ namespace ReSharper.Structured.Logging.QuickFixes
                     if (treeNode is ITokenNode token)
                     {
                         if (treeNode.GetTokenType() == CSharpTokenType.INTERPOLATED_STRING_REGULAR_START)
-                            builder.Append(token.GetText()[2..]);
+                            builder.Append(token.GetText().Substring(2));
                         else if (treeNode.GetTokenType() == CSharpTokenType.INTERPOLATED_STRING_VERBATIM_START)
-                            builder.Append(token.GetText()[3..]);
+                            builder.Append(token.GetText().Substring(3));
                         else if (treeNode.GetTokenType() == CSharpTokenType.INTERPOLATED_STRING_REGULAR_END ||
                                  treeNode.GetTokenType() == CSharpTokenType.INTERPOLATED_STRING_VERBATIM_END)
-                            builder.Append(token.GetText()[..^1]);
+                            builder.Append(token.GetText().Substring(0, token.GetText().Length - 1));
                         else
                             builder.Append(token.GetText());
                         continue;
