@@ -49,7 +49,7 @@ prepareSandbox {
 }
 
 wrapper {
-    gradleVersion = '8.2.1'
+    gradleVersion = '8.13'
     distributionType = Wrapper.DistributionType.ALL
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
