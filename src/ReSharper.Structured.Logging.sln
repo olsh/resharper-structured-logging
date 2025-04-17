@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		rider\main\resources\META-INF\plugin.xml = rider\main\resources\META-INF\plugin.xml
 		..\README.md = ..\README.md
 		..\.gitignore = ..\.gitignore
+		..\.github\dependabot.yml = ..\.github\dependabot.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReSharper.Structured.Logging.Rider", "ReSharper.Structured.Logging\ReSharper.Structured.Logging.Rider.csproj", "{81C42342-6FD5-48D0-B45F-FD364B170FC1}"
