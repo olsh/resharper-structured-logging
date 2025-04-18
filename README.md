@@ -4,19 +4,19 @@
 
 An extension for ReSharper and Rider IDE that highlights structured logging templates and contains some useful analyzers
 
-> [The highlighting is a built-in feature starting from R#/Rider 2021.2](https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-900883583), 
+> [The highlighting is a built-in feature starting from R#/Rider 2021.2](https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-900883583),
 > but the extension still contains some useful analyzers that are not (yet) implemented by JetBrains team
 
-At the moment it supports Serilog, NLog, and Microsoft.Extensions.Logging
+At the moment it supports Serilog, NLog, Microsoft.Extensions.Logging and ZLogger
 
 ## Installation ReSharper
 
-Look for `Structured Logging` in ReSharper -> Extension manager.  
+Look for `Structured Logging` in ReSharper -> Extension manager.
 [JetBrains Plugins Repository](https://plugins.jetbrains.com/plugin/12083-structured-logging)
 
 ## Installation Rider
 
-Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.  
+Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 [JetBrains Plugins Repository](https://plugins.jetbrains.com/plugin/12832-structured-logging)
 
 ## Highlighting
@@ -25,17 +25,17 @@ Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 
 ## Analyzers
 
-* [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md)           
-* [Complex object is not destructured](rules/ComplexObjectDestructuringProblem.md)               
-* [Complex object is not destructured in context](rules/ComplexObjectInContextDestructuringProblem.md)               
-* [Contextual logger mismatch](rules/ContextualLoggerProblem.md)                                 
-* [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md)   
-* [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md)                
-* [Template should be a compile-time constant](rules/TemplateIsNotCompileTimeConstantProblem.md) 
-* [Prefer named properties instead of positional ones](rules/PositionalPropertyUsedProblem.md) 
-* [Inconsistent log property naming](rules/InconsistentLogPropertyNaming.md) 
-* [Inconsistent log property naming in context](rules/InconsistentContextLogPropertyNaming.md) 
-* [Log event messages should be fragments, not sentences](rules/LogMessageIsSentenceProblem.md) 
+* [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md)
+* [Complex object is not destructured](rules/ComplexObjectDestructuringProblem.md)
+* [Complex object is not destructured in context](rules/ComplexObjectInContextDestructuringProblem.md)
+* [Contextual logger mismatch](rules/ContextualLoggerProblem.md)
+* [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md)
+* [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md)
+* [Template should be a compile-time constant](rules/TemplateIsNotCompileTimeConstantProblem.md)
+* [Prefer named properties instead of positional ones](rules/PositionalPropertyUsedProblem.md)
+* [Inconsistent log property naming](rules/InconsistentLogPropertyNaming.md)
+* [Inconsistent log property naming in context](rules/InconsistentContextLogPropertyNaming.md)
+* [Log event messages should be fragments, not sentences](rules/LogMessageIsSentenceProblem.md)
 
 ## Turning Off Analyzers
 
