@@ -29,7 +29,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        create("RD", ProductVersion, false)
+        rider(ProductVersion, false)
         jetbrainsRuntime()
     }
 }
