@@ -1,55 +1,69 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.1.20'
-    id 'org.jetbrains.intellij' version '1.15.0'
+     id 'org.jetbrains.kotlin.jvm'        version '2.1.10'
+     id 'org.jetbrains.intellij.platform' version '2.5.0'
 }
 
 buildDir = 'gradle-build'
 version = ext.PluginVersion
 
 compileKotlin {
-    kotlinOptions { jvmTarget = "17" }
-}
-
-intellij {
-    type = 'RD'
-    version = "${ProductVersion}"
-    downloadSources = false
-    instrumentCode = false
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
 
 sourceSets {
     main {
-        java.srcDir 'src/rider/main/kotlin'
+        java.srcDir      'src/rider/main/kotlin'
         resources.srcDir 'src/rider/main/resources'
     }
 }
 
 repositories {
-    maven { url 'https://cache-redirector.jetbrains.com/intellij-repository/snapshots' }
-    maven { url 'https://cache-redirector.jetbrains.com/maven-central' }
+    mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+        jetbrainsRuntime()
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        rider(ProductVersion, false)
+        jetbrainsRuntime()
+    }
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        name = rootProject.name
+    }
 }
 
 prepareSandbox {
     def dotNetFiles = [
-            "${DotNetOutputDirectory}/${DotNetProjectName}.dll",
-            "${DotNetOutputDirectory}/${DotNetProjectName}.pdb",
+        "${DotNetOutputDirectory}/${DotNetProjectName}.dll",
+        "${DotNetOutputDirectory}/${DotNetProjectName}.pdb",
     ]
 
-    dotNetFiles.forEach({ f ->
+    dotNetFiles.forEach { f ->
         def file = file(f)
-        from(file, { into "${rootProject.name}/dotnet" })
-    })
+        from(file) {
+            into "${rootProject.name}/dotnet"
+        }
+    }
 
     doLast {
-        dotNetFiles.forEach({ f ->
-            def file = file(f)
-            if (!file.exists()) throw new RuntimeException("File ${file} does not exist")
-        })
+        dotNetFiles.forEach { f ->
+            if (!file(f).exists()) {
+                throw new RuntimeException("File $f does not exist")
+            }
+        }
     }
 }
 
 wrapper {
-    gradleVersion = '8.2.1'
+    gradleVersion    = '8.13'
     distributionType = Wrapper.DistributionType.ALL
-    distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+    distributionUrl  = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }

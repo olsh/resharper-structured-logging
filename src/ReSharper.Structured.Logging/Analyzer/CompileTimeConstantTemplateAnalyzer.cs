@@ -1,3 +1,5 @@
+using System;
+
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CodeAnnotations;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
@@ -11,11 +13,11 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IInvocationExpression))]
     public class CompileTimeConstantTemplateAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
-        private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;
+        private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
         public CompileTimeConstantTemplateAnalyzer(CodeAnnotationsCache codeAnnotationsCache)
         {
-            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
+            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
         }
 
         protected override void Run(
@@ -23,7 +25,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
+            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider.Value);
             if (templateArgument?.Value == null)
             {
                 return;

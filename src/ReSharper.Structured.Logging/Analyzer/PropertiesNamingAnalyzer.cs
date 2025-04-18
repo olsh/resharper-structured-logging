@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 
 using JetBrains.Application.Settings;
@@ -21,12 +22,12 @@ public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<IInvocationExpres
 {
     private readonly MessageTemplateParser _messageTemplateParser;
 
-    private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;
+    private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
     public PropertiesNamingAnalyzer(MessageTemplateParser messageTemplateParser, CodeAnnotationsCache codeAnnotationsCache)
     {
         _messageTemplateParser = messageTemplateParser;
-        _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
+        _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
     }
 
     protected override void Run(
@@ -51,7 +52,7 @@ public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<IInvocationExpres
         IContextBoundSettingsStore settingsStore,
         Regex ignoredPropertiesRegex)
     {
-        var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
+        var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider.Value);
         var templateText = templateArgument?.TryGetTemplateText();
         if (templateText == null)
         {

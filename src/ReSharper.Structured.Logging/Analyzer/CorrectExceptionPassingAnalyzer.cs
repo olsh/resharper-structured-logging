@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using JetBrains.Metadata.Reader.API;
 using JetBrains.ReSharper.Feature.Services.Daemon;
@@ -15,11 +16,11 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IInvocationExpression))]
     public class CorrectExceptionPassingAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
-        private readonly TemplateParameterNameAttributeProvider _templateParameterNameAttributeProvider;
+        private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
         public CorrectExceptionPassingAnalyzer(CodeAnnotationsCache codeAnnotationsCache)
         {
-            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetProvider<TemplateParameterNameAttributeProvider>();
+            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
         }
 
         // ReSharper disable once CognitiveComplexity
@@ -28,7 +29,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider);
+            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider.Value);
             if (templateArgument == null)
             {
                 return;
