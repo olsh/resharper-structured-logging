@@ -12,5 +12,5 @@ namespace ConsoleApp
 }
 
 ---------------------------------------------------------
-(0): ReSharper Warning: Duplicate properties in message template
-(1): ReSharper Warning: Duplicate properties in message template
+(0):<overlapped> ReSharper Warning: Duplicate properties in message template
+(1):<overlapped> ReSharper Warning: Duplicate properties in message template

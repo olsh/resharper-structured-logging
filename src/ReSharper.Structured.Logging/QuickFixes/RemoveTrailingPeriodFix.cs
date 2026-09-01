@@ -1,16 +1,15 @@
-using System;
 using System.Text.RegularExpressions;
 
 using JetBrains.Annotations;
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
+using JetBrains.ReSharper.Feature.Services.BulbActions;
 using JetBrains.ReSharper.Feature.Services.QuickFixes;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 using JetBrains.ReSharper.Resources.Shell;
-using JetBrains.TextControl;
 using JetBrains.Util;
 
 using ReSharper.Structured.Logging.Highlighting;
@@ -18,7 +17,7 @@ using ReSharper.Structured.Logging.Highlighting;
 namespace ReSharper.Structured.Logging.QuickFixes
 {
     [QuickFix]
-    public class RemoveTrailingPeriodFix : ScopedQuickFixBase
+    public class RemoveTrailingPeriodFix : ModernScopedQuickFixBase
     {
         private readonly IStringLiteralAlterer _stringLiteral;
 
@@ -34,7 +33,8 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         public override bool IsAvailable(IUserDataHolder cache)
         {
-            return _stringLiteral.Expression.GetDocumentRange().IsValid();
+            return _stringLiteral.Expression.GetDocumentRange()
+                .IsValid();
         }
 
         /// <inheritdoc />
@@ -43,7 +43,7 @@ namespace ReSharper.Structured.Logging.QuickFixes
             return _stringLiteral.Expression;
         }
 
-        protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
+        protected override IBulbActionCommand ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
             using (WriteLockCookie.Create())
             {
