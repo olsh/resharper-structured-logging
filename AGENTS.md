@@ -16,6 +16,10 @@ Run commands from the repository root:
 
 The build requires a compatible .NET SDK; Rider packaging also requires JDK 17. Generated output appears in `bin/`, `gradle-build/`, and repository-root package files and must not be committed.
 
+## Development Reference
+
+When implementing features or editing ReSharper/Rider plugin code, consult the [ReSharper Platform SDK documentation](https://www.jetbrains.com/help/resharper/sdk/welcome.html) for supported APIs, extension points, and platform guidance.
+
 ## Coding Style & Naming Conventions
 
 Follow `.editorconfig`: UTF-8, spaces, final newlines, and trimmed trailing whitespace. Use four-space indentation for C# and Kotlin; use two spaces for project, JSON, YAML, XML, props, and NuSpec files. Keep `System` imports first and separate import groups. Use PascalCase for types and members, `_camelCase` for private C# fields, and descriptive analyzer/highlighting names such as `PropertiesNamingAnalyzer` and `InconsistentLogPropertyNamingWarning`. Preserve the surrounding namespace style when editing older files.
