@@ -12,9 +12,10 @@ Run commands from the repository root:
 - `build.cmd Test`: build the test project and run it with NUnit Console.
 - `build.cmd Pack`: compile and create the ReSharper NuGet package; this is the default NUKE target.
 - `build.cmd PackRiderPlugin --is-rider-host`: build and package the Rider plugin through Gradle.
+- `build.cmd RunIde --is-rider-host [--run-ide-solution <path>]`: launch a sandboxed Rider with the plugin installed for manual testing; the optional solution path is opened on start, for example `--run-ide-solution test/manual/Issue130/Issue130.slnx`.
 - `dotnet sln ReSharper.Structured.Logging.slnx list`: verify that solution project links resolve.
 
-The build requires a compatible .NET SDK; Rider packaging also requires JDK 21. Generated output appears in `bin/`, `gradle-build/`, and repository-root package files and must not be committed.
+The build requires a compatible .NET SDK; Rider packaging also requires a JDK 17 or newer to run Gradle. The JDK that the Rider build itself compiles against is derived from the target Rider version and provisioned automatically by the Foojay toolchain resolver configured in `settings.gradle`, so it does not need to be installed by hand. Generated output appears in `bin/`, `gradle-build/`, and repository-root package files and must not be committed.
 
 ## Development References
 

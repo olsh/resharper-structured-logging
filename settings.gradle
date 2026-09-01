@@ -1,1 +1,7 @@
+plugins {
+    // The IntelliJ Platform Gradle Plugin derives the JVM toolchain from the target Rider build,
+    // so let Gradle provision that JDK instead of requiring it to be installed by hand
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
 rootProject.name = 'rider-structured-logging'

@@ -28,6 +28,7 @@
         "Compile",
         "Pack",
         "PackRiderPlugin",
+        "RunIde",
         "Sonar",
         "SonarBegin",
         "Test"
@@ -109,6 +110,9 @@
         },
         "IsRiderHost": {
           "type": "boolean"
+        },
+        "RunIdeSolution": {
+          "type": "string"
         },
         "Solution": {
           "type": "string"

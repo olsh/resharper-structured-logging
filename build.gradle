@@ -6,12 +6,6 @@ plugins {
 buildDir = 'gradle-build'
 version = ext.PluginVersion
 
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "21"
-    }
-}
-
 sourceSets {
     main {
         java.srcDir      'src/rider/main/kotlin'
@@ -29,7 +23,9 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        rider(ProductVersion, false)
+        rider(ProductVersion) {
+            useInstaller = false
+        }
         jetbrainsRuntime()
         bundledModule("intellij.rider.rdclient.dotnet")
     }
@@ -63,8 +59,14 @@ prepareSandbox {
     }
 }
 
+runIde {
+    if (project.hasProperty('RunIdeSolution')) {
+        argumentProviders.add({ [project.property('RunIdeSolution').toString()] } as CommandLineArgumentProvider)
+    }
+}
+
 wrapper {
-    gradleVersion    = '8.13'
+    gradleVersion    = '9.7.1'
     distributionType = Wrapper.DistributionType.ALL
     distributionUrl  = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }

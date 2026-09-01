@@ -59,6 +59,8 @@ class Build : NukeBuild
 
     [Parameter] readonly AbsolutePath Solution;
 
+    [Parameter] readonly AbsolutePath RunIdeSolution;
+
     [LocalPath("./gradlew.bat")] readonly Tool Gradle;
 
     [NuGetPackage(
@@ -67,6 +69,22 @@ class Build : NukeBuild
     readonly Tool DotNetCleanup;
 
     string RiderPackagePath => RootDirectory / "rider-structured-logging.zip";
+
+    // JetBrains is not very consistent in versioning
+    // https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-892764206
+    string RiderProductVersion
+    {
+        get
+        {
+            var productVersion = SdkVersionWithoutSuffix.TrimEnd('.', '0');
+            if (!string.IsNullOrEmpty(SdkVersionSuffix))
+            {
+                productVersion += $"{SdkVersionSuffix.Replace("0", string.Empty).ToUpper()}-SNAPSHOT";
+            }
+
+            return productVersion;
+        }
+    }
 
     string ProjectName => IsRiderHost
         ? "ReSharper.Structured.Logging.Rider"
@@ -142,16 +160,8 @@ class Build : NukeBuild
         .Requires(() => IsRiderHost)
         .Executes(() =>
         {
-            // JetBrains is not very consistent in versioning
-            // https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-892764206
-            var productVersion = SdkVersionWithoutSuffix.TrimEnd('.', '0');
-            if (!string.IsNullOrEmpty(SdkVersionSuffix))
-            {
-                productVersion += $"{SdkVersionSuffix.Replace("0", string.Empty).ToUpper()}-SNAPSHOT";
-            }
-
             Gradle(
-                $"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={productVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={ProjectName}",
+                $"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={RiderProductVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={ProjectName}",
                 logger:
                 (_, s) =>
                 {
@@ -164,6 +174,31 @@ class Build : NukeBuild
 
             (RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip")
                 .Copy(RiderPackagePath, ExistsPolicy.FileOverwrite);
+        });
+
+    Target RunIde => _ => _
+        .DependsOn(Compile)
+        .Requires(() => IsRiderHost)
+        .Executes(() =>
+        {
+            var arguments =
+                $"runIde -PPluginVersion={ExtensionVersion} -PProductVersion={RiderProductVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={ProjectName}";
+
+            if (RunIdeSolution != null)
+            {
+                arguments += $" -PRunIdeSolution={RunIdeSolution}";
+            }
+
+            Gradle(
+                arguments,
+                logger:
+                (_, s) =>
+                {
+                    // Gradle and the sandboxed IDE write plenty of noise to stderr
+                    // Keep it visible without failing the build
+                    // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+                    Serilog.Log.Information(s);
+                });
         });
 
     Target SonarBegin => _ => _
