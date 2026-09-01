@@ -1,32 +1,32 @@
 <Solution>
-  <Folder Name="/Rules/">
-    <File Path="rules/AnonymousObjectDestructuringProblem.md" />
-    <File Path="rules/ComplexObjectDestructuringProblem.md" />
-    <File Path="rules/ComplexObjectInContextDestructuringProblem.md" />
-    <File Path="rules/ContextualLoggerProblem.md" />
-    <File Path="rules/ExceptionPassedAsTemplateArgumentProblem.md" />
-    <File Path="rules/InconsistentContextLogPropertyNaming.md" />
-    <File Path="rules/InconsistentLogPropertyNaming.md" />
-    <File Path="rules/LogMessageIsSentenceProblem.md" />
-    <File Path="rules/PositionalPropertyUsedProblem.md" />
-    <File Path="rules/TemplateDuplicatePropertyProblem.md" />
-    <File Path="rules/TemplateIsNotCompileTimeConstantProblem.md" />
-  </Folder>
-  <Folder Name="/Solution Items/">
-    <File Path=".editorconfig" />
-    <File Path=".github/dependabot.yml" />
-    <File Path=".gitignore" />
-    <File Path="appveyor.yml" />
-    <File Path="build.gradle" />
-    <File Path="Directory.Build.props" />
-    <File Path="README.md" />
-    <File Path="src/rider/main/resources/META-INF/plugin.xml" />
-  </Folder>
-  <Project Path="build/_build.csproj">
-    <Build Project="false" />
-  </Project>
-  <Project Path="test/src/ReSharper.Structured.Logging.Rider.Tests.csproj" />
-  <Project Path="test/src/ReSharper.Structured.Logging.Tests.csproj" />
-  <Project Path="src/ReSharper.Structured.Logging/ReSharper.Structured.Logging.csproj" />
-  <Project Path="src/ReSharper.Structured.Logging/ReSharper.Structured.Logging.Rider.csproj" />
+    <Folder Name="/Rules/">
+        <File Path="rules/AnonymousObjectDestructuringProblem.md"/>
+        <File Path="rules/ComplexObjectDestructuringProblem.md"/>
+        <File Path="rules/ComplexObjectInContextDestructuringProblem.md"/>
+        <File Path="rules/ContextualLoggerProblem.md"/>
+        <File Path="rules/ExceptionPassedAsTemplateArgumentProblem.md"/>
+        <File Path="rules/InconsistentContextLogPropertyNaming.md"/>
+        <File Path="rules/InconsistentLogPropertyNaming.md"/>
+        <File Path="rules/LogMessageIsSentenceProblem.md"/>
+        <File Path="rules/PositionalPropertyUsedProblem.md"/>
+        <File Path="rules/TemplateDuplicatePropertyProblem.md"/>
+        <File Path="rules/TemplateIsNotCompileTimeConstantProblem.md"/>
+    </Folder>
+    <Folder Name="/Solution Items/">
+        <File Path=".editorconfig"/>
+        <File Path=".github/dependabot.yml"/>
+        <File Path=".github/workflows/build.yml"/>
+        <File Path=".gitignore"/>
+        <File Path="build.gradle"/>
+        <File Path="Directory.Build.props"/>
+        <File Path="README.md"/>
+        <File Path="src/rider/main/resources/META-INF/plugin.xml"/>
+    </Folder>
+    <Project Path="build/_build.csproj">
+        <Build Project="false"/>
+    </Project>
+    <Project Path="test/src/ReSharper.Structured.Logging.Rider.Tests.csproj"/>
+    <Project Path="test/src/ReSharper.Structured.Logging.Tests.csproj"/>
+    <Project Path="src/ReSharper.Structured.Logging/ReSharper.Structured.Logging.csproj"/>
+    <Project Path="src/ReSharper.Structured.Logging/ReSharper.Structured.Logging.Rider.csproj"/>
 </Solution>

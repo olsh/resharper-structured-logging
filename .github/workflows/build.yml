@@ -1,0 +1,92 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: windows-2025
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+          cache-dependency-path: |
+            build.gradle
+            settings.gradle
+            gradle.properties
+            gradle/wrapper/gradle-wrapper.properties
+
+      - name: Validate solution
+        run: dotnet sln ReSharper.Structured.Logging.slnx list
+
+      - name: Test ReSharper plugin
+        run: .\build.cmd Test --configuration Release
+
+      - name: Pack ReSharper plugin
+        run: .\build.cmd Pack --configuration Release
+
+      - name: Test Rider plugin
+        run: .\build.cmd Test --configuration Release --is-rider-host
+
+      - name: Pack Rider plugin
+        run: .\build.cmd PackRiderPlugin --configuration Release --is-rider-host
+
+      - name: Analyze with SonarCloud
+        if: >-
+          github.event_name != 'pull_request' ||
+          (github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]')
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
+            throw "The SONAR_TOKEN repository secret is required for trusted builds."
+          }
+
+          .\build.cmd Sonar --configuration Release
+
+      - name: Upload ReSharper package
+        uses: actions/upload-artifact@v7
+        with:
+          name: resharper-package
+          path: ReSharper.Structured.Logging.*.${{ github.run_number }}*.nupkg
+          if-no-files-found: error
+
+      - name: Upload Rider package
+        uses: actions/upload-artifact@v7
+        with:
+          name: rider-package
+          path: rider-structured-logging.zip
+          if-no-files-found: error

@@ -4,7 +4,6 @@ using System.Xml.Linq;
 
 using Nuke.Common;
 using Nuke.Common.CI;
-using Nuke.Common.CI.AppVeyor;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -34,10 +33,15 @@ class Build : NukeBuild
 
         var versionMatch = Regex.Match(SdkVersion, @"(?<version>[\d\.]+)(?<suffix>-.*)?");
 
-        SdkVersionWithoutSuffix = versionMatch.Groups["version"].ToString();
-        SdkVersionSuffix = versionMatch.Groups["suffix"].ToString();
+        SdkVersionWithoutSuffix = versionMatch.Groups["version"]
+            .ToString();
+        SdkVersionSuffix = versionMatch.Groups["suffix"]
+            .ToString();
 
-        ExtensionVersion = AppVeyor == null ? SdkVersion : $"{versionMatch.Groups["version"]}.{AppVeyor.BuildNumber}{versionMatch.Groups["suffix"]}";
+        var buildNumber = GetVariable<string>("GITHUB_RUN_NUMBER");
+        ExtensionVersion = string.IsNullOrEmpty(buildNumber)
+            ? SdkVersion
+            : $"{versionMatch.Groups["version"]}.{buildNumber}{versionMatch.Groups["suffix"]}";
         var sdkMatch = Regex.Match(SdkVersion, @"\d{2}(\d{2}).(\d).*");
         WaveMajorVersion = int.Parse(sdkMatch.Groups[1]
             .Value + sdkMatch.Groups[2]
@@ -47,11 +51,11 @@ class Build : NukeBuild
         base.OnBuildInitialized();
     }
 
-    [CI] readonly AppVeyor AppVeyor;
-
     [Parameter] readonly string Configuration = "Release";
 
     [Parameter] readonly bool IsRiderHost;
+
+    [Parameter] [Secret] readonly string SonarToken;
 
     [Parameter] readonly AbsolutePath Solution;
 
@@ -62,13 +66,7 @@ class Build : NukeBuild
         packageExecutable: "cleanup.dll")]
     readonly Tool DotNetCleanup;
 
-    string NuGetPackageFileName => $"{ProjectName}.{ExtensionVersion}.nupkg";
-
-    string NuGetPackagePath => RootDirectory / NuGetPackageFileName;
-
     string RiderPackagePath => RootDirectory / "rider-structured-logging.zip";
-
-    string SonarQubeApiKey => GetVariable<string>("sonar:apikey");
 
     string ProjectName => IsRiderHost
         ? "ReSharper.Structured.Logging.Rider"
@@ -80,7 +78,8 @@ class Build : NukeBuild
 
     AbsolutePath TestProject => RootDirectory / "test" / "src" / $"{TestProjectName}.csproj";
 
-    AbsolutePath OutputDirectory => RootDirectory / "src" / "ReSharper.Structured.Logging" / "bin" / ProjectName / Configuration;
+    AbsolutePath OutputDirectory =>
+        RootDirectory / "src" / "ReSharper.Structured.Logging" / "bin" / ProjectName / Configuration;
 
     AbsolutePath TestProjectOutputDirectory => RootDirectory / "test" / "src" / "bin" / TestProjectName / Configuration;
 
@@ -95,13 +94,6 @@ class Build : NukeBuild
     string WaveVersionsRange { get; set; }
 
     int WaveMajorVersion { get; set; }
-
-    Target UpdateBuildVersion => _ => _
-        .Requires(() => AppVeyor)
-        .Executes(() =>
-        {
-            AppVeyor.Instance.UpdateBuildVersion(ExtensionVersion);
-        });
 
     Target Clean => _ => _
         .Executes(() =>
@@ -158,80 +150,46 @@ class Build : NukeBuild
                 productVersion += $"{SdkVersionSuffix.Replace("0", string.Empty).ToUpper()}-SNAPSHOT";
             }
 
-            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={productVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={ProjectName}", logger:
+            Gradle(
+                $"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={productVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={ProjectName}",
+                logger:
                 (_, s) =>
                 {
                     // Gradle writes warnings to stderr
                     // By default logger will write stderr as errors
-                    // AppVeyor writes errors as special messages and stops the build if such messages more than 500
+                    // Keep Gradle warnings from being reported as CI build errors
                     // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
                     Serilog.Log.Debug(s);
                 });
 
-            (RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip").Copy(RiderPackagePath, ExistsPolicy.FileOverwrite);
+            (RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip")
+                .Copy(RiderPackagePath, ExistsPolicy.FileOverwrite);
         });
 
     Target SonarBegin => _ => _
         .Unlisted()
         .Before(Compile)
+        .Requires(() => SonarToken)
         .Executes(() =>
         {
-            SonarScannerBegin(s =>
-            {
-                s = s
-                    .SetServer("https://sonarcloud.io")
-                    .SetFramework("net5.0")
-                    .SetLogin(SonarQubeApiKey)
-                    .SetProjectKey("resharper-structured-logging")
-                    .SetName("ReSharper Structured Logging")
-                    .SetOrganization("olsh")
-                    .SetVersion("1.0.0.0");
-
-                if (AppVeyor != null)
-                {
-                    if (AppVeyor.PullRequestNumber != null)
-                    {
-                        s = s
-                            .SetPullRequestKey(AppVeyor.PullRequestNumber.ToString())
-                            .SetPullRequestBase(AppVeyor.RepositoryBranch)
-                            .SetPullRequestBranch(AppVeyor.PullRequestHeadRepositoryBranch);
-                    }
-                    else
-                    {
-                        s = s
-                            .SetBranchName(AppVeyor.RepositoryBranch);
-                    }
-                }
-
-                return s;
-            });
+            SonarScannerBegin(s => s
+                .SetServer("https://sonarcloud.io")
+                .SetFramework("net5.0")
+                .SetToken(SonarToken)
+                .SetProjectKey("resharper-structured-logging")
+                .SetName("ReSharper Structured Logging")
+                .SetOrganization("olsh")
+                .SetVersion(ExtensionVersion));
         });
 
     Target Sonar => _ => _
         .DependsOn(SonarBegin, Compile)
         .Requires(() => !IsRiderHost)
+        .Requires(() => SonarToken)
         .Executes(() =>
         {
             SonarScannerEnd(s => s
-                .SetLogin(SonarQubeApiKey)
+                .SetToken(SonarToken)
                 .SetFramework("net5.0"));
-        });
-
-    Target UploadReSharperArtifact => _ => _
-        .DependsOn(Test, Pack)
-        .Requires(() => AppVeyor)
-        .Requires(() => !IsRiderHost)
-        .Executes(() =>
-        {
-            AppVeyor.PushArtifact(NuGetPackagePath);
-        });
-
-    Target UploadRiderArtifact => _ => _
-        .DependsOn(Test, PackRiderPlugin)
-        .Requires(() => AppVeyor)
-        .Requires(() => IsRiderHost)
-        .Executes(() =>
-        {
-            AppVeyor.PushArtifact(RiderPackagePath);
         });
 }

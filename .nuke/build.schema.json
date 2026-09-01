@@ -30,10 +30,7 @@
         "PackRiderPlugin",
         "Sonar",
         "SonarBegin",
-        "Test",
-        "UpdateBuildVersion",
-        "UploadReSharperArtifact",
-        "UploadRiderArtifact"
+        "Test"
       ]
     },
     "Verbosity": {
@@ -115,6 +112,10 @@
         },
         "Solution": {
           "type": "string"
+        },
+        "SonarToken": {
+          "type": "string",
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         }
       }
     },

@@ -1,5 +1,6 @@
 # ReSharper Structured Logging
-[![Build status](https://ci.appveyor.com/api/projects/status/c4riih64hbd4sebw?svg=true)](https://ci.appveyor.com/project/olsh/resharper-structured-logging)
+
+[![Build](https://github.com/olsh/resharper-structured-logging/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/olsh/resharper-structured-logging/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=resharper-structured-logging&metric=alert_status)](https://sonarcloud.io/dashboard?id=resharper-structured-logging)
 
 An extension for ReSharper and Rider IDE that highlights structured logging templates and contains some useful analyzers
@@ -44,8 +45,8 @@ Individual analyzers can be disabled as needed either through code comments or b
 
 ### Turning Off Via Comments
 
-The analyzer name can be used as-is in a ReSharper comment to disable an analyzer on a per-file or per-line basis.
-For example:
+The analyzer name can be used as-is in a ReSharper comment to disable an analyzer on a per-file or per-line basis. For
+example:
 
 ```csharp
 // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
@@ -54,8 +55,8 @@ For example:
 ### Turning Off Via `.editorconfig`
 
 To disable an analyzer for an entire directory, you can add a line to a `.editorconfig` file
-([learn more](https://editorconfig.org)). In this case, the analyzer name needs to be converted to `snake_case`, prefixed
-with `resharper_` and suffixed with `_highlighting`. For example:
+([learn more](https://editorconfig.org)). In this case, the analyzer name needs to be converted to `snake_case`,
+prefixed with `resharper_` and suffixed with `_highlighting`. For example:
 
 ```editorconfig
 resharper_template_is_not_compile_time_constant_problem_highlighting = none
