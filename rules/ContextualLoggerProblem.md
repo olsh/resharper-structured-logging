@@ -24,6 +24,15 @@ class A
 class B { } 
 ```
 
+```csharp
+class A(ILogger<B> log)
+{
+	ILogger<B> _log = log;
+}
+
+class B { } 
+```
+
 Compliant Solution:
 ```csharp
 class A
@@ -43,6 +52,15 @@ class A
 	{
 		_log = log;
 	}
+}
+
+class B {} 
+```
+
+```csharp
+class A(ILogger<A> log)
+{
+	ILogger<A> _log = log;
 }
 
 class B {} 

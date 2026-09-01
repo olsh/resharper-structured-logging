@@ -9,18 +9,24 @@ using ReSharper.Structured.Logging.Highlighting;
 
 namespace ReSharper.Structured.Logging.Analyzer
 {
-    [ElementProblemAnalyzer(typeof(IConstructorDeclaration))]
-    public class ContextualLoggerConstructorAnalyzer : ElementProblemAnalyzer<IConstructorDeclaration>
+    [ElementProblemAnalyzer(typeof(IConstructorDeclaration), typeof(IPrimaryConstructorDeclaration))]
+    public class ContextualLoggerConstructorAnalyzer : ElementProblemAnalyzer<ICSharpParametersOwnerDeclaration>
     {
         // ReSharper disable once CognitiveComplexity
-        protected override void Run(IConstructorDeclaration element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
+        protected override void Run(
+            ICSharpParametersOwnerDeclaration element,
+            ElementProblemAnalyzerData data,
+            IHighlightingConsumer consumer)
         {
-            if (element.Params?.ParameterDeclarations == null)
+            var containingType = element.DeclaredElement?.GetContainingType();
+            var className = containingType?.GetClrName()
+                .FullName;
+            if (className == null)
             {
                 return;
             }
 
-            foreach (var declaration in element.Params.ParameterDeclarations)
+            foreach (var declaration in element.ParameterDeclarations)
             {
                 if (!(declaration.Type is IDeclaredType declaredType))
                 {
@@ -38,14 +44,10 @@ namespace ReSharper.Structured.Logging.Analyzer
                     continue;
                 }
 
-                var containingType = element.DeclaredElement?.GetContainingType();
-                var className = containingType?.GetClrName().FullName;
-                if (className == null)
-                {
-                    continue;
-                }
-
-                if (className.Equals(argumentType.GetClassType()?.GetClrName().FullName))
+                if (className.Equals(
+                        argumentType.GetClassType()
+                            ?.GetClrName()
+                            .FullName))
                 {
                     continue;
                 }

@@ -1,0 +1,11 @@
+﻿using Microsoft.Extensions.Logging;
+
+struct A(|ILogger<B>|(0) log)
+{
+	private readonly ILogger<B> _log = log;
+}
+
+class B { }
+
+---------------------------------------------------------
+(0): ReSharper Warning: Incorrect type is used for contextual logger
