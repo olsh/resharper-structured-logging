@@ -334,7 +334,7 @@ ASALocalRun/
 .sonarqube/
 
 # Cake
-tools/
+/tools/
 
 # Temp build folder
 temp/
