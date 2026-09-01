@@ -349,3 +349,8 @@ build/classes/
 
 # Test data
 /test/data/NuGetLocks/
+
+# Local development artifacts
+/.intellijPlatform/
+/build/tmp/
+/test/manual/

@@ -14,11 +14,15 @@ Run commands from the repository root:
 - `build.cmd PackRiderPlugin --is-rider-host`: build and package the Rider plugin through Gradle.
 - `dotnet sln ReSharper.Structured.Logging.slnx list`: verify that solution project links resolve.
 
-The build requires a compatible .NET SDK; Rider packaging also requires JDK 17. Generated output appears in `bin/`, `gradle-build/`, and repository-root package files and must not be committed.
+The build requires a compatible .NET SDK; Rider packaging also requires JDK 21. Generated output appears in `bin/`, `gradle-build/`, and repository-root package files and must not be committed.
 
-## Development Reference
+## Development References
 
 When implementing features or editing ReSharper/Rider plugin code, consult the [ReSharper Platform SDK documentation](https://www.jetbrains.com/help/resharper/sdk/welcome.html) for supported APIs, extension points, and platform guidance.
+
+You can use the [JetBrains ReSharper and Rider plugin repository](https://github.com/jetbrains/resharper-rider-plugin) as a reference for plugin implementation, build configuration, settings, project structure, and samples.
+
+For Rider frontend and UI code written in Kotlin or Java, use the [IntelliJ Platform SDK documentation repository](https://github.com/JetBrains/intellij-sdk-docs) as a reference for platform APIs, extension points, UI implementation, and code samples.
 
 ## Coding Style & Naming Conventions
 
