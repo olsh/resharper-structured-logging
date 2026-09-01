@@ -1,10 +1,11 @@
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.AppVeyor;
 using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
@@ -24,7 +25,11 @@ class Build : NukeBuild
 
     protected override void OnBuildInitialized()
     {
-        SdkVersion = Project.GetProperty("SdkVersion");
+        SdkVersion = XDocument
+            .Load((RootDirectory / "Directory.Build.props").ToString())
+            .Descendants()
+            .Single(x => x.Name.LocalName == "SdkVersion")
+            .Value;
         SdkVersion.NotNull("Unable to detect SDK version");
 
         var versionMatch = Regex.Match(SdkVersion, @"(?<version>[\d\.]+)(?<suffix>-.*)?");
@@ -48,7 +53,7 @@ class Build : NukeBuild
 
     [Parameter] readonly bool IsRiderHost;
 
-    [Solution] readonly Solution Solution;
+    [Parameter] readonly AbsolutePath Solution;
 
     [LocalPath("./gradlew.bat")] readonly Tool Gradle;
 
@@ -57,7 +62,7 @@ class Build : NukeBuild
         packageExecutable: "cleanup.dll")]
     readonly Tool DotNetCleanup;
 
-    string NuGetPackageFileName => $"{Project.Name}.{ExtensionVersion}.nupkg";
+    string NuGetPackageFileName => $"{ProjectName}.{ExtensionVersion}.nupkg";
 
     string NuGetPackagePath => RootDirectory / NuGetPackageFileName;
 
@@ -65,15 +70,19 @@ class Build : NukeBuild
 
     string SonarQubeApiKey => GetVariable<string>("sonar:apikey");
 
-    Project Project => IsRiderHost
-        ? Solution.GetProject("ReSharper.Structured.Logging.Rider")
-        : Solution.GetProject("ReSharper.Structured.Logging");
+    string ProjectName => IsRiderHost
+        ? "ReSharper.Structured.Logging.Rider"
+        : "ReSharper.Structured.Logging";
 
-    Project TestProject => Solution.GetProject($"{Project.Name}.Tests");
+    string TestProjectName => $"{ProjectName}.Tests";
 
-    AbsolutePath OutputDirectory => Project.Directory / "bin" / Project.Name / Configuration;
+    AbsolutePath Project => RootDirectory / "src" / "ReSharper.Structured.Logging" / $"{ProjectName}.csproj";
 
-    AbsolutePath TestProjectOutputDirectory => TestProject.Directory / "bin" / TestProject.Name / Configuration;
+    AbsolutePath TestProject => RootDirectory / "test" / "src" / $"{TestProjectName}.csproj";
+
+    AbsolutePath OutputDirectory => RootDirectory / "src" / "ReSharper.Structured.Logging" / "bin" / ProjectName / Configuration;
+
+    AbsolutePath TestProjectOutputDirectory => RootDirectory / "test" / "src" / "bin" / TestProjectName / Configuration;
 
     string ExtensionVersion { get; set; }
 
@@ -97,7 +106,7 @@ class Build : NukeBuild
     Target Clean => _ => _
         .Executes(() =>
         {
-            DotNetCleanup($"{Solution.Path} -y -v");
+            DotNetCleanup($"{Solution} -y -v");
         });
 
     Target Compile => _ => _
@@ -105,7 +114,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetBuild(s => s
-                .SetProjectFile(Project.Path)
+                .SetProjectFile(Project)
                 .SetConfiguration(Configuration)
                 .SetVersionPrefix(ExtensionVersion)
                 .SetOutputDirectory(OutputDirectory));
@@ -115,11 +124,11 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetBuild(s => s
-                .SetProjectFile(TestProject.Path)
+                .SetProjectFile(TestProject)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(TestProjectOutputDirectory));
 
-            NUnit3(s => s.SetInputFiles(TestProjectOutputDirectory / $"{TestProject.Name}.dll"));
+            NUnit3(s => s.SetInputFiles(TestProjectOutputDirectory / $"{TestProjectName}.dll"));
         });
 
     Target Pack => _ => _
@@ -131,7 +140,7 @@ class Build : NukeBuild
                 .SetTargetPath(BuildProjectDirectory / "ReSharper.Structured.Logging.nuspec")
                 .SetVersion(ExtensionVersion)
                 .SetBasePath(OutputDirectory)
-                .AddProperty("project", Project.Name)
+                .AddProperty("project", ProjectName)
                 .AddProperty("waveVersion", WaveVersionsRange)
                 .SetOutputDirectory(RootDirectory));
         });
@@ -149,7 +158,7 @@ class Build : NukeBuild
                 productVersion += $"{SdkVersionSuffix.Replace("0", string.Empty).ToUpper()}-SNAPSHOT";
             }
 
-            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={productVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={Project.Name}", logger:
+            Gradle($"buildPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={productVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={ProjectName}", logger:
                 (_, s) =>
                 {
                     // Gradle writes warnings to stderr
