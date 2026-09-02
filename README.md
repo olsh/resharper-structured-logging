@@ -7,12 +7,36 @@
 
 An extension for ReSharper and Rider IDE that highlights structured logging templates and contains some useful analyzers
 
-> [The highlighting is a built-in feature starting from R#/Rider 2021.2](https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-900883583),
-> but the extension still contains some useful analyzers that are not (yet) implemented by JetBrains team
-
 At the moment it supports Serilog, NLog, Microsoft.Extensions.Logging and ZLogger,
 including templates declared with `Microsoft.Extensions.Logging.LoggerMessageAttribute`
 and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`
+
+## Analyzers
+
+| Analyzer | Quick fix | Built into ReSharper/Rider |
+| --- | :---: | --- |
+| [Message template highlighting](#highlighting) | — | [2021.2](https://www.jetbrains.com/help/resharper/Code_Analysis__String_Formatting_Methods.html) |
+| [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md) | ✔ | — |
+| [Complex object is not destructured](rules/ComplexObjectDestructuringProblem.md) | ✔ | — |
+| [Complex object is not destructured in context](rules/ComplexObjectInContextDestructuringProblem.md) | — | — |
+| [Contextual logger mismatch](rules/ContextualLoggerProblem.md) | ✔ | — |
+| [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) | — | — |
+| [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md) | — | [2025.2](https://www.jetbrains.com/help/resharper/DuplicateItemInLoggerTemplate.html), Serilog-style calls only |
+| [Template should be a compile-time constant](rules/TemplateIsNotCompileTimeConstantProblem.md) | ✔ | [2025.1](https://www.jetbrains.com/help/resharper/NonStaticLoggerTemplate.html), as a hint |
+| [Prefer named properties instead of positional ones](rules/PositionalPropertyUsedProblem.md) | — | — |
+| [Inconsistent log property naming](rules/InconsistentLogPropertyNaming.md) | ✔ | — |
+| [Inconsistent log property naming in context](rules/InconsistentContextLogPropertyNaming.md) | ✔ | — |
+| [Log event messages should be fragments, not sentences](rules/LogMessageIsSentenceProblem.md) | ✔ | — |
+
+The last column lists the ReSharper/Rider release that ships an equivalent feature. Template
+highlighting became a built-in feature in 2021.2 and the extension no longer provides it. The other two
+rows are still reported by the extension, because the built-in inspections do not fully replace them:
+
+* Duplicate properties are reported by the IDE for calls such as `Log.Information("{Id} {Id}", ...)`,
+  but not for templates declared with `LoggerMessageAttribute`.
+* A template that is not a compile-time constant is reported by the IDE as a hint tied to
+  [CA2254](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2254),
+  while the extension reports it as a warning. The quick fix comes from ReSharper.
 
 ## Installation ReSharper
 
@@ -27,20 +51,6 @@ Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 ## Highlighting
 
 ![Highlighting](https://github.com/olsh/resharper-structured-logging/raw/master/images/highlighting.png)
-
-## Analyzers
-
-* [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md)
-* [Complex object is not destructured](rules/ComplexObjectDestructuringProblem.md)
-* [Complex object is not destructured in context](rules/ComplexObjectInContextDestructuringProblem.md)
-* [Contextual logger mismatch](rules/ContextualLoggerProblem.md)
-* [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md)
-* [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md)
-* [Template should be a compile-time constant](rules/TemplateIsNotCompileTimeConstantProblem.md)
-* [Prefer named properties instead of positional ones](rules/PositionalPropertyUsedProblem.md)
-* [Inconsistent log property naming](rules/InconsistentLogPropertyNaming.md)
-* [Inconsistent log property naming in context](rules/InconsistentContextLogPropertyNaming.md)
-* [Log event messages should be fragments, not sentences](rules/LogMessageIsSentenceProblem.md)
 
 ## Dimming Logging Statements
 
