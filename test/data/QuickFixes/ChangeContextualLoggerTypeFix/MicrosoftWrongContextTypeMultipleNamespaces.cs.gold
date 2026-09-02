@@ -1,0 +1,19 @@
+﻿using Microsoft.Extensions.Logging;
+
+namespace X
+{
+	class A { }
+}
+
+namespace Y
+{
+	class A
+	{
+		ILogger<A> _log;
+
+		public A(ILogger<{caret}A> log)
+		{
+			_log = log;
+		}
+	}
+}

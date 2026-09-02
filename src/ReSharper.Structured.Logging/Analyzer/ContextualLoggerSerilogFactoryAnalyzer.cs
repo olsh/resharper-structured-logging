@@ -29,7 +29,11 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            consumer.AddHighlighting(new ContextualLoggerWarning(element.GetDocumentRange()));
+            consumer.AddHighlighting(
+                new ContextualLoggerWarning(
+                    element.GetDocumentRange(),
+                    element.GetFirstTypeArgumentNode(),
+                    containingNode.DeclaredElement));
         }
     }
 }

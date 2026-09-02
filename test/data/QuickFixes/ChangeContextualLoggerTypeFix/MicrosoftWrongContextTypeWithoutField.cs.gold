@@ -1,0 +1,10 @@
+﻿using Microsoft.Extensions.Logging;
+
+class A
+{
+	public A(ILogger<A{caret}> log)
+	{
+	}
+}
+
+class B { }
