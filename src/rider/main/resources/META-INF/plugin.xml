@@ -23,6 +23,11 @@
     </ul>
 
     <p>
+      Logging statements can optionally be dimmed, the way unreachable code is rendered, so that they stand out
+      less than the surrounding code. Enable <b>Dim logging statements</b> in the plugin settings.
+    </p>
+
+    <p>
       Individual analyzers can be turned off per line or per file with a
       <b>// ReSharper disable once &lt;AnalyzerName&gt;</b> comment, or per directory through
       <b>.editorconfig</b>.

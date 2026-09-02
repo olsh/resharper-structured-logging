@@ -40,6 +40,15 @@ Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 * [Inconsistent log property naming in context](rules/InconsistentContextLogPropertyNaming.md)
 * [Log event messages should be fragments, not sentences](rules/LogMessageIsSentenceProblem.md)
 
+## Dimming Logging Statements
+
+Logging statements can be greyed out, the way unreachable code is rendered, so that they stand out less than the
+surrounding code. The option is off by default; enable `Dim logging statements` in
+Settings -> Environment -> Structured Logging.
+
+Only a statement that consists of nothing but a logging call is dimmed, so a logging call feeding a larger expression
+keeps its usual colors. Analysis squiggles stay visible on dimmed statements.
+
 ## Turning Off Analyzers
 
 Individual analyzers can be disabled as needed either through code comments or by adding a line to a project's

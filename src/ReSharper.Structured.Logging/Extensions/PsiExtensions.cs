@@ -260,8 +260,12 @@ namespace ReSharper.Structured.Logging.Extensions
             return StringUtil.Unquote(expressionText);
         }
 
+        /// <summary>
+        /// Returns the name of the parameter holding the message template, or <c>null</c> when the invoked
+        /// member is not a logging member. A <c>null</c> result is the plugin-wide "not a logging call" signal.
+        /// </summary>
         [CanBeNull]
-        private static string GetTemplateParameterName(this ICSharpArgumentsOwner argumentsOwner, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
+        public static string GetTemplateParameterName(this ICSharpArgumentsOwner argumentsOwner, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
         {
             // An attribute usage resolves the invoked constructor through a dedicated reference
             var declaredElement = argumentsOwner is IAttribute attribute
