@@ -1,0 +1,15 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(string host)
+        {
+            Log.Logger.Information(|"Could not open socket to " + host|(0));
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Message template should be compile time constant

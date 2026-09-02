@@ -1,0 +1,14 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        private const string Template = "Disk quota {Quota} MB exceeded";
+
+        public static void Main(int quota)
+        {
+            Log.Logger.Information(Template, quota);
+        }
+    }
+}

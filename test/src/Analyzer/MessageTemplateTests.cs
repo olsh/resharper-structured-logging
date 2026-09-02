@@ -49,6 +49,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
                    || highlighting is InconsistentLogPropertyNamingWarning
                    || highlighting is InconsistentContextLogPropertyNamingWarning
                    || highlighting is LogMessageIsSentenceWarning
+                   || highlighting is TemplateIsNotCompileTimeConstantWarning
                    || highlighting is DimmedLoggingStatementHighlighting;
         }
 

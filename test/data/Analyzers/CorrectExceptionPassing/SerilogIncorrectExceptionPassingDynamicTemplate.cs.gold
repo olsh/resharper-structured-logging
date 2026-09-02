@@ -7,7 +7,7 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-            Log.Logger.Information($"{DateTime.Now} |{{|(0)Error|}}|(1)", |new Exception()|(2));
+            Log.Logger.Information(|$"{DateTime.Now} |{{|(0)Error|}}|(1)"|(2), |new Exception()|(3));
         }
     }
 }
@@ -15,4 +15,5 @@ namespace ConsoleApp
 ---------------------------------------------------------
 (0): ReSharper C# Escape Character 1: 
 (1): ReSharper C# Escape Character 1: 
-(2): ReSharper Warning: Exception should be passed to the exception argument
+(2): ReSharper Warning: Message template should be compile time constant
+(3): ReSharper Warning: Exception should be passed to the exception argument

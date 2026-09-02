@@ -1,0 +1,17 @@
+﻿using System;
+
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(Exception exception)
+        {
+            Log.Logger.Error(exception, |$"Failed at {DateTime.Now}"|(0));
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Message template should be compile time constant
