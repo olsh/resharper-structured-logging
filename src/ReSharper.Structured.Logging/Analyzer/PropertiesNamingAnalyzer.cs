@@ -17,8 +17,8 @@ using ReSharper.Structured.Logging.Settings;
 
 namespace ReSharper.Structured.Logging.Analyzer;
 
-[ElementProblemAnalyzer(typeof(IInvocationExpression))]
-public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
+[ElementProblemAnalyzer(typeof(IInvocationExpression), typeof(IAttribute))]
+public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<ICSharpArgumentsOwner>
 {
     private readonly MessageTemplateParser _messageTemplateParser;
 
@@ -31,7 +31,7 @@ public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<IInvocationExpres
     }
 
     protected override void Run(
-        IInvocationExpression element,
+        ICSharpArgumentsOwner element,
         ElementProblemAnalyzerData data,
         IHighlightingConsumer consumer)
     {
@@ -43,17 +43,21 @@ public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<IInvocationExpres
         var ignoredPropertiesRegex = string.IsNullOrWhiteSpace(ignoreRegexString) ? null : new Regex(ignoreRegexString);
 
         CheckPropertiesInTemplate(element, consumer, settingsStore, ignoredPropertiesRegex);
-        CheckPropertiesInContext(element, consumer, settingsStore, ignoredPropertiesRegex);
+
+        if (element is IInvocationExpression invocationExpression)
+        {
+            CheckPropertiesInContext(invocationExpression, consumer, settingsStore, ignoredPropertiesRegex);
+        }
     }
 
     private void CheckPropertiesInTemplate(
-        IInvocationExpression element,
+        ICSharpArgumentsOwner element,
         IHighlightingConsumer consumer,
         IContextBoundSettingsStore settingsStore,
         Regex ignoredPropertiesRegex)
     {
-        var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider.Value);
-        var templateText = templateArgument?.TryGetTemplateText();
+        var templateExpression = element.GetTemplateExpression(_templateParameterNameAttributeProvider.Value);
+        var templateText = templateExpression?.TryGetTemplateText();
         if (templateText == null)
         {
             return;
@@ -79,7 +83,7 @@ public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<IInvocationExpres
             }
 
             consumer.AddHighlighting(
-                new InconsistentLogPropertyNamingWarning(templateArgument.GetTokenInformation(property), property,
+                new InconsistentLogPropertyNamingWarning(templateExpression.GetTokenInformation(property), property,
                     suggestedName));
         }
     }

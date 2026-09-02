@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,41 +27,54 @@ namespace ReSharper.Structured.Logging.Extensions
         [CanBeNull]
         public static ICSharpArgument GetTemplateArgument(this IInvocationExpression invocationExpression, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
         {
-            if (!(invocationExpression.Reference.Resolve().DeclaredElement is ITypeMember typeMember))
-            {
-                return null;
-            }
+            var templateParameterName = invocationExpression.GetTemplateParameterName(templateParameterNameAttributeProvider);
 
-            var templateParameterName = templateParameterNameAttributeProvider.GetInfo(typeMember);
+            return string.IsNullOrEmpty(templateParameterName)
+                       ? null
+                       : invocationExpression.FindTemplateArgument(templateParameterName);
+        }
+
+        /// <summary>
+        /// Returns the message template expression of a logging call or of a logging attribute
+        /// such as [LoggerMessage(Message = "...")].
+        /// </summary>
+        [CanBeNull]
+        public static ICSharpExpression GetTemplateExpression(this ICSharpArgumentsOwner argumentsOwner, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
+        {
+            var templateParameterName = argumentsOwner.GetTemplateParameterName(templateParameterNameAttributeProvider);
             if (string.IsNullOrEmpty(templateParameterName))
             {
                 return null;
             }
 
-            foreach (var argument in invocationExpression.ArgumentList.Arguments)
+            var templateArgument = argumentsOwner.FindTemplateArgument(templateParameterName);
+            if (templateArgument != null)
             {
-                if (argument.MatchingParameter?.Element.ShortName == templateParameterName)
-                {
-                    return argument;
-                }
+                return templateArgument.Value;
+            }
+
+            // An attribute can also carry the template in a named property, e.g. [LoggerMessage(Message = "...")]
+            if (argumentsOwner is IAttribute attribute)
+            {
+                return attribute.FindTemplatePropertyAssignment(templateParameterName)?.Source;
             }
 
             return null;
         }
 
-        public static MessageTemplateTokenInformation GetTokenInformation(this ICSharpArgument argument, MessageTemplateToken token)
+        public static MessageTemplateTokenInformation GetTokenInformation(this ICSharpExpression templateExpression, MessageTemplateToken token)
         {
-            var (tokenTextRange, tokenArgument) = FindTokenTextRange(argument, token);
-            var tokenDocument = argument.GetDocumentRange().Document;
+            var (tokenTextRange, tokenArgument) = FindTokenTextRange(templateExpression, token);
+            var tokenDocument = templateExpression.GetDocumentRange().Document;
             var documentRange = new DocumentRange(tokenDocument, tokenTextRange);
 
             return new MessageTemplateTokenInformation(documentRange, tokenArgument);
         }
 
         // ReSharper disable once CognitiveComplexity
-        private static (TextRange, IStringLiteralAlterer) FindTokenTextRange(this ICSharpArgument argument, MessageTemplateToken token)
+        private static (TextRange, IStringLiteralAlterer) FindTokenTextRange(this ICSharpExpression templateExpression, MessageTemplateToken token)
         {
-            if (argument.Value is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
+            if (templateExpression is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
             {
                 var arguments = new LinkedList<ExpressionArgumentInfo>();
                 FlattenAdditiveExpression(additiveExpression, arguments);
@@ -95,19 +109,19 @@ namespace ReSharper.Structured.Logging.Extensions
                 }
             }
 
-            var startOffset = argument.GetDocumentRange().TextRange.StartOffset + token.StartIndex + 1;
-            if (argument.Expression.IsVerbatimString())
+            var startOffset = templateExpression.GetDocumentRange().TextRange.StartOffset + token.StartIndex + 1;
+            if (templateExpression.IsVerbatimString())
             {
                 startOffset++;
             }
 
             // ReSharper disable once AssignNullToNotNullAttribute
-            return (new TextRange(startOffset, startOffset + token.Length), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Expression));
+            return (new TextRange(startOffset, startOffset + token.Length), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateExpression));
         }
 
-        public static string TryGetTemplateText(this ICSharpArgument argument)
+        public static string TryGetTemplateText(this ICSharpExpression templateExpression)
         {
-            if (argument.Value is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
+            if (templateExpression is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
             {
                 var linkedList = new LinkedList<ExpressionArgumentInfo>();
                 FlattenAdditiveExpression(additiveExpression, linkedList);
@@ -115,13 +129,13 @@ namespace ReSharper.Structured.Logging.Extensions
                 return string.Join(string.Empty, linkedList.Select(l => l.Expression.GetExpressionText()));
             }
 
-            return argument.Value.GetExpressionText();
+            return templateExpression.GetExpressionText();
         }
 
         [CanBeNull]
-        public static IStringLiteralAlterer TryCreateLastTemplateFragmentExpression(this ICSharpArgument argument)
+        public static IStringLiteralAlterer TryCreateLastTemplateFragmentExpression(this ICSharpExpression templateExpression)
         {
-            if (argument.Value is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
+            if (templateExpression is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
             {
                 var argumentInfo = additiveExpression.Arguments.Last();
                 if (argumentInfo is ExpressionArgumentInfo expressionArgumentInfo)
@@ -132,7 +146,7 @@ namespace ReSharper.Structured.Logging.Extensions
                 return null;
             }
 
-            return argument.Value == null ? null : StringLiteralAltererUtil.TryCreateStringLiteralByExpression(argument.Value);
+            return templateExpression == null ? null : StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateExpression);
         }
 
         public static bool IsGenericMicrosoftExtensionsLogger([NotNull]this IDeclaredType declared)
@@ -226,6 +240,48 @@ namespace ReSharper.Structured.Logging.Extensions
             }
 
             return StringUtil.Unquote(expressionText);
+        }
+
+        [CanBeNull]
+        private static string GetTemplateParameterName(this ICSharpArgumentsOwner argumentsOwner, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
+        {
+            // An attribute usage resolves the invoked constructor through a dedicated reference
+            var declaredElement = argumentsOwner is IAttribute attribute
+                                      ? attribute.ConstructorReference?.Resolve().DeclaredElement
+                                      : argumentsOwner.Reference?.Resolve().DeclaredElement;
+
+            return declaredElement is ITypeMember typeMember
+                       ? templateParameterNameAttributeProvider.GetInfo(typeMember)
+                       : null;
+        }
+
+        [CanBeNull]
+        private static ICSharpArgument FindTemplateArgument(this ICSharpArgumentsOwner argumentsOwner, string templateParameterName)
+        {
+            foreach (var argument in argumentsOwner.Arguments)
+            {
+                if (argument.MatchingParameter?.Element.ShortName == templateParameterName)
+                {
+                    return argument;
+                }
+            }
+
+            return null;
+        }
+
+        [CanBeNull]
+        private static IPropertyAssignment FindTemplatePropertyAssignment(this IAttribute attribute, string templateParameterName)
+        {
+            foreach (var propertyAssignment in attribute.PropertyAssignments)
+            {
+                // The attribute property mirrors the constructor parameter, e.g. `message` and `Message`
+                if (string.Equals(propertyAssignment.PropertyNameIdentifier?.Name, templateParameterName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return propertyAssignment;
+                }
+            }
+
+            return null;
         }
 
         private static void FlattenAdditiveExpression(IAdditiveExpression additiveExpression, LinkedList<ExpressionArgumentInfo> list)

@@ -1,0 +1,14 @@
+﻿using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    public static partial class LogMessages
+    {
+        private const string Template = "Could not open socket to {hostName}";
+
+        [LoggerMessage(EventId = 0, Level = LogLevel.Information, Message = Template)]
+        public static partial void CouldNotOpenSocket(ILogger logger, string hostName);
+    }
+}
+
+---------------------------------------------------------

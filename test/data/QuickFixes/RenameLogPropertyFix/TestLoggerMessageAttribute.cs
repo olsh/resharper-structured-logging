@@ -1,0 +1,10 @@
+﻿using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    public static partial class LogMessages
+    {
+        [LoggerMessage(EventId = 0, Level = LogLevel.Information, Message = "Could not open socket to {host{caret}Name}")]
+        public static partial void CouldNotOpenSocket(ILogger logger, string hostName);
+    }
+}

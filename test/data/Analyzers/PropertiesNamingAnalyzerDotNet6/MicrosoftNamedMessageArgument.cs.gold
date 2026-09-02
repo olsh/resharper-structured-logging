@@ -1,0 +1,15 @@
+﻿using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    class A
+    {
+        public A(ILogger<A> log)
+        {
+            log.LogInformation(message: "|{myProperty}|(0)", 1);
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Property name 'myProperty' does not match naming rules. Suggested name is 'MyProperty'.

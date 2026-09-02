@@ -45,7 +45,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var templateText = templateArgument.TryGetTemplateText();
+            var templateText = templateArgument.Value.TryGetTemplateText();
             if (templateText == null)
             {
                 return;
@@ -69,7 +69,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                         continue;
                     }
 
-                    var tokenInformation = templateArgument.GetTokenInformation(namedProperty);
+                    var tokenInformation = templateArgument.Value.GetTokenInformation(namedProperty);
                     consumer.AddHighlighting(new AnonymousObjectDestructuringWarning(tokenInformation));
                 }
             }

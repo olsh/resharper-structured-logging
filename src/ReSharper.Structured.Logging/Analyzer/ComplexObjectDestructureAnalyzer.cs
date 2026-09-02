@@ -70,7 +70,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var templateText = templateArgument.TryGetTemplateText();
+            var templateText = templateArgument.Value.TryGetTemplateText();
             if (templateText == null)
             {
                 return;
@@ -105,7 +105,7 @@ namespace ReSharper.Structured.Logging.Analyzer
                     }
 
                     consumer.AddHighlighting(
-                        new ComplexObjectDestructuringWarning(templateArgument.GetTokenInformation(namedProperty)));
+                        new ComplexObjectDestructuringWarning(templateArgument.Value.GetTokenInformation(namedProperty)));
                 }
             }
         }
