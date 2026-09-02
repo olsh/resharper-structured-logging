@@ -11,5 +11,8 @@ namespace ReSharper.Structured.Logging.Settings
 
         [SettingsEntry("", "Ignored properties RegEx")]
         public string IgnoredPropertiesRegex { get; set; }
+
+        [SettingsEntry(false, "Dim logging statements")]
+        public bool DimLoggingStatements { get; set; }
     }
 }

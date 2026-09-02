@@ -48,6 +48,12 @@ namespace ReSharper.Structured.Logging.Settings
             var ignoredRegex = OptionsSettingsSmartContext
                 .GetValueProperty(lifetime, StructuredLoggingSettingsAccessor.IgnoredPropertiesRegex);
             AddControl(ignoredRegex.GetBeTextBox(lifetime));
+
+            AddHeader("Logging statements appearance");
+            AddBoolOption(
+                StructuredLoggingSettingsAccessor.DimLoggingStatements,
+                "Dim logging statements",
+                "Renders logging statements greyed out, the way unreachable code is rendered, so that they stand out less than the surrounding code.");
         }
     }
 }

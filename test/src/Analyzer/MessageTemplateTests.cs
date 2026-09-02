@@ -48,7 +48,8 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
                    || highlighting is PositionalPropertyUsedWarning
                    || highlighting is InconsistentLogPropertyNamingWarning
                    || highlighting is InconsistentContextLogPropertyNamingWarning
-                   || highlighting is LogMessageIsSentenceWarning;
+                   || highlighting is LogMessageIsSentenceWarning
+                   || highlighting is DimmedLoggingStatementHighlighting;
         }
 
         protected virtual void MutateSettings([NotNull] IContextBoundSettingsStore settingsStore)

@@ -158,6 +158,9 @@ class Build : NukeBuild
         {
             NuGetPack(s => s
                 .SetTargetPath(BuildProjectDirectory / "ReSharper.Structured.Logging.nuspec")
+                // A ReSharper extension ships its assembly in dotFiles rather than lib, which package
+                // analysis reports as NU5100
+                .SetNoPackageAnalysis(true)
                 .SetVersion(ExtensionVersion)
                 .SetBasePath(OutputDirectory)
                 .AddProperty("project", ProjectName)
