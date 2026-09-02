@@ -78,9 +78,44 @@ namespace ReSharper.Structured.Logging.Analyzer
             consumer.AddHighlighting(
                 new ExceptionPassedAsTemplateArgumentWarning(
                     holeArguments[exceptionHoleIndex],
+                    templateArgument,
                     element,
                     tokenInformation,
-                    namedProperty));
+                    namedProperty,
+                    IsExceptionArgumentOccupied(element, templateArgument, exceptionType)));
+        }
+
+        /// <summary>
+        /// Reports whether an exception is already bound to a parameter before the template, that is whether the
+        /// dedicated exception argument is taken.
+        /// </summary>
+        private static bool IsExceptionArgumentOccupied(
+            [NotNull] IInvocationExpression invocationExpression,
+            [NotNull] ICSharpArgument templateArgument,
+            [NotNull] IDeclaredType exceptionType)
+        {
+            var templateParameter = templateArgument.MatchingParameter?.Element;
+            if (templateParameter == null)
+            {
+                return false;
+            }
+
+            var templateParameterIndex = templateParameter.IndexOf();
+            foreach (var argument in invocationExpression.ArgumentList.Arguments)
+            {
+                var parameter = argument.MatchingParameter?.Element;
+                if (parameter == null || parameter.IndexOf() >= templateParameterIndex)
+                {
+                    continue;
+                }
+
+                if (argument.Value?.Type() is IDeclaredType declaredType && declaredType.IsSubtypeOf(exceptionType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static int FindExceptionHoleIndex(

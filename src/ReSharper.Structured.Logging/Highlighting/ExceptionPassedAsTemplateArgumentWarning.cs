@@ -32,19 +32,32 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         public ExceptionPassedAsTemplateArgumentWarning(
             [NotNull] ICSharpArgument exceptionArgument,
+            [NotNull] ICSharpArgument templateArgument,
             [NotNull] IInvocationExpression invocationExpression,
             [CanBeNull] MessageTemplateTokenInformation tokenInformation,
-            [CanBeNull] PropertyToken namedProperty)
+            [CanBeNull] PropertyToken namedProperty,
+            bool exceptionArgumentOccupied)
         {
             ExceptionArgument = exceptionArgument;
+            TemplateArgument = templateArgument;
             InvocationExpression = invocationExpression;
             TokenInformation = tokenInformation;
             NamedProperty = namedProperty;
+            ExceptionArgumentOccupied = exceptionArgumentOccupied;
             _documentRange = exceptionArgument.GetDocumentRange();
         }
 
+        /// <summary>
+        /// Whether another exception already fills the dedicated exception argument. The message is still wrong,
+        /// but moving this one there would pass two exceptions, so no fix is offered.
+        /// </summary>
+        public bool ExceptionArgumentOccupied { get; }
+
         [NotNull]
         public ICSharpArgument ExceptionArgument { get; }
+
+        [NotNull]
+        public ICSharpArgument TemplateArgument { get; }
 
         [NotNull]
         public IInvocationExpression InvocationExpression { get; }
