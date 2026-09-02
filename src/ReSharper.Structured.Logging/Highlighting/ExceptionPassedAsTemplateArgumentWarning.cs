@@ -28,6 +28,11 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         private const string Message = "Exception should be passed to the exception argument";
 
+        // The dedicated argument is taken, so the advice above does not apply: the only way out is to stop
+        // passing this exception as a property
+        private const string ExceptionArgumentOccupiedMessage =
+            "Exception should not be passed as a template argument, the exception argument is already used";
+
         private readonly DocumentRange _documentRange;
 
         public ExceptionPassedAsTemplateArgumentWarning(
@@ -74,7 +79,7 @@ namespace ReSharper.Structured.Logging.Highlighting
 
         public string ErrorStripeToolTip => ToolTip;
 
-        public string ToolTip => Message;
+        public string ToolTip => ExceptionArgumentOccupied ? ExceptionArgumentOccupiedMessage : Message;
 
         public DocumentRange CalculateRange()
         {

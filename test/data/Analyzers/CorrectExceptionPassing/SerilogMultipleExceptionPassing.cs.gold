@@ -13,4 +13,4 @@ namespace ConsoleApp
 }
 
 ---------------------------------------------------------
-(0): ReSharper Warning: Exception should be passed to the exception argument
+(0): ReSharper Warning: Exception should not be passed as a template argument, the exception argument is already used

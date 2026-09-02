@@ -21,5 +21,8 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
         // Moving the exception would pass two of them, the dedicated argument is already taken
         [Test]
         public void TestSerilogExceptionArgumentOccupiedNotAvailable() => DoNamedTest();
+
+        [Test]
+        public void TestSerilogExceptionArgumentOccupiedByNewExceptionNotAvailable() => DoNamedTest();
     }
 }
