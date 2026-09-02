@@ -8,10 +8,16 @@ on:
     branches:
       - master
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the packages to JetBrains Marketplace and create the GitHub release
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # A release must never be cancelled by a push that lands while it is publishing
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 permissions:
   contents: read
@@ -24,6 +30,9 @@ jobs:
   build:
     name: Build and test
     runs-on: windows-2025
+
+    outputs:
+      version: ${{ steps.version.outputs.value }}
 
     steps:
       - name: Check out repository
@@ -90,3 +99,51 @@ jobs:
           name: rider-package-${{ env.EXTENSION_VERSION }}
           path: rider-structured-logging-${{ env.EXTENSION_VERSION }}.zip
           if-no-files-found: error
+
+      # The pack targets export EXTENSION_VERSION into the job environment, which the release job
+      # cannot see, so hand it over as a job output instead
+      - name: Expose extension version
+        id: version
+        run: echo "value=$env:EXTENSION_VERSION" >> $env:GITHUB_OUTPUT
+
+      - name: Publish ReSharper plugin
+        if: inputs.publish
+        env:
+          MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
+        run: .\build.cmd PublishReSharperPlugin --configuration Release
+
+      - name: Publish Rider plugin
+        if: inputs.publish
+        env:
+          MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
+        run: .\build.cmd PublishRiderPlugin --configuration Release --is-rider-host
+
+  release:
+    name: Create GitHub release
+    needs: build
+    if: inputs.publish
+    runs-on: ubuntu-latest
+
+    # Scoped to this job so that ordinary build and pull request runs stay read-only
+    permissions:
+      contents: write
+
+    steps:
+      - name: Tag the commit and publish release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if [ -z "$VERSION" ]; then
+            echo "::error::The build job did not report an extension version"
+            exit 1
+          fi
+
+          # EAP builds carry a prerelease suffix, for example 2025.1.0.373-eap02
+          case "$VERSION" in
+            *-*) prerelease=--prerelease ;;
+            *) prerelease= ;;
+          esac
+
+          gh release create "$VERSION" --target "$GITHUB_SHA" --title "$VERSION" --generate-notes $prerelease

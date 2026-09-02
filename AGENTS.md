@@ -17,6 +17,14 @@ Run commands from the repository root:
 
 The build requires a compatible .NET SDK; Rider packaging also requires a JDK 17 or newer to run Gradle. The JDK that the Rider build itself compiles against is derived from the target Rider version and provisioned automatically by the Foojay toolchain resolver configured in `settings.gradle`, so it does not need to be installed by hand. Generated output appears in `bin/`, `gradle-build/`, and repository-root package files and must not be committed.
 
+## Releasing
+
+Releases are published from the `Build` workflow, not from a tag. Run it manually with the `publish` input enabled (`gh workflow run build.yml --ref master -f publish=true`) and it packs both plugins, pushes the ReSharper `.nupkg` and the Rider `.zip` to JetBrains Marketplace, then creates the git tag and GitHub release. Publishing needs the `JETBRAINS_MARKETPLACE_TOKEN` repository secret, a permanent token from <https://plugins.jetbrains.com/author/me/tokens>.
+
+The published version and the tag are `<SdkVersion>.<workflow run number>`, where `SdkVersion` comes from `Directory.Build.props`. Marketplace rejects a version it already has, so a failed publish must be re-dispatched rather than re-run, and Marketplace moderation means a successful run only says the update was uploaded. An EAP `SdkVersion` suffix routes the Rider plugin to the `eap` channel and marks the GitHub release as a prerelease.
+
+The corresponding NUKE targets are `PublishReSharperPlugin` and `PublishRiderPlugin --is-rider-host`; both read the token from the `MARKETPLACE_TOKEN` environment variable and refuse to run without it.
+
 ## Development References
 
 When implementing features or editing ReSharper/Rider plugin code, consult the [ReSharper Platform SDK documentation](https://www.jetbrains.com/help/resharper/sdk/welcome.html) for supported APIs, extension points, and platform guidance.

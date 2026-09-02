@@ -28,6 +28,8 @@
         "Compile",
         "Pack",
         "PackRiderPlugin",
+        "PublishReSharperPlugin",
+        "PublishRiderPlugin",
         "RunIde",
         "Sonar",
         "SonarBegin",
@@ -110,6 +112,10 @@
         },
         "IsRiderHost": {
           "type": "boolean"
+        },
+        "MarketplaceToken": {
+          "type": "string",
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "RunIdeSolution": {
           "type": "string"
