@@ -31,7 +31,7 @@ Follow `.editorconfig`: UTF-8, spaces, final newlines, and trimmed trailing whit
 
 ## Testing Guidelines
 
-Tests use NUnit with JetBrains ReSharper test infrastructure. Name fixtures `*Tests` and test methods `Test<Scenario>`. For analyzer or quick-fix behavior, add matching files under `test/data/<Category>/<Feature>/`; update both the `.cs` input and `.cs.gold` expectation. No numeric coverage threshold is configured, but behavior changes should include regression tests. Run `build.cmd Test` before submitting.
+Tests use NUnit with JetBrains ReSharper test infrastructure. Name fixtures `*Tests` and test methods `Test<Scenario>`. For analyzer or quick-fix behavior, add matching files under `test/data/<Category>/<Feature>/`; update both the `.cs` input and `.cs.gold` expectation. Data files are resolved from the test method name, and the two suites differ: quick-fix tests call `DoNamedTest()` and expect `Test<Scenario>.cs`, while analyzer tests call `DoNamedTest2()` and expect `<Scenario>.cs` without the `Test` prefix. No numeric coverage threshold is configured, but behavior changes should include regression tests. Run `build.cmd Test` before submitting.
 
 ## Commit & Pull Request Guidelines
 

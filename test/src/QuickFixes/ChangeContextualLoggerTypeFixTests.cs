@@ -8,6 +8,6 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
     {
         protected override string SubPath => "ChangeContextualLoggerTypeFix";
 
-        [Test] public void TestSerilogWrongContextType() => DoNamedTest2();
+        [Test] public void TestSerilogWrongContextType() => DoNamedTest();
     }
 }

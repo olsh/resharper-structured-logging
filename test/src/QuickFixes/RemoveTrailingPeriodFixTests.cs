@@ -8,6 +8,6 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
     {
         protected override string SubPath => "RemoveTrailingPeriodFix";
 
-        [Test] public void TestSerilogTrailingPeriod() => DoNamedTest2();
+        [Test] public void TestSerilogTrailingPeriod() => DoNamedTest();
     }
 }

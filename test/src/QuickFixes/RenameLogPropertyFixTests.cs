@@ -8,10 +8,10 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
     {
         protected override string SubPath => "RenameLogPropertyFix";
 
-        [Test] public void TestSerilogProperty() => DoNamedTest2();
+        [Test] public void TestSerilogProperty() => DoNamedTest();
 
-        [Test] public void TestSerilogDestructuredProperty() => DoNamedTest2();
+        [Test] public void TestSerilogDestructuredProperty() => DoNamedTest();
 
-        [Test] public void TestSerilogPropertyConcatenated() => DoNamedTest2();
+        [Test] public void TestSerilogPropertyConcatenated() => DoNamedTest();
     }
 }

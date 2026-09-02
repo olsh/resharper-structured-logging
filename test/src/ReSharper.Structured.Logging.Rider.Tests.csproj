@@ -2,6 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- JetBrains.Rider.SDK's own transitive floor (JetBrains.Rider.Native.Core.* >= 262.0.0) is not published on nuget.org -->
+    <NoWarn>$(NoWarn);NU1603</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="JetBrains.Rider.SDK.Tests" Version="$(SdkVersion)" PrivateAssets="all" />

@@ -7,10 +7,10 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
     {
         protected override string SubPath => "AddDestructuringFix";
 
-        [Test] public void TestSerilogEscapedString() => DoNamedTest2();
+        [Test] public void TestSerilogEscapedString() => DoNamedTest();
 
-        [Test] public void TestSerilogNewAnonymousObject() => DoNamedTest2();
+        [Test] public void TestSerilogNewAnonymousObject() => DoNamedTest();
 
-        [Test] public void TestSerilogNewComplexObject() => DoNamedTest2();
+        [Test] public void TestSerilogNewComplexObject() => DoNamedTest();
     }
 }

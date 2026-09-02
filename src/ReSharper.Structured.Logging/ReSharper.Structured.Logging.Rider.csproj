@@ -3,6 +3,8 @@
     <TargetFramework>net472</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
+    <!-- JetBrains.Rider.SDK's own transitive floor (JetBrains.Rider.Native.Core.* >= 262.0.0) is not published on nuget.org -->
+    <NoWarn>$(NoWarn);NU1603</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Exclude the project from analysis to prvent duplications -->

@@ -16,10 +16,10 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
     {
         protected override string RelativeTestDataPath => @"QuickFixes\ChangeContextualLoggerTypeFix";
 
-        [Test] public void TestMicrosoftPrimaryConstructor() => DoNamedTest2();
+        [Test] public void TestMicrosoftPrimaryConstructor() => DoNamedTest();
 
-        [Test] public void TestRecordWrongContextType() => DoNamedTest2();
+        [Test] public void TestRecordWrongContextType() => DoNamedTest();
 
-        [Test] public void TestStructWrongContextType() => DoNamedTest2();
+        [Test] public void TestStructWrongContextType() => DoNamedTest();
     }
 }

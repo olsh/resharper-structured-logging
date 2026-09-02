@@ -8,14 +8,14 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
     {
         protected override string SubPath => "TemplateIsNotCompileTimeConstantFix";
 
-        [Test] public void TestSerilogInterpolatedString() => DoNamedTest2();
+        [Test] public void TestSerilogInterpolatedString() => DoNamedTest();
 
-        [Test] public void TestSerilogInterpolatedStringWithSingleQuotes() => DoNamedTest2();
+        [Test] public void TestSerilogInterpolatedStringWithSingleQuotes() => DoNamedTest();
 
-        [Test] public void TestSerilogInterpolatedStringWithEscapeSequences() => DoNamedTest2();
+        [Test] public void TestSerilogInterpolatedStringWithEscapeSequences() => DoNamedTest();
 
-        [Test] public void TestSerilogInterpolatedStringWithEscapedBraces() => DoNamedTest2();
+        [Test] public void TestSerilogInterpolatedStringWithEscapedBraces() => DoNamedTest();
 
-        [Test] public void TestSerilogVerbatimInterpolatedString() => DoNamedTest2();
+        [Test] public void TestSerilogVerbatimInterpolatedString() => DoNamedTest();
     }
 }
