@@ -73,41 +73,14 @@ namespace ReSharper.Structured.Logging.Extensions
             return new MessageTemplateTokenInformation(documentRange, tokenArgument);
         }
 
-        // ReSharper disable once CognitiveComplexity
         private static (TextRange, IStringLiteralAlterer) FindTokenTextRange(this ICSharpExpression templateExpression, MessageTemplateToken token)
         {
             if (templateExpression is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
             {
-                var arguments = new LinkedList<ExpressionArgumentInfo>();
-                FlattenAdditiveExpression(additiveExpression, arguments);
-
-                var globalOffset = 0;
-                foreach (var additiveArgument in arguments)
+                var concatenatedRange = FindTokenTextRangeInConcatenation(additiveExpression, token);
+                if (concatenatedRange.HasValue)
                 {
-                    var range = additiveArgument.GetDocumentRange();
-                    var start = range.StartOffset.Offset;
-                    var end = range.EndOffset.Offset;
-
-                    // Usually there are two quotes in the string expression
-                    // But if it's a verbatim string, we should count @ symbol as well
-                    var isVerbatimString = additiveArgument.Expression.IsVerbatimString();
-                    var nonTemplateTokenCount = isVerbatimString ? 3 : 2;
-
-                    // The token index is zero-based so we need to subtract 1
-                    if (token.StartIndex < end - start - 1 - nonTemplateTokenCount + globalOffset)
-                    {
-                        var tokenStartIndex = start + token.StartIndex - globalOffset + 1;
-                        if (isVerbatimString)
-                        {
-                            tokenStartIndex++;
-                        }
-
-                        var tokenEndIndex = tokenStartIndex + token.Length;
-
-                        return (new TextRange(tokenStartIndex, end > tokenEndIndex ? tokenEndIndex : end), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(additiveArgument.Expression));
-                    }
-
-                    globalOffset += end - start - nonTemplateTokenCount;
+                    return concatenatedRange.Value;
                 }
             }
 
@@ -119,6 +92,48 @@ namespace ReSharper.Structured.Logging.Extensions
 
             // ReSharper disable once AssignNullToNotNullAttribute
             return (new TextRange(startOffset, startOffset + token.Length), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateExpression));
+        }
+
+        /// <summary>
+        /// Walks the fragments of a concatenated template, tracking how many characters of the template each
+        /// fragment contributes, and returns the range of the fragment the token falls into, or <c>null</c>
+        /// when the token lies past the end of the concatenation.
+        /// </summary>
+        private static (TextRange, IStringLiteralAlterer)? FindTokenTextRangeInConcatenation(IAdditiveExpression additiveExpression, MessageTemplateToken token)
+        {
+            var arguments = new LinkedList<ExpressionArgumentInfo>();
+            FlattenAdditiveExpression(additiveExpression, arguments);
+
+            var globalOffset = 0;
+            foreach (var additiveArgument in arguments)
+            {
+                var range = additiveArgument.GetDocumentRange();
+                var start = range.StartOffset.Offset;
+                var end = range.EndOffset.Offset;
+
+                // Usually there are two quotes in the string expression
+                // But if it's a verbatim string, we should count @ symbol as well
+                var isVerbatimString = additiveArgument.Expression.IsVerbatimString();
+                var nonTemplateTokenCount = isVerbatimString ? 3 : 2;
+
+                // The token index is zero-based so we need to subtract 1
+                if (token.StartIndex < end - start - 1 - nonTemplateTokenCount + globalOffset)
+                {
+                    var tokenStartIndex = start + token.StartIndex - globalOffset + 1;
+                    if (isVerbatimString)
+                    {
+                        tokenStartIndex++;
+                    }
+
+                    var tokenEndIndex = tokenStartIndex + token.Length;
+
+                    return (new TextRange(tokenStartIndex, end > tokenEndIndex ? tokenEndIndex : end), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(additiveArgument.Expression));
+                }
+
+                globalOffset += end - start - nonTemplateTokenCount;
+            }
+
+            return null;
         }
 
         public static string TryGetTemplateText(this ICSharpExpression templateExpression)
@@ -139,7 +154,8 @@ namespace ReSharper.Structured.Logging.Extensions
         {
             if (templateExpression is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
             {
-                var argumentInfo = additiveExpression.Arguments.Last();
+                var arguments = additiveExpression.Arguments;
+                var argumentInfo = arguments[arguments.Count - 1];
                 if (argumentInfo is ExpressionArgumentInfo expressionArgumentInfo)
                 {
                     return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(expressionArgumentInfo.Expression);
@@ -294,16 +310,9 @@ namespace ReSharper.Structured.Logging.Extensions
         [CanBeNull]
         private static IPropertyAssignment FindTemplatePropertyAssignment(this IAttribute attribute, string templateParameterName)
         {
-            foreach (var propertyAssignment in attribute.PropertyAssignments)
-            {
-                // The attribute property mirrors the constructor parameter, e.g. `message` and `Message`
-                if (string.Equals(propertyAssignment.PropertyNameIdentifier?.Name, templateParameterName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return propertyAssignment;
-                }
-            }
-
-            return null;
+            // The attribute property mirrors the constructor parameter, e.g. `message` and `Message`
+            return attribute.PropertyAssignments.FirstOrDefault(
+                propertyAssignment => string.Equals(propertyAssignment.PropertyNameIdentifier?.Name, templateParameterName, StringComparison.OrdinalIgnoreCase));
         }
 
         private static void FlattenAdditiveExpression(IAdditiveExpression additiveExpression, LinkedList<ExpressionArgumentInfo> list)
