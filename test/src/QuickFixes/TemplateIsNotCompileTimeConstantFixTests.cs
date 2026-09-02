@@ -1,3 +1,5 @@
+using JetBrains.ReSharper.TestFramework;
+
 using NUnit.Framework;
 
 using ReSharper.Structured.Logging.QuickFixes;
@@ -16,6 +18,10 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
 
         [Test] public void TestSerilogInterpolatedStringWithEscapedBraces() => DoNamedTest();
 
+        [Test] public void TestSerilogInterpolatedStringWithDollarSign() => DoNamedTest();
+
         [Test] public void TestSerilogVerbatimInterpolatedString() => DoNamedTest();
+
+        [Test, TestNet60] public void TestMicrosoftInterpolatedStringWithSingleQuotes() => DoNamedTest();
     }
 }
