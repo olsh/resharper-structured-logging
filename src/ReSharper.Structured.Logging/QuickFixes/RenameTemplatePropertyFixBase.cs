@@ -37,15 +37,19 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         private bool _suggestedNameCalculated;
 
+        // A quick fix binds to a highlighting by the type of its constructor parameter, so each warning
+        // needs its own overload even though they carry the same payload
         protected RenameTemplatePropertyFixBase([NotNull] PositionalPropertyUsedWarning error)
+            : this((TemplatePropertyWarningBase)error)
         {
-            _tokenInformation = error.TokenInformation;
-            _namedProperty = error.NamedProperty;
-            _argument = error.Argument;
-            _usedPropertyNames = error.UsedPropertyNames;
         }
 
         protected RenameTemplatePropertyFixBase([NotNull] DuplicateTemplatePropertyWarning error)
+            : this((TemplatePropertyWarningBase)error)
+        {
+        }
+
+        private RenameTemplatePropertyFixBase([NotNull] TemplatePropertyWarningBase error)
         {
             _tokenInformation = error.TokenInformation;
             _namedProperty = error.NamedProperty;
