@@ -2,15 +2,45 @@
   <id>com.intellij.resharper.StructuredLogging</id>
   <name>Structured Logging</name>
   <description><![CDATA[
-    Contains some useful analyzers for structured logging. Supports Serilog, NLog, and Microsoft.Extensions.Logging.
-    <br/>
-    For more information visit the <a href="https://github.com/olsh/resharper-structured-logging#readme">project repository</a>.
+    Analyzers for structured logging message templates in .NET.
 
-    <br/>
-    <br/>
-    <a href="https://github.com/olsh/resharper-structured-logging/releases">Release notes</a>
+    <p>
+      Supports <b>Serilog</b>, <b>NLog</b>, <b>Microsoft.Extensions.Logging</b> and <b>ZLogger</b>,
+      including templates declared with <b>LoggerMessageAttribute</b> and
+      <b>LoggerMessage.Define</b>/<b>DefineScope</b>.
+    </p>
+
+    <p>The plugin reports:</p>
+    <ul>
+      <li>Anonymous or complex objects that are not destructured, including inside a logging context</li>
+      <li>A contextual logger that does not match the type it is used in</li>
+      <li>An exception passed as a template argument instead of the exception parameter</li>
+      <li>Duplicate properties in a template</li>
+      <li>Templates that are not compile-time constants</li>
+      <li>Positional properties used instead of named ones</li>
+      <li>Inconsistent log property naming, including inside a logging context</li>
+      <li>Log event messages written as sentences rather than fragments</li>
+    </ul>
+
+    <p>
+      Individual analyzers can be turned off per line or per file with a
+      <b>// ReSharper disable once &lt;AnalyzerName&gt;</b> comment, or per directory through
+      <b>.editorconfig</b>.
+    </p>
+
+    <p>
+      Message template highlighting itself is a built-in feature of ReSharper and Rider since 2021.2;
+      this plugin adds the analyzers on top of it.
+    </p>
+
+    <p>
+      For more information visit the
+      <a href="https://github.com/olsh/resharper-structured-logging#readme">project repository</a>.
+    </p>
   ]]></description>
-  <change-notes>https://github.com/olsh/resharper-structured-logging/releases</change-notes>
+  <change-notes><![CDATA[
+    See the <a href="https://github.com/olsh/resharper-structured-logging/releases">release notes on GitHub</a>.
+  ]]></change-notes>
   <version></version>
   <vendor url="https://github.com/olsh/resharper-structured-logging">Oleg Shevchenko</vendor>
   <idea-version since-build="" until-build=""/>

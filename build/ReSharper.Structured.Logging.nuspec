@@ -9,9 +9,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/olsh/resharper-structured-logging</projectUrl>
-    <description>Contains some useful analyzers for structured logging. Supports Serilog, NLog, and Microsoft.Extensions.Logging.</description>
+    <description>Analyzers for structured logging message templates in .NET. Supports Serilog, NLog, Microsoft.Extensions.Logging and ZLogger, including templates declared with LoggerMessageAttribute and LoggerMessage.Define/DefineScope. Reports objects that are not destructured, contextual logger mismatches, exceptions passed as template arguments, duplicate template properties, templates that are not compile-time constants, positional properties used instead of named ones, inconsistent property naming, and log messages written as sentences.</description>
     <releaseNotes>https://github.com/olsh/resharper-structured-logging/releases</releaseNotes>
-    <tags>resharper serilog nlog templates logging structuredlogging</tags>
+    <tags>resharper rider serilog nlog zlogger microsoft-extensions-logging templates logging structuredlogging analyzers</tags>
     <dependencies>
       <dependency id="Wave" version="$waveVersion$" />
     </dependencies>
