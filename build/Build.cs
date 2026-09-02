@@ -4,12 +4,14 @@ using System.Xml.Linq;
 
 using Nuke.Common;
 using Nuke.Common.CI;
+using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Tools.NUnit;
 using Nuke.Common.Tools.SonarScanner;
+using Nuke.Common.Utilities.Collections;
 
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.Tools.NUnit.NUnitTasks;
@@ -38,10 +40,9 @@ class Build : NukeBuild
         SdkVersionSuffix = versionMatch.Groups["suffix"]
             .ToString();
 
-        var buildNumber = GetVariable<string>("GITHUB_RUN_NUMBER");
-        ExtensionVersion = string.IsNullOrEmpty(buildNumber)
+        ExtensionVersion = GitHubActions == null
             ? SdkVersion
-            : $"{versionMatch.Groups["version"]}.{buildNumber}{versionMatch.Groups["suffix"]}";
+            : $"{versionMatch.Groups["version"]}.{GitHubActions.RunNumber}{versionMatch.Groups["suffix"]}";
         var sdkMatch = Regex.Match(SdkVersion, @"\d{2}(\d{2}).(\d).*");
         WaveMajorVersion = int.Parse(sdkMatch.Groups[1]
             .Value + sdkMatch.Groups[2]
@@ -50,6 +51,8 @@ class Build : NukeBuild
 
         base.OnBuildInitialized();
     }
+
+    [CI] readonly GitHubActions GitHubActions;
 
     [Parameter] readonly string Configuration = "Release";
 
@@ -66,7 +69,7 @@ class Build : NukeBuild
         packageExecutable: "DotnetCleanup.dll")]
     readonly Tool DotNetCleanup;
 
-    string RiderPackagePath => RootDirectory / "rider-structured-logging.zip";
+    string RiderPackagePath => RootDirectory / $"rider-structured-logging-{ExtensionVersion}.zip";
 
     // JetBrains is not very consistent in versioning
     // https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-892764206
@@ -151,6 +154,8 @@ class Build : NukeBuild
                 .AddProperty("project", ProjectName)
                 .AddProperty("waveVersion", WaveVersionsRange)
                 .SetOutputDirectory(RootDirectory));
+
+            PublishExtensionVersion();
         });
 
     Target PackRiderPlugin => _ => _
@@ -172,6 +177,8 @@ class Build : NukeBuild
 
             (RootDirectory / "gradle-build" / "distributions" / $"rider-structured-logging-{ExtensionVersion}.zip")
                 .Copy(RiderPackagePath, ExistsPolicy.FileOverwrite);
+
+            PublishExtensionVersion();
         });
 
     Target RunIde => _ => _
@@ -225,4 +232,32 @@ class Build : NukeBuild
                 .SetToken(SonarToken)
                 .SetFramework("net5.0"));
         });
+
+    // Replaces AppVeyor's UpdateBuildVersion, which used to display the extension version on the
+    // build page. GitHub Actions evaluates run-name before any step runs, so the version cannot go
+    // there; it goes to the job summary instead, and to the workflow environment so that the upload
+    // steps can name the artifacts after it.
+    void PublishExtensionVersion()
+    {
+        ReportSummary(_ => _.AddPair("Version", ExtensionVersion));
+
+        if (GitHubActions == null)
+        {
+            return;
+        }
+
+        var environmentFile = (AbsolutePath)GetVariable("GITHUB_ENV");
+        if (environmentFile != null)
+        {
+            environmentFile.AppendAllLines(new[] { $"EXTENSION_VERSION={ExtensionVersion}" });
+        }
+
+        // Both pack targets call this, but the ReSharper one always runs first and the version is
+        // the same, so a single summary entry is enough
+        var summaryFile = GitHubActions.StepSummaryFile;
+        if (!IsRiderHost && summaryFile != null)
+        {
+            summaryFile.AppendAllLines(new[] { $"### Version `{ExtensionVersion}`" });
+        }
+    }
 }

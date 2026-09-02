@@ -80,13 +80,13 @@ jobs:
       - name: Upload ReSharper package
         uses: actions/upload-artifact@v7
         with:
-          name: resharper-package
-          path: ReSharper.Structured.Logging.*.${{ github.run_number }}*.nupkg
+          name: resharper-package-${{ env.EXTENSION_VERSION }}
+          path: ReSharper.Structured.Logging.${{ env.EXTENSION_VERSION }}.nupkg
           if-no-files-found: error
 
       - name: Upload Rider package
         uses: actions/upload-artifact@v7
         with:
-          name: rider-package
-          path: rider-structured-logging.zip
+          name: rider-package-${{ env.EXTENSION_VERSION }}
+          path: rider-structured-logging-${{ env.EXTENSION_VERSION }}.zip
           if-no-files-found: error
