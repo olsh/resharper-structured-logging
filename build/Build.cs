@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -60,6 +62,8 @@ class Build : NukeBuild
 
     [Parameter] [Secret] readonly string SonarToken;
 
+    [Parameter] [Secret] readonly string MarketplaceToken;
+
     [Parameter] readonly AbsolutePath RunIdeSolution;
 
     [LocalPath("./gradlew.bat")] readonly Tool Gradle;
@@ -70,6 +74,8 @@ class Build : NukeBuild
     readonly Tool DotNetCleanup;
 
     string RiderPackagePath => RootDirectory / $"rider-structured-logging-{ExtensionVersion}.zip";
+
+    string ReSharperPackagePath => RootDirectory / $"{ProjectName}.{ExtensionVersion}.nupkg";
 
     // JetBrains is not very consistent in versioning
     // https://github.com/olsh/resharper-structured-logging/issues/35#issuecomment-892764206
@@ -86,6 +92,9 @@ class Build : NukeBuild
             return productVersion;
         }
     }
+
+    // EAP builds must not reach the stable channel of the Marketplace
+    string PluginChannel => string.IsNullOrEmpty(SdkVersionSuffix) ? "default" : "eap";
 
     string ProjectName => IsRiderHost
         ? "ReSharper.Structured.Logging.Rider"
@@ -181,6 +190,45 @@ class Build : NukeBuild
             PublishExtensionVersion();
         });
 
+    Target PublishReSharperPlugin => _ => _
+        .DependsOn(Pack)
+        .Requires(() => !IsRiderHost)
+        .Requires(() => MarketplaceToken)
+        .Executes(() =>
+        {
+            NuGetPush(s => s
+                .SetTargetPath(ReSharperPackagePath)
+                .SetSource("https://plugins.jetbrains.com/")
+                .SetApiKey(MarketplaceToken));
+        });
+
+    Target PublishRiderPlugin => _ => _
+        .DependsOn(PackRiderPlugin)
+        .Requires(() => IsRiderHost)
+        .Requires(() => MarketplaceToken)
+        .Executes(() =>
+        {
+            // NUKE logs tool arguments, so the token travels through the environment instead
+            // Seeding from Variables is required because this replaces the child process environment
+            var environmentVariables = new Dictionary<string, string>(Variables, StringComparer.OrdinalIgnoreCase)
+            {
+                ["PUBLISH_TOKEN"] = MarketplaceToken,
+            };
+
+            Gradle(
+                $"publishPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={RiderProductVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={ProjectName} -PPluginChannel={PluginChannel}",
+                environmentVariables: environmentVariables,
+                logger:
+                (_, s) =>
+                {
+                    // Gradle writes warnings to stderr
+                    // By default logger will write stderr as errors
+                    // Keep Gradle warnings from being reported as CI build errors
+                    // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+                    Serilog.Log.Debug(s);
+                });
+        });
+
     Target RunIde => _ => _
         .DependsOn(Compile)
         .Requires(() => IsRiderHost)
@@ -252,10 +300,11 @@ class Build : NukeBuild
             environmentFile.AppendAllLines(new[] { $"EXTENSION_VERSION={ExtensionVersion}" });
         }
 
-        // Both pack targets call this, but the ReSharper one always runs first and the version is
-        // the same, so a single summary entry is enough
+        // Both pack targets call this, and a publish run packs a second time, but the version is
+        // the same. The variable exported above is visible to every later step of the same job, so
+        // its absence means this is the first pack and the only one that should report the version
         var summaryFile = GitHubActions.StepSummaryFile;
-        if (!IsRiderHost && summaryFile != null)
+        if (!IsRiderHost && summaryFile != null && GetVariable("EXTENSION_VERSION") == null)
         {
             summaryFile.AppendAllLines(new[] { $"### Version `{ExtensionVersion}`" });
         }

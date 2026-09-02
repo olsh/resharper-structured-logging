@@ -35,6 +35,11 @@ intellijPlatform {
     pluginConfiguration {
         name = rootProject.name
     }
+
+    publishing {
+        token    = providers.environmentVariable('PUBLISH_TOKEN')
+        channels = [PluginChannel]
+    }
 }
 
 prepareSandbox {
