@@ -1,0 +1,8 @@
+﻿using Microsoft.Extensions.Logging;
+
+struct A(ILogger<A{caret}> log)
+{
+	private readonly ILogger<A> _log = log;
+}
+
+class B { }

@@ -52,7 +52,12 @@ namespace ReSharper.Structured.Logging.Analyzer
                     continue;
                 }
 
-                consumer.AddHighlighting(new ContextualLoggerWarning(declaration.TypeUsage.GetDocumentRange()));
+                consumer.AddHighlighting(
+                    new ContextualLoggerWarning(
+                        declaration.TypeUsage.GetDocumentRange(),
+                        declaration.TypeUsage.GetFirstTypeArgumentNode(),
+                        containingType,
+                        declaration));
             }
         }
     }

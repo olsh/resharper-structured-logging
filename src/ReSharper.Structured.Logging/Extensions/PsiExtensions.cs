@@ -187,6 +187,20 @@ namespace ReSharper.Structured.Logging.Extensions
             return substitution.Apply(typeParameter);
         }
 
+        [CanBeNull]
+        public static ITypeUsage GetFirstTypeArgumentNode([CanBeNull]this ITypeUsage typeUsage)
+        {
+            return (typeUsage as IUserTypeUsage)?.ScalarTypeName?.TypeArgumentList?.TypeArgumentNodes
+                .FirstOrDefault();
+        }
+
+        [CanBeNull]
+        public static ITypeUsage GetFirstTypeArgumentNode([CanBeNull]this IInvocationExpression invocationExpression)
+        {
+            return (invocationExpression?.InvokedExpression as IReferenceExpression)?.TypeArgumentList
+                ?.TypeArgumentNodes.FirstOrDefault();
+        }
+
         private static bool IsVerbatimString([CanBeNull]this IExpression expression)
         {
             return expression?.FirstChild?.NodeType == CSharpTokenType.STRING_LITERAL_VERBATIM;
