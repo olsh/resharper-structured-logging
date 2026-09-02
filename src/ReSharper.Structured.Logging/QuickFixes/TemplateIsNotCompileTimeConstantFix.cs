@@ -74,15 +74,7 @@ namespace ReSharper.Structured.Logging.QuickFixes
                 {
                     if (treeNode is ITokenNode token)
                     {
-                        if (treeNode.GetTokenType() == CSharpTokenType.INTERPOLATED_STRING_REGULAR_START)
-                            builder.Append(token.GetText().Substring(2));
-                        else if (treeNode.GetTokenType() == CSharpTokenType.INTERPOLATED_STRING_VERBATIM_START)
-                            builder.Append(token.GetText().Substring(3));
-                        else if (treeNode.GetTokenType() == CSharpTokenType.INTERPOLATED_STRING_REGULAR_END ||
-                                 treeNode.GetTokenType() == CSharpTokenType.INTERPOLATED_STRING_VERBATIM_END)
-                            builder.Append(token.GetText().Substring(0, token.GetText().Length - 1));
-                        else
-                            builder.Append(token.GetText());
+                        builder.Append(GetStringLiteralText(token));
                         continue;
                     }
 
@@ -111,8 +103,8 @@ namespace ReSharper.Structured.Logging.QuickFixes
                     var firstName = PropertyNameProvider.GetSuggestedName(namesSuggestion.FirstName(), settingsStore);
 
                     hotspots.Add((
-                        builder.Length + 1,
-                        builder.Length + 1 + firstName.Length,
+                        builder.Length,
+                        builder.Length + firstName.Length,
                         namesSuggestion.AllNames().Select(c => PropertyNameProvider.GetSuggestedName(c, settingsStore)).ToList()));
                     builder.Append(firstName);
 
@@ -120,7 +112,7 @@ namespace ReSharper.Structured.Logging.QuickFixes
                     InvocationExpression.AddArgumentAfter(argument, InvocationExpression.Arguments.Last());
                 }
 
-                var literalExpression = elementFactory.CreateStringLiteralExpression(builder.ToString());
+                var literalExpression = elementFactory.CreateExpressionAsIs(builder.ToString());
                 var literalExpressionArgument = InvocationExpression.AddArgumentAfter(
                     elementFactory.CreateArgument(ParameterKind.VALUE, literalExpression),
                     MessageTemplateArgument);
@@ -139,6 +131,28 @@ namespace ReSharper.Structured.Logging.QuickFixes
                     .GetDocumentEndOffset();
                 return BulbActionUtils.ExecuteHotspotSession(hotspotsRegistry, endSelectionRange);
             }
+        }
+
+        // The source text of an interpolated string is already escaped for its string kind,
+        // so the only thing that has to change is the $ of the opening quote.
+        // Keeping the rest of the text as is avoids a second round of escaping,
+        // which would shift the hotspot offsets calculated against the built template.
+        private static string GetStringLiteralText(ITokenNode token)
+        {
+            var text = token.GetText();
+            var tokenType = token.GetTokenType();
+
+            if (tokenType == CSharpTokenType.INTERPOLATED_STRING_REGULAR_START)
+            {
+                return "\"" + text.Substring(2);
+            }
+
+            if (tokenType == CSharpTokenType.INTERPOLATED_STRING_VERBATIM_START)
+            {
+                return "@\"" + text.Substring(3);
+            }
+
+            return text;
         }
     }
 }

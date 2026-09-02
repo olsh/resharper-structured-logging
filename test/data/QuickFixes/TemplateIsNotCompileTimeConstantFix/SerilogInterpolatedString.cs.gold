@@ -1,0 +1,17 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            var aaa = 123;
+
+            Log.Logger.Information("A: {{spotstart#1}Aaa{spotend#1}}", aaa);{caret}
+        }
+    }
+}
+
+LOOKUP ITEMS IN HOTSPOTS:
+  spot#1 [Count: 1, Focus: Hard] Aaa
