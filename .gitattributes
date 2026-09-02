@@ -3,6 +3,9 @@
 ###############################################################################
 * text=auto
 
+# Ships inside the Rider plugin jar, so keep it byte-identical everywhere
+*.svg text eol=lf
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #

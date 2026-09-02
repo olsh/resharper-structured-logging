@@ -165,6 +165,9 @@ class Build : NukeBuild
                 .SetBasePath(OutputDirectory)
                 .AddProperty("project", ProjectName)
                 .AddProperty("waveVersion", WaveVersionsRange)
+                // The base path is the compiled output directory, so the logo is passed as an
+                // absolute path rather than resolved relative to it
+                .AddProperty("logoPath", RootDirectory / "images" / "logo.png")
                 .SetOutputDirectory(RootDirectory));
 
             PublishExtensionVersion();
