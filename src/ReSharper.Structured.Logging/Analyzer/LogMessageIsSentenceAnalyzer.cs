@@ -12,8 +12,8 @@ using ReSharper.Structured.Logging.Highlighting;
 
 namespace ReSharper.Structured.Logging.Analyzer
 {
-    [ElementProblemAnalyzer(typeof(IInvocationExpression), HighlightingTypes = new[] { typeof(LogMessageIsSentenceWarning) })]
-    public class LogMessageIsSentenceAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
+    [ElementProblemAnalyzer(typeof(IInvocationExpression), typeof(IAttribute), HighlightingTypes = new[] { typeof(LogMessageIsSentenceWarning) })]
+    public class LogMessageIsSentenceAnalyzer : ElementProblemAnalyzer<ICSharpArgumentsOwner>
     {
         private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
@@ -24,10 +24,10 @@ namespace ReSharper.Structured.Logging.Analyzer
             _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
         }
 
-        protected override void Run(IInvocationExpression element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
+        protected override void Run(ICSharpArgumentsOwner element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider.Value);
-            var lastFragmentExpression = templateArgument?.TryCreateLastTemplateFragmentExpression();
+            var templateExpression = element.GetTemplateExpression(_templateParameterNameAttributeProvider.Value);
+            var lastFragmentExpression = templateExpression?.TryCreateLastTemplateFragmentExpression();
             if (lastFragmentExpression == null)
             {
                 return;

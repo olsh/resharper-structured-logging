@@ -1,0 +1,13 @@
+﻿using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    public static partial class LogMessages
+    {
+        [LoggerMessage(EventId = 0, Level = LogLevel.Information, Message = "Could not open " + "socket to |{hostName}|(0)")]
+        public static partial void CouldNotOpenSocket(ILogger logger, string hostName);
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Property name 'hostName' does not match naming rules. Suggested name is 'HostName'.

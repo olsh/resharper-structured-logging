@@ -39,6 +39,13 @@ public class TemplateParameterNameAttributeProvider(
             return "format";
         }
 
+        if (className == "Microsoft.Extensions.Logging.LoggerMessageAttribute")
+        {
+            // The template is either the `message` constructor parameter or the `Message` property.
+            // Every other member (EventId, EventName, Level, SkipEnabledCheck) holds no template.
+            return attributesOwner is IConstructor || attributesOwner.ShortName == "Message" ? "message" : null;
+        }
+
         return null;
     }
 

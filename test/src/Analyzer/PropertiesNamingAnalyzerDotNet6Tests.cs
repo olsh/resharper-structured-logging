@@ -15,5 +15,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         protected override string SubPath => "PropertiesNamingAnalyzerDotNet6";
 
         [Test] public void TestZLoggerInvalidNamedProperty() => DoNamedTest2();
+
+        [Test] public void TestMicrosoftNamedMessageArgument() => DoNamedTest2();
     }
 }

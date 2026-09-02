@@ -12,8 +12,8 @@ using ReSharper.Structured.Logging.Serilog.Parsing;
 
 namespace ReSharper.Structured.Logging.Analyzer
 {
-    [ElementProblemAnalyzer(typeof(IInvocationExpression))]
-    public class DuplicatePropertiesTemplateAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
+    [ElementProblemAnalyzer(typeof(IInvocationExpression), typeof(IAttribute))]
+    public class DuplicatePropertiesTemplateAnalyzer : ElementProblemAnalyzer<ICSharpArgumentsOwner>
     {
         private readonly MessageTemplateParser _messageTemplateParser;
 
@@ -26,12 +26,12 @@ namespace ReSharper.Structured.Logging.Analyzer
         }
 
         protected override void Run(
-            IInvocationExpression element,
+            ICSharpArgumentsOwner element,
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
-            var templateArgument = element.GetTemplateArgument(_templateParameterNameAttributeProvider.Value);
-            var templateText = templateArgument?.TryGetTemplateText();
+            var templateExpression = element.GetTemplateExpression(_templateParameterNameAttributeProvider.Value);
+            var templateText = templateExpression?.TryGetTemplateText();
             if (templateText == null)
             {
                 return;
@@ -49,7 +49,7 @@ namespace ReSharper.Structured.Logging.Analyzer
             {
                 foreach (var token in duplicates)
                 {
-                    consumer.AddHighlighting(new DuplicateTemplatePropertyWarning(templateArgument.GetTokenInformation(token)));
+                    consumer.AddHighlighting(new DuplicateTemplatePropertyWarning(templateExpression.GetTokenInformation(token)));
                 }
             }
         }
