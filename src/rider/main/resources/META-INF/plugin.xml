@@ -57,6 +57,14 @@
       id="StructuredLogging"
       bundle="messages.StructuredLoggingBundle"
       key="configurable.name.structuredlogging.title" />
+
+    <dependencySupport kind="dotnet" coordinate="Serilog" displayName="Serilog" />
+    <dependencySupport kind="dotnet" coordinate="NLog" displayName="NLog" />
+    <dependencySupport kind="dotnet" coordinate="Microsoft.Extensions.Logging"
+                       displayName="Microsoft.Extensions.Logging" />
+    <dependencySupport kind="dotnet" coordinate="Microsoft.Extensions.Logging.Abstractions"
+                       displayName="Microsoft.Extensions.Logging" />
+    <dependencySupport kind="dotnet" coordinate="ZLogger" displayName="ZLogger" />
   </extensions>
   <depends>com.intellij.modules.rider</depends>
 </idea-plugin>
