@@ -19,10 +19,13 @@ namespace ReSharper.Structured.Logging.Analyzer
 
         private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
-        public DuplicatePropertiesTemplateAnalyzer(MessageTemplateParser messageTemplateParser, CodeAnnotationsCache codeAnnotationsCache)
+        public DuplicatePropertiesTemplateAnalyzer(
+            MessageTemplateParser messageTemplateParser,
+            CodeAnnotationsCache codeAnnotationsCache)
         {
             _messageTemplateParser = messageTemplateParser;
-            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
+            _templateParameterNameAttributeProvider =
+                codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
         }
 
         protected override void Run(
@@ -43,13 +46,27 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
+            var holeArguments = element.GetTemplateHoleArguments(_templateParameterNameAttributeProvider.Value);
+            var usedPropertyNames = messageTemplate.NamedProperties.Select(n => n.PropertyName)
+                .ToArray();
+
             foreach (var duplicates in messageTemplate.NamedProperties
-                .GroupBy(n => n.PropertyName)
-                .Where(g => g.Count() > 1))
+                         .GroupBy(n => n.PropertyName)
+                         .Where(g => g.Count() > 1))
             {
                 foreach (var token in duplicates)
                 {
-                    consumer.AddHighlighting(new DuplicateTemplatePropertyWarning(templateExpression.GetTokenInformation(token)));
+                    var holeIndex = Array.IndexOf(messageTemplate.NamedProperties, token);
+                    var argument = holeArguments != null && holeIndex >= 0 && holeIndex < holeArguments.Count
+                        ? holeArguments[holeIndex]
+                        : null;
+
+                    consumer.AddHighlighting(
+                        new DuplicateTemplatePropertyWarning(
+                            templateExpression.GetTokenInformation(token),
+                            token,
+                            argument,
+                            usedPropertyNames));
                 }
             }
         }

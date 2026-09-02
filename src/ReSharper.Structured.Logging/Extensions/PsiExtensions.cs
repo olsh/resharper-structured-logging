@@ -104,6 +104,29 @@ namespace ReSharper.Structured.Logging.Extensions
         }
 
         /// <summary>
+        /// The <see cref="ICSharpArgumentsOwner"/> overload of the hole binder. An attribute template has no
+        /// arguments filling its holes, and the holes of LoggerMessage.Define are filled by generic type
+        /// parameters, so both return <c>null</c>.
+        /// </summary>
+        [CanBeNull]
+        public static IReadOnlyList<ICSharpArgument> GetTemplateHoleArguments(
+            this ICSharpArgumentsOwner argumentsOwner,
+            TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
+        {
+            if (!(argumentsOwner is IInvocationExpression invocationExpression)
+                || invocationExpression.IsLoggerMessageDefineMethod())
+            {
+                return null;
+            }
+
+            var templateArgument = invocationExpression.GetTemplateArgument(templateParameterNameAttributeProvider);
+
+            return templateArgument == null
+                ? null
+                : invocationExpression.GetTemplateHoleArguments(templateArgument);
+        }
+
+        /// <summary>
         /// Returns the message template expression of a logging call or of a logging attribute
         /// such as [LoggerMessage(Message = "...")].
         /// </summary>
