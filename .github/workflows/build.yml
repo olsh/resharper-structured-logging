@@ -20,9 +20,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_NOLOGO: true
@@ -31,6 +28,9 @@ jobs:
   build:
     name: Build and test
     runs-on: windows-2025
+
+    permissions:
+      contents: read
 
     outputs:
       version: ${{ steps.version.outputs.value }}
@@ -125,7 +125,6 @@ jobs:
     if: inputs.publish
     runs-on: ubuntu-latest
 
-    # Scoped to this job so that ordinary build and pull request runs stay read-only
     permissions:
       contents: write
 
