@@ -7,10 +7,9 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-            Log.Logger.Information(new Exception(), "{One} {OtherException}", 1, |new Exception()|(0));
+            Log.Logger.Information(messageTemplate: "{One}", exception: new Exception());
         }
     }
 }
 
 ---------------------------------------------------------
-(0): ReSharper Warning: Exception should be passed to the exception argument
