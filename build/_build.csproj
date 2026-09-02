@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169</NoWarn>
     <NukeRootDirectory>..</NukeRootDirectory>
@@ -11,14 +11,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="9.0.4" />
+    <PackageReference Include="Nuke.Common" Version="10.1.0" />
+  </ItemGroup>
+
+  <!-- Nuke.Common pulls vulnerable transitive versions of these; drop once it ships updated ones -->
+  <ItemGroup>
+    <PackageReference Include="NuGet.Packaging" Version="6.12.5" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.11" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageDownload Include="dotnet-sonarscanner" Version="[11.2.1]" />
-    <PackageDownload Include="NuGet.CommandLine" Version="[6.9.1]" />
-    <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.17.0]" />
-    <PackageDownload Include="dotnet-cleanup" Version="[0.6.1]" />
+    <PackageDownload Include="NuGet.CommandLine" Version="[7.9.0]" />
+    <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.22.0]" />
+    <PackageDownload Include="dotnet-cleanup" Version="[1.0.1]" />
   </ItemGroup>
 
 </Project>

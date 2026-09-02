@@ -57,15 +57,13 @@ class Build : NukeBuild
 
     [Parameter] [Secret] readonly string SonarToken;
 
-    [Parameter] readonly AbsolutePath Solution;
-
     [Parameter] readonly AbsolutePath RunIdeSolution;
 
     [LocalPath("./gradlew.bat")] readonly Tool Gradle;
 
     [NuGetPackage(
         packageId: "dotnet-cleanup",
-        packageExecutable: "cleanup.dll")]
+        packageExecutable: "DotnetCleanup.dll")]
     readonly Tool DotNetCleanup;
 
     string RiderPackagePath => RootDirectory / "rider-structured-logging.zip";
@@ -116,11 +114,11 @@ class Build : NukeBuild
     Target Clean => _ => _
         .Executes(() =>
         {
-            DotNetCleanup($"{Solution} -y -v");
+            // The build project is excluded because the running NUKE process is loaded from its own output
+            DotNetCleanup($"{RootDirectory} -y --exclude build/** --verbosity normal");
         });
 
     Target Compile => _ => _
-        .DependsOn()
         .Executes(() =>
         {
             DotNetBuild(s => s

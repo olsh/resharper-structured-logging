@@ -1,4 +1,3 @@
 {
-  "$schema": "./build.schema.json",
-  "Solution": "ReSharper.Structured.Logging.slnx"
+  "$schema": "./build.schema.json"
 }
