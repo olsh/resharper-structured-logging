@@ -10,6 +10,7 @@ An extension for ReSharper and Rider IDE that highlights structured logging temp
 
 At the moment it supports Serilog, NLog, Microsoft.Extensions.Logging and ZLogger,
 including templates declared with `Microsoft.Extensions.Logging.LoggerMessageAttribute`
+and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`
 
 ## Installation ReSharper
 

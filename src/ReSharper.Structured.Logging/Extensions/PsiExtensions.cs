@@ -24,6 +24,8 @@ namespace ReSharper.Structured.Logging.Extensions
     {
         private static readonly IClrTypeName LogContextFqn = new ClrTypeName("Serilog.Context.LogContext");
 
+        private static readonly IClrTypeName LoggerMessageFqn = new ClrTypeName("Microsoft.Extensions.Logging.LoggerMessage");
+
         [CanBeNull]
         public static ICSharpArgument GetTemplateArgument(this IInvocationExpression invocationExpression, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
         {
@@ -174,6 +176,22 @@ namespace ReSharper.Structured.Logging.Extensions
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// LoggerMessage.Define and DefineScope bind template holes to generic type parameters,
+        /// so the arguments that follow the template are not the values of those holes.
+        /// </summary>
+        public static bool IsLoggerMessageDefineMethod(this IInvocationExpression invocationExpression)
+        {
+            var typeMember = invocationExpression.Reference?.Resolve().DeclaredElement as ITypeMember;
+            var containingType = typeMember?.GetContainingType();
+            if (containingType == null)
+            {
+                return false;
+            }
+
+            return LoggerMessageFqn.Equals(containingType.GetClrName());
         }
 
         public static bool IsSerilogContextPushPropertyMethod(this IInvocationExpression invocationExpression)

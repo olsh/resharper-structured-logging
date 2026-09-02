@@ -37,6 +37,13 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
+            // Template holes of LoggerMessage.Define/DefineScope are filled by generic type parameters,
+            // so the arguments that follow the template are not hole values
+            if (element.IsLoggerMessageDefineMethod())
+            {
+                return;
+            }
+
             var anonymousObjectsArguments = element.ArgumentList.Arguments
                 .Where(a => a.Value is IAnonymousObjectCreationExpression)
                 .ToArray();

@@ -1,0 +1,12 @@
+﻿using System;
+
+using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    public static class LogMessages
+    {
+        private static readonly Action<ILogger, int, Exception> Retry =
+            LoggerMessage.Define<int>(LogLevel.Warning, new EventId(2), "Retrying {0}");
+    }
+}

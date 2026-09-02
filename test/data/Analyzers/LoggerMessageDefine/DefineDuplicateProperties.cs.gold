@@ -1,0 +1,16 @@
+﻿using System;
+
+using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    public static class LogMessages
+    {
+        private static readonly Action<ILogger, string, string, Exception> HostMismatch =
+            LoggerMessage.Define<string, string>(LogLevel.Warning, new EventId(1), "|{Host}|(0) is not equal to |{Host}|(1)");
+    }
+}
+
+---------------------------------------------------------
+(0):<overlapped> ReSharper Warning: Duplicate properties in message template
+(1):<overlapped> ReSharper Warning: Duplicate properties in message template

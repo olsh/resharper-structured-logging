@@ -18,5 +18,8 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
 
         [Test]
         public void TestLoggerMessageAttribute() => DoNamedTest();
+
+        [Test]
+        public void TestLoggerMessageDefine() => DoNamedTest();
     }
 }

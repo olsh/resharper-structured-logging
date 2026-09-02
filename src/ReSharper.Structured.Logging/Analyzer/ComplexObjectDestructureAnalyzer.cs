@@ -70,6 +70,13 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
+            // Template holes of LoggerMessage.Define/DefineScope are filled by generic type parameters,
+            // the arguments that follow the template (LogDefineOptions) are not hole values
+            if (element.IsLoggerMessageDefineMethod())
+            {
+                return;
+            }
+
             var templateText = templateArgument.Value.TryGetTemplateText();
             if (templateText == null)
             {

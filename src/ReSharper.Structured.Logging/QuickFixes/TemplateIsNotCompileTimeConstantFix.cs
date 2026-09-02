@@ -23,6 +23,7 @@ using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.ReSharper.TestRunner.Abstractions.Extensions;
 using JetBrains.TextControl;
 using JetBrains.Util;
+using ReSharper.Structured.Logging.Extensions;
 using ReSharper.Structured.Logging.Highlighting;
 using ReSharper.Structured.Logging.Services;
 
@@ -43,7 +44,11 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         public override bool IsAvailable(IUserDataHolder cache)
         {
-            return InvocationExpression.IsValid() && MessageTemplateArgument.Expression is IInterpolatedStringExpression;
+            // The fix appends the interpolation values as arguments, but LoggerMessage.Define/DefineScope
+            // have no overload to receive them, they bind the template holes to generic type parameters
+            return InvocationExpression.IsValid()
+                   && MessageTemplateArgument.Expression is IInterpolatedStringExpression
+                   && !InvocationExpression.IsLoggerMessageDefineMethod();
         }
 
         // ReSharper disable once CognitiveComplexity

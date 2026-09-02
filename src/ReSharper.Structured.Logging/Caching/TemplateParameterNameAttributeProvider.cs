@@ -39,6 +39,12 @@ public class TemplateParameterNameAttributeProvider(
             return "format";
         }
 
+        if (className == "Microsoft.Extensions.Logging.LoggerMessage")
+        {
+            // Every Define and DefineScope overload declares the template as `formatString`
+            return attributesOwner.ShortName is "Define" or "DefineScope" ? "formatString" : null;
+        }
+
         if (className == "Microsoft.Extensions.Logging.LoggerMessageAttribute")
         {
             // The template is either the `message` constructor parameter or the `Message` property.
