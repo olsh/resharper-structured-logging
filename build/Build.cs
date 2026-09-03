@@ -12,13 +12,11 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Tools.NUnit;
-using Nuke.Common.Tools.SonarScanner;
 using Nuke.Common.Utilities.Collections;
 
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.Tools.NUnit.NUnitTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.SonarScanner.SonarScannerTasks;
 using static Nuke.Common.Tools.NuGet.NuGetTasks;
 
 [ShutdownDotNetAfterServerBuild]
@@ -59,8 +57,6 @@ class Build : NukeBuild
     [Parameter] readonly string Configuration = "Release";
 
     [Parameter] readonly bool IsRiderHost;
-
-    [Parameter] [Secret] readonly string SonarToken;
 
     [Parameter] [Secret] readonly string MarketplaceToken;
 
@@ -258,33 +254,6 @@ class Build : NukeBuild
                     // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
                     Serilog.Log.Information(s);
                 });
-        });
-
-    Target SonarBegin => _ => _
-        .Unlisted()
-        .Before(Compile)
-        .Requires(() => SonarToken)
-        .Executes(() =>
-        {
-            SonarScannerBegin(s => s
-                .SetServer("https://sonarcloud.io")
-                .SetFramework("net5.0")
-                .SetToken(SonarToken)
-                .SetProjectKey("resharper-structured-logging")
-                .SetName("ReSharper Structured Logging")
-                .SetOrganization("olsh")
-                .SetVersion(ExtensionVersion));
-        });
-
-    Target Sonar => _ => _
-        .DependsOn(SonarBegin, Compile)
-        .Requires(() => !IsRiderHost)
-        .Requires(() => SonarToken)
-        .Executes(() =>
-        {
-            SonarScannerEnd(s => s
-                .SetToken(SonarToken)
-                .SetFramework("net5.0"));
         });
 
     // Replaces AppVeyor's UpdateBuildVersion, which used to display the extension version on the

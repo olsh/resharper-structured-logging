@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageDownload Include="dotnet-sonarscanner" Version="[11.2.1]" />
     <PackageDownload Include="NuGet.CommandLine" Version="[7.9.0]" />
     <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.22.0]" />
     <PackageDownload Include="dotnet-cleanup" Version="[1.0.1]" />
