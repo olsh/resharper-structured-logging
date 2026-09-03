@@ -1,0 +1,12 @@
+﻿using Microsoft.Extensions.Logging;
+
+class A
+{
+    public void Configure(ILoggerFactory loggerFactory)
+    {
+        ILogger<A> log;
+        log = loggerFactory.CreateLogger<A{caret}>();
+    }
+}
+
+class B { }

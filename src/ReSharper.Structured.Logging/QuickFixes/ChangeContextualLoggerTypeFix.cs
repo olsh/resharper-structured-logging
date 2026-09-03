@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 using JetBrains.Annotations;
 using JetBrains.Application.Progress;
@@ -82,22 +83,46 @@ namespace ReSharper.Structured.Logging.QuickFixes
                 .FullName;
         }
 
-        private static bool HasSingleDeclarator([NotNull] IFieldDeclaration fieldDeclaration)
+        private static bool HasSingleDeclarator([NotNull] IMultipleDeclarationMember declarationMember)
         {
-            var multipleDeclaration = (fieldDeclaration as IMultipleDeclarationMember)?.MultipleDeclaration;
+            var multipleDeclaration = declarationMember.MultipleDeclaration;
 
             return multipleDeclaration == null || multipleDeclaration.Declarators.Count <= 1;
         }
 
         /// <summary>
-        /// Locates the type argument of every field or property the logger parameter is assigned to,
-        /// so that the type keeps compiling after the parameter type is changed.
+        /// Locates the type argument of every field, property or variable the logger is assigned to,
+        /// so that the type keeps compiling after the logger type is changed.
         /// </summary>
         [NotNull]
         private IList<ITypeUsage> FindAssignedMemberTypeArguments()
         {
             var result = new List<ITypeUsage>();
-            if (_parameterDeclaration == null || !_parameterDeclaration.IsValid())
+
+            // Only members logging the very same wrong type are rewritten. ILogger<T> is covariant,
+            // so an ILogger<object> member is legitimate and has to be left alone.
+            var wrongTypeName = GetContextTypeName(_typeArgument);
+            if (wrongTypeName == null)
+            {
+                return result;
+            }
+
+            // A ForContext<T>() or CreateLogger<T>() call has no parameter to walk from,
+            // the logger goes straight from the invocation into the member.
+            if (_parameterDeclaration == null)
+            {
+                var invocationTypeArgument = GetWrongLoggerTypeArgument(
+                    FindMemberTypeUsage(_typeArgument.GetContainingNode<IInvocationExpression>()),
+                    wrongTypeName);
+                if (invocationTypeArgument != null)
+                {
+                    result.Add(invocationTypeArgument);
+                }
+
+                return result;
+            }
+
+            if (!_parameterDeclaration.IsValid())
             {
                 return result;
             }
@@ -105,14 +130,6 @@ namespace ReSharper.Structured.Logging.QuickFixes
             var parameter = _parameterDeclaration.DeclaredElement;
             var typeDeclaration = _parameterDeclaration.GetContainingNode<ITypeDeclaration>();
             if (parameter == null || typeDeclaration == null)
-            {
-                return result;
-            }
-
-            // Only members logging the very same wrong type are rewritten. ILogger<T> is covariant,
-            // so an ILogger<object> member is legitimate and has to be left alone.
-            var wrongTypeName = GetContextTypeName(_typeArgument);
-            if (wrongTypeName == null)
             {
                 return result;
             }
@@ -143,59 +160,117 @@ namespace ReSharper.Structured.Logging.QuickFixes
             return result;
         }
 
+        /// <summary>
+        /// The declared type of the field, property or variable the expression is stored in, or
+        /// <c>null</c> when the value is consumed some other way - returned or passed as an argument,
+        /// for instance - where there is nothing that can be rewritten along with it.
+        /// </summary>
         [CanBeNull]
-        private ITypeUsage FindMemberTypeUsage([NotNull] IReferenceExpression referenceExpression)
+        private ITypeUsage FindMemberTypeUsage([CanBeNull] ICSharpExpression expression)
         {
-            // Primary constructor: private readonly ILogger<B> _log = log;
-            var initializer = ExpressionInitializerNavigator.GetByValue(referenceExpression);
-            if (initializer != null)
+            if (expression == null)
             {
-                var initializedField = FieldDeclarationNavigator.GetByInitial(initializer);
-                if (initializedField != null)
-                {
-                    return HasSingleDeclarator(initializedField) ? initializedField.TypeUsage : null;
-                }
-
-                return PropertyDeclarationNavigator.GetByInitial(initializer)
-                    ?.TypeUsage;
+                return null;
             }
 
-            // Regular constructor: _log = log;
-            var assignment = AssignmentExpressionNavigator.GetBySource(referenceExpression);
+            var initializer = ExpressionInitializerNavigator.GetByValue(expression);
+
+            return initializer == null
+                ? FindAssignedDeclarationTypeUsage(expression)
+                : FindInitializedDeclarationTypeUsage(initializer);
+        }
+
+        /// <summary>
+        /// The declaration a logger initializes, which is the shape of a member declared and filled
+        /// in one go and of a variable initialised from a factory call.
+        /// </summary>
+        [CanBeNull]
+        private static ITypeUsage FindInitializedDeclarationTypeUsage([NotNull] IVariableInitializer initializer)
+        {
+            var initializedField = FieldDeclarationNavigator.GetByInitial(initializer);
+            if (initializedField != null)
+            {
+                return HasSingleDeclarator(initializedField) ? initializedField.TypeUsage : null;
+            }
+
+            var initializedVariable = LocalVariableDeclarationNavigator.GetByInitial(initializer);
+            if (initializedVariable != null)
+            {
+                return GetRewritableVariableTypeUsage(initializedVariable);
+            }
+
+            return PropertyDeclarationNavigator.GetByInitial(initializer)
+                ?.TypeUsage;
+        }
+
+        /// <summary>
+        /// The declaration a logger is assigned to after it has been declared, which is how a
+        /// constructor fills a field and how a method fills a variable declared further up.
+        /// </summary>
+        [CanBeNull]
+        private ITypeUsage FindAssignedDeclarationTypeUsage([NotNull] ICSharpExpression expression)
+        {
+            var assignment = AssignmentExpressionNavigator.GetBySource(expression);
             if (assignment == null || assignment.AssignmentType != AssignmentType.EQ)
             {
                 return null;
             }
 
-            var member = (assignment.Dest as IReferenceExpression)?.Reference.Resolve()
+            var target = (assignment.Dest as IReferenceExpression)?.Reference.Resolve()
                 .DeclaredElement;
-
-            // Guards against assigning the logger into a member of some other type.
-            if (member == null || !_expectedType.Equals((member as IClrDeclaredElement)?.GetContainingType()))
+            if (target == null)
             {
                 return null;
             }
 
-            foreach (var declaration in member.GetDeclarations())
+            // Guards against assigning the logger into a member of some other type. A variable needs
+            // no such guard, it belongs to the method the assignment sits in.
+            if (target is ITypeMember member && !_expectedType.Equals(member.GetContainingType()))
             {
-                // Never reach into another file - the quick fix only rewrites what the user can see.
-                if (declaration.GetSourceFile() != _parameterDeclaration.GetSourceFile())
-                {
-                    continue;
-                }
-
-                if (declaration is IFieldDeclaration fieldDeclaration)
-                {
-                    return HasSingleDeclarator(fieldDeclaration) ? fieldDeclaration.TypeUsage : null;
-                }
-
-                if (declaration is IPropertyDeclaration propertyDeclaration)
-                {
-                    return propertyDeclaration.TypeUsage;
-                }
+                return null;
             }
 
-            return null;
+            // Never reach into another file - the quick fix only rewrites what the user can see.
+            var declaration = target.GetDeclarations()
+                .FirstOrDefault(d => d.GetSourceFile() == expression.GetSourceFile());
+
+            return declaration == null ? null : GetRewritableDeclarationTypeUsage(declaration);
+        }
+
+        /// <summary>
+        /// The type usage that can follow the logger, or <c>null</c> for the shapes that have to be
+        /// left alone: a parameter, whose signature this fix does not own, and a declaration sharing
+        /// its type with further declarators.
+        /// </summary>
+        [CanBeNull]
+        private static ITypeUsage GetRewritableDeclarationTypeUsage([NotNull] IDeclaration declaration)
+        {
+            if (declaration is IFieldDeclaration fieldDeclaration)
+            {
+                return HasSingleDeclarator(fieldDeclaration) ? fieldDeclaration.TypeUsage : null;
+            }
+
+            if (declaration is IPropertyDeclaration propertyDeclaration)
+            {
+                return propertyDeclaration.TypeUsage;
+            }
+
+            return declaration is ILocalVariableDeclaration variableDeclaration
+                ? GetRewritableVariableTypeUsage(variableDeclaration)
+                : null;
+        }
+
+        /// <summary>
+        /// An implicitly typed variable already follows whatever its initializer returns, so it has
+        /// no type argument of its own to rewrite.
+        /// </summary>
+        [CanBeNull]
+        private static ITypeUsage GetRewritableVariableTypeUsage(
+            [NotNull] ILocalVariableDeclaration variableDeclaration)
+        {
+            return variableDeclaration.IsVar || !HasSingleDeclarator(variableDeclaration)
+                ? null
+                : variableDeclaration.TypeUsage;
         }
 
         [CanBeNull]

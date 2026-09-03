@@ -9,5 +9,9 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestSerilogCorrectContextType() => DoNamedTest2();
 
         [Test] public void TestSerilogWrongContextType() => DoNamedTest2();
+
+        [Test] public void TestSerilogStaticLogCorrectContextType() => DoNamedTest2();
+
+        [Test] public void TestSerilogStaticLogWrongContextType() => DoNamedTest2();
     }
 }
