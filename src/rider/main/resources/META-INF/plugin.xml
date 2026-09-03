@@ -8,6 +8,9 @@
       Supports <b>Serilog</b>, <b>NLog</b>, <b>Microsoft.Extensions.Logging</b> and <b>ZLogger</b>,
       including templates declared with <b>LoggerMessageAttribute</b> and
       <b>LoggerMessage.Define</b>/<b>DefineScope</b>.
+      Custom logging wrappers are analyzed as well, once the method is annotated with
+      <b>MessageTemplateFormatMethodAttribute</b> or its template parameter with
+      <b>StructuredMessageTemplateAttribute</b>.
     </p>
 
     <p>The plugin reports:</p>

@@ -27,3 +27,5 @@ Log.Information("The user is {@MyUser}", new User());
 
 Log.Information("The user is {$MyUser}", new User());
 ```
+
+Also applies to [custom logging wrappers](../README.md#custom-logging-wrappers).

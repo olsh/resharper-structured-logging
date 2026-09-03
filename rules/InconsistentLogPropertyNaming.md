@@ -9,3 +9,5 @@ Compliant Solution:
 ```csharp
 Log.Error("Processed {PropertyName}", 1);
 ```
+
+Also applies to [custom logging wrappers](../README.md#custom-logging-wrappers).
