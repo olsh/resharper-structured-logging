@@ -9,7 +9,8 @@ An extension for ReSharper and Rider IDE that highlights structured logging temp
 
 At the moment it supports Serilog, NLog, Microsoft.Extensions.Logging and ZLogger,
 including templates declared with `Microsoft.Extensions.Logging.LoggerMessageAttribute`
-and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`
+and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`.
+[Custom logging wrappers](#custom-logging-wrappers) are supported as well
 
 ## Analyzers
 
@@ -37,6 +38,53 @@ inspection does not fully replace it:
 * A template that is not a compile-time constant is reported by the IDE as a hint tied to
   [CA2254](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2254),
   while the extension reports it as a warning. The quick fix comes from ReSharper.
+
+## Custom Logging Wrappers
+
+Wrapping a logger in a helper of your own normally hides the message template from the analyzers, because the helper is
+not one of the methods listed above. Annotating the helper brings the highlighting and every analyzer back:
+
+```csharp
+public static class LoggerExtensions
+{
+    [MessageTemplateFormatMethod("messageTemplate")]
+    public static void LogInformation(this ILogger logger, string messageTemplate, params object[] propertyValues)
+    {
+        logger.Information(messageTemplate, propertyValues);
+    }
+}
+```
+
+`MessageTemplateFormatMethodAttribute` ships with Serilog (`Serilog.Core`) and with NLog (`NLog`). Only the attribute
+name is matched, so a project that references neither can declare its own in any namespace:
+
+```csharp
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class MessageTemplateFormatMethodAttribute : Attribute
+{
+    public MessageTemplateFormatMethodAttribute(string messageTemplateParameterName)
+    {
+        MessageTemplateParameterName = messageTemplateParameterName;
+    }
+
+    public string MessageTemplateParameterName { get; }
+}
+```
+
+Alternatively, mark the template parameter with `StructuredMessageTemplateAttribute` from
+[JetBrains.Annotations](https://www.nuget.org/packages/JetBrains.Annotations), the annotation the built-in R#/Rider
+template highlighting also understands:
+
+```csharp
+public static void LogInformation(
+    this ILogger logger,
+    [StructuredMessageTemplate] string messageTemplate,
+    params object[] propertyValues)
+```
+
+An exception parameter declared before the template parameter is recognized on a wrapper too, so
+[exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) keeps working on the
+wrapper's overloads
 
 ## Dimming Logging Statements
 

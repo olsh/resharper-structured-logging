@@ -15,3 +15,5 @@ catch (Exception exception)
    Log.Error(exception, "Disk quota {Quota} MB exceeded", quota);
 }
 ```
+
+Also applies to [custom logging wrappers](../README.md#custom-logging-wrappers).
