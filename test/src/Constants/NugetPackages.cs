@@ -8,6 +8,10 @@ namespace ReSharper.Structured.Logging.Tests.Constants
 
         public const string NlogLoggingPackage = "NLog/6.2.0";
 
+        // ZLogger 1.x for the ZLogInformation(string, params object[]) overloads
         public const string ZLoggerLoggingPackage = "ZLogger/1.7.0";
+
+        // ZLoggerMessageAttribute only exists in ZLogger 2.x
+        public const string ZLoggerV2LoggingPackage = "ZLogger/2.5.10";
     }
 }

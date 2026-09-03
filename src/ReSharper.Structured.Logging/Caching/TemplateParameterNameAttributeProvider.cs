@@ -47,10 +47,11 @@ public class TemplateParameterNameAttributeProvider(
             return attributesOwner.ShortName is "Define" or "DefineScope" ? "formatString" : null;
         }
 
-        if (className == "Microsoft.Extensions.Logging.LoggerMessageAttribute")
+        if (className is "Microsoft.Extensions.Logging.LoggerMessageAttribute" or "ZLogger.ZLoggerMessageAttribute")
         {
-            // The template is either the `message` constructor parameter or the `Message` property.
-            // Every other member (EventId, EventName, Level, SkipEnabledCheck) holds no template.
+            // Both attributes declare the template either as the `message` constructor parameter or as the
+            // `Message` property. Every other member (EventId, EventName, Level, SkipEnabledCheck) holds no
+            // template, and the constructors that take no message simply have no `message` to resolve.
             return attributesOwner is IConstructor || attributesOwner.ShortName == "Message" ? "message" : null;
         }
 
