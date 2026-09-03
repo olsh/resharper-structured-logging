@@ -11,7 +11,8 @@ namespace ReSharper.Structured.Logging.Tests.Constants
         // ZLogger 1.x for the ZLogInformation(string, params object[]) overloads
         public const string ZLoggerLoggingPackage = "ZLogger/1.7.0";
 
-        // ZLoggerMessageAttribute only exists in ZLogger 2.x
+        // ZLogger 2.x replaced those overloads with interpolated string handlers, and is also the only
+        // version that has ZLoggerMessageAttribute
         public const string ZLoggerV2LoggingPackage = "ZLogger/2.5.10";
     }
 }

@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CodeAnnotations;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 
 using ReSharper.Structured.Logging.Caching;
@@ -27,7 +28,26 @@ namespace ReSharper.Structured.Logging.Analyzer
         protected override void Run(ICSharpArgumentsOwner element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
         {
             var templateExpression = element.GetTemplateExpression(_templateParameterNameAttributeProvider.Value);
-            var lastFragmentExpression = templateExpression?.TryCreateLastTemplateFragmentExpression();
+            if (templateExpression == null)
+            {
+                return;
+            }
+
+            // A ZLogger 2.x template is the interpolated string itself, so the text the message ends with is
+            // whatever precedes the closing quotes. There is no literal for the fix to rewrite
+            if (templateExpression.IsZLoggerTemplateHandler())
+            {
+                if (DotAtTheEnd.IsMatch(templateExpression.GetText()
+                        .TrimEnd('"')))
+                {
+                    consumer.AddHighlighting(
+                        new LogMessageIsSentenceWarning(templateExpression.GetDocumentRange(), DotAtTheEnd));
+                }
+
+                return;
+            }
+
+            var lastFragmentExpression = templateExpression.TryCreateLastTemplateFragmentExpression();
             if (lastFragmentExpression == null)
             {
                 return;

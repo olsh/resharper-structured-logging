@@ -7,7 +7,7 @@
 
 An extension for ReSharper and Rider IDE that highlights structured logging templates and contains some useful analyzers
 
-At the moment it supports Serilog, NLog, Microsoft.Extensions.Logging and ZLogger,
+At the moment it supports Serilog, NLog, Microsoft.Extensions.Logging and [ZLogger](#zlogger),
 including templates declared with `Microsoft.Extensions.Logging.LoggerMessageAttribute`,
 `ZLogger.ZLoggerMessageAttribute` and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`.
 [Custom logging wrappers](#custom-logging-wrappers) are supported as well
@@ -85,6 +85,39 @@ public static void LogInformation(
 An exception parameter declared before the template parameter is recognized on a wrapper too, so
 [exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) keeps working on the
 wrapper's overloads
+
+## ZLogger
+
+ZLogger 1.x takes the template as a string, so every analyzer applies to it as it does to any other logger.
+
+ZLogger 2.x replaced those overloads with interpolated string handlers, and its templates are interpolated
+strings instead: `logger.ZLogInformation($"Connected to {host}")`. The property name of a hole is the source
+text of its expression, unless the format specifier gives one explicitly:
+
+```csharp
+// logs the property `host`
+logger.ZLogInformation($"Connected to {host}");
+
+// logs the property `Host`
+logger.ZLogInformation($"Connected to {host:@Host}");
+
+// logs the property `StartedAt`, rendered with the `yyyy-MM-dd` format
+logger.ZLogInformation($"Started at {startedAt:@StartedAt:yyyy-MM-dd}");
+```
+
+[Inconsistent log property naming](rules/InconsistentLogPropertyNaming.md),
+[duplicate properties](rules/TemplateDuplicatePropertyProblem.md),
+[log event messages should be fragments](rules/LogMessageIsSentenceProblem.md) and
+[statement dimming](#dimming-logging-statements) apply to these call sites. The remaining analyzers do not:
+an interpolated template is a compile-time constant by construction, it has no positional properties, and
+ZLogger serializes with `:json` rather than with Serilog's destructuring operators.
+
+The naming analyzer only reports a hole it could suggest a rename for: one with an explicit `:@name`, or one
+holding a plain identifier. `$"{user.Name}"` and `$"{GetCount()}"` are logged under those expressions
+verbatim, but they are left alone, because no property name could be suggested for them. They still count as
+[duplicate properties](rules/TemplateDuplicatePropertyProblem.md) when the same expression is repeated.
+
+Quick fixes are not offered on an interpolated template, only the warnings.
 
 ## Dimming Logging Statements
 

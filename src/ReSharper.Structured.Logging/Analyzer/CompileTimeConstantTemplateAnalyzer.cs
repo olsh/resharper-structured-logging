@@ -36,6 +36,13 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
+            // A ZLogger 2.x template is an interpolated string by design: the handler consumes the holes
+            // one by one, nothing formats the string before the logger sees it
+            if (templateArgument.Value.IsZLoggerTemplateHandler())
+            {
+                return;
+            }
+
             consumer.AddHighlighting(new TemplateIsNotCompileTimeConstantWarning(element, templateArgument));
         }
     }

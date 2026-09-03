@@ -1,0 +1,16 @@
+﻿using Microsoft.Extensions.Logging;
+using ZLogger;
+
+namespace ConsoleApp
+{
+    class A
+    {
+        public A(ILogger<A> log, string host)
+        {
+            log.ZLogInformation($"Connected to {host:@|hostName|(0)}");
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Property name 'hostName' does not match naming rules. Suggested name is 'HostName'.

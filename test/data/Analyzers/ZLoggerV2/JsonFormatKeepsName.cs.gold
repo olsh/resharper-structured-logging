@@ -1,0 +1,18 @@
+﻿using System;
+
+using Microsoft.Extensions.Logging;
+using ZLogger;
+
+namespace ConsoleApp
+{
+    class A
+    {
+        public A(ILogger<A> log, Uri uri)
+        {
+            log.ZLogInformation($"Connected to {|uri|(0):json}");
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Property name 'uri' does not match naming rules. Suggested name is 'Uri'.

@@ -1,0 +1,16 @@
+﻿using Microsoft.Extensions.Logging;
+using ZLogger;
+
+namespace ConsoleApp
+{
+    class A
+    {
+        public A(ILogger<A> log, string host)
+        {
+            log.ZLogInformation(|$"Could not open socket to {host:@Host}."|(0));
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Log event messages should be fragments, not sentences. Avoid a trailing period/full stop.

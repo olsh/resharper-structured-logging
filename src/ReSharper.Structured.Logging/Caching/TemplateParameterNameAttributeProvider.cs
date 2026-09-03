@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using JetBrains.Annotations;
 using JetBrains.Application.Parts;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CodeAnnotations;
+
+using ReSharper.Structured.Logging.Services;
 
 namespace ReSharper.Structured.Logging.Caching;
 
@@ -38,7 +41,9 @@ public class TemplateParameterNameAttributeProvider(
 
         if (className == "ZLogger.ZLoggerExtensions")
         {
-            return "format";
+            // ZLogger 2.x replaced every `string format` overload with an interpolated string handler,
+            // so the template moved from `format` to the handler parameter
+            return FindInterpolatedStringHandlerParameterName(attributesOwner) ?? "format";
         }
 
         if (className == "Microsoft.Extensions.Logging.LoggerMessage")
@@ -71,6 +76,32 @@ public class TemplateParameterNameAttributeProvider(
     protected override bool ComputeWithoutAttributes()
     {
         return true;
+    }
+
+    /// <summary>
+    /// Returns the name of the parameter typed as a ZLogger interpolated string handler, the shape every
+    /// ZLogger 2.x <c>ZLog*</c> overload uses for its template, or <c>null</c> on the 1.x overloads, which
+    /// take a plain <c>string format</c>. Matching the type rather than the parameter name keeps this
+    /// correct if ZLogger ever renames the parameter.
+    /// </summary>
+    [CanBeNull]
+    private static string FindInterpolatedStringHandlerParameterName(ITypeMember attributesOwner)
+    {
+        if (attributesOwner is not IParametersOwner parametersOwner)
+        {
+            return null;
+        }
+
+        foreach (var parameter in parametersOwner.Parameters)
+        {
+            if (parameter.Type is IDeclaredType declaredType
+                && ZLoggerTemplateHandler.IsHandlerType(declaredType.GetClrName()))
+            {
+                return parameter.ShortName;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

@@ -1,0 +1,18 @@
+﻿using System;
+
+using Microsoft.Extensions.Logging;
+using ZLogger;
+
+namespace ConsoleApp
+{
+    class A
+    {
+        public A(ILogger<A> log, DateTime startedAt)
+        {
+            log.ZLogInformation($"Started at {startedAt:@|startedAtUtc|(0):yyyy-MM-dd}");
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Property name 'startedAtUtc' does not match naming rules. Suggested name is 'StartedAtUtc'.

@@ -29,3 +29,6 @@ Log.Information("The user is {$MyUser}", new User());
 ```
 
 Also applies to [custom logging wrappers](../README.md#custom-logging-wrappers).
+
+Does not apply to [ZLogger](../README.md#zlogger) 2.x interpolated templates: destructuring is Serilog syntax,
+ZLogger serializes a value with the `:json` format specifier instead.

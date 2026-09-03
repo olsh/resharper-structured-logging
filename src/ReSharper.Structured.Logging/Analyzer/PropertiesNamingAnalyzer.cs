@@ -56,22 +56,17 @@ public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<ICSharpArgumentsO
         IContextBoundSettingsStore settingsStore,
         Regex ignoredPropertiesRegex)
     {
-        var templateExpression = element.GetTemplateExpression(_templateParameterNameAttributeProvider.Value);
-        var templateText = templateExpression?.TryGetTemplateText();
-        if (templateText == null)
+        var messageTemplate = element.TryGetLogMessageTemplate(
+            _templateParameterNameAttributeProvider.Value,
+            _messageTemplateParser);
+        if (messageTemplate?.Template.NamedProperties == null)
         {
             return;
         }
 
-        var messageTemplate = _messageTemplateParser.Parse(templateText);
-        if (messageTemplate.NamedProperties == null)
+        foreach (var property in messageTemplate.Template.NamedProperties)
         {
-            return;
-        }
-
-        foreach (var property in messageTemplate.NamedProperties)
-        {
-            if (string.IsNullOrEmpty(property.PropertyName))
+            if (string.IsNullOrEmpty(property.PropertyName) || !messageTemplate.CanCheckPropertyName(property))
             {
                 continue;
             }
@@ -83,8 +78,8 @@ public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<ICSharpArgumentsO
             }
 
             consumer.AddHighlighting(
-                new InconsistentLogPropertyNamingWarning(templateExpression.GetTokenInformation(property), property,
-                    suggestedName));
+                new InconsistentLogPropertyNamingWarning(
+                    messageTemplate.Expression.GetTokenInformation(property), property, suggestedName));
         }
     }
 

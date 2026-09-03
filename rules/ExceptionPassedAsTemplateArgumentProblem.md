@@ -17,3 +17,7 @@ catch (Exception exception)
 ```
 
 Also applies to [custom logging wrappers](../README.md#custom-logging-wrappers).
+
+Does not apply to [ZLogger](../README.md#zlogger) 2.x interpolated templates. The arguments after the template
+are ZLogger's own `context` and the caller-info parameters the compiler fills in, so none of them is a
+template argument.
