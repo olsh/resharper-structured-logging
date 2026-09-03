@@ -25,5 +25,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestOtherAttributePropertiesIgnored() => DoNamedTest2();
 
         [Test] public void TestLevelOnlyConstructor() => DoNamedTest2();
+
+        [Test] public void TestParameterlessConstructor() => DoNamedTest2();
     }
 }
