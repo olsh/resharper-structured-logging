@@ -38,7 +38,7 @@ class Build : NukeBuild
             .Value;
         SdkVersion.NotNull("Unable to detect SDK version");
 
-        var versionMatch = Regex.Match(SdkVersion, @"(?<version>[\d\.]+)(?<suffix>-.*)?");
+        var versionMatch = Regex.Match(SdkVersion, @"(?<version>[\d\.]+)(?<suffix>-.*)?", RegexOptions.None, RegexTimeout);
 
         SdkVersionWithoutSuffix = versionMatch.Groups["version"]
             .ToString();
@@ -48,7 +48,7 @@ class Build : NukeBuild
         ExtensionVersion = GitHubActions == null
             ? SdkVersion
             : $"{versionMatch.Groups["version"]}.{GitHubActions.RunNumber}{versionMatch.Groups["suffix"]}";
-        var sdkMatch = Regex.Match(SdkVersion, @"\d{2}(\d{2}).(\d).*");
+        var sdkMatch = Regex.Match(SdkVersion, @"\d{2}(\d{2}).(\d).*", RegexOptions.None, RegexTimeout);
         WaveMajorVersion = int.Parse(sdkMatch.Groups[1]
             .Value + sdkMatch.Groups[2]
             .Value);
@@ -76,6 +76,10 @@ class Build : NukeBuild
         packageId: "dotnet-cleanup",
         packageExecutable: "DotnetCleanup.dll")]
     readonly Tool DotNetCleanup;
+
+    // Every regex here runs over a version string of a couple of dozen characters, so the bound is
+    // only ever reached by a runaway
+    static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(1);
 
     // Every project pins its SDK package to $(SdkVersion), and JetBrains does not always push the
     // four of them at the same minute, so a version counts as available only once all of them have it
@@ -106,7 +110,12 @@ class Build : NukeBuild
             {
                 // -eap01 is -EAP1 there. The leading zeros go one number at a time, so that -eap10
                 // does not collapse onto -EAP1
-                var suffix = Regex.Replace(SdkVersionSuffix, @"\d+", x => int.Parse(x.Value).ToString());
+                var suffix = Regex.Replace(
+                    SdkVersionSuffix,
+                    @"\d+",
+                    x => int.Parse(x.Value).ToString(),
+                    RegexOptions.None,
+                    RegexTimeout);
                 productVersion += $"{suffix.ToUpperInvariant()}-SNAPSHOT";
             }
 
@@ -314,7 +323,9 @@ class Build : NukeBuild
             propsFile.WriteAllText(Regex.Replace(
                 propsFile.ReadAllText(),
                 "<SdkVersion>[^<]*</SdkVersion>",
-                $"<SdkVersion>{targetVersion}</SdkVersion>"));
+                $"<SdkVersion>{targetVersion}</SdkVersion>",
+                RegexOptions.None,
+                RegexTimeout));
 
             Serilog.Log.Information("Updated the JetBrains SDK from {Current} to {Target}", SdkVersion, targetVersion);
             ReportSummary(_ => _.AddPair("SDK", $"{SdkVersion} -> {targetVersion}"));
