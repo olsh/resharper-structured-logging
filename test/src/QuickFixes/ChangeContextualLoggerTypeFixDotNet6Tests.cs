@@ -42,5 +42,7 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
         [Test] public void TestMicrosoftFactoryLocalVariable() => DoNamedTest();
 
         [Test] public void TestMicrosoftFactoryImplicitlyTypedLocalVariable() => DoNamedTest();
+
+        [Test] public void TestMicrosoftFactoryAssignedLocalVariable() => DoNamedTest();
     }
 }
