@@ -1,0 +1,19 @@
+﻿using System;
+
+using Microsoft.Extensions.Logging;
+using ZLogger;
+
+namespace ConsoleApp
+{
+    class A
+    {
+        public A(ILogger<A> log, Uri uri)
+        {
+            log.ZLogInformation($"{|uri.Host|(0)} is not equal to {|uri.Host|(1)}");
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Duplicate properties in message template
+(1): ReSharper Warning: Duplicate properties in message template

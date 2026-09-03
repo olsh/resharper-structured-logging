@@ -37,7 +37,8 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         public override bool IsAvailable(IUserDataHolder cache)
         {
-            return _tokenInformation.DocumentRange.IsValid();
+            // An interpolated template carries no string literal to rewrite
+            return _tokenInformation.DocumentRange.IsValid() && _tokenInformation.StringLiteral != null;
         }
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)

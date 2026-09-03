@@ -19,6 +19,7 @@ using JetBrains.Util;
 using ReSharper.Structured.Logging.Caching;
 using ReSharper.Structured.Logging.Models;
 using ReSharper.Structured.Logging.Serilog.Parsing;
+using ReSharper.Structured.Logging.Services;
 
 namespace ReSharper.Structured.Logging.Extensions
 {
@@ -78,6 +79,13 @@ namespace ReSharper.Structured.Logging.Extensions
             this IInvocationExpression invocationExpression,
             [NotNull] ICSharpArgument templateArgument)
         {
+            // The holes of a ZLogger 2.x template live inside the interpolated string, so the parameters
+            // that follow it (context, memberName, filePath, lineNumber) hold no hole values
+            if (templateArgument.Value.IsZLoggerTemplateHandler())
+            {
+                return null;
+            }
+
             var templateParameter = templateArgument.MatchingParameter?.Element;
             if (templateParameter == null)
             {
@@ -176,6 +184,56 @@ namespace ReSharper.Structured.Logging.Extensions
             return null;
         }
 
+        /// <summary>
+        /// Returns the message template of a logging call or logging attribute, or <c>null</c> when the
+        /// element is not a logging one or its template cannot be read. A template written as a string
+        /// literal is parsed; a ZLogger 2.x template is recovered from its interpolated string.
+        /// </summary>
+        [CanBeNull]
+        public static LogMessageTemplate TryGetLogMessageTemplate(
+            this ICSharpArgumentsOwner argumentsOwner,
+            TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider,
+            [NotNull] MessageTemplateParser messageTemplateParser)
+        {
+            var templateExpression = argumentsOwner.GetTemplateExpression(templateParameterNameAttributeProvider);
+            if (templateExpression == null)
+            {
+                return null;
+            }
+
+            if (templateExpression is IInterpolatedStringExpression interpolatedString
+                && interpolatedString.IsZLoggerTemplateHandler())
+            {
+                return InterpolatedMessageTemplateBuilder.TryBuild(interpolatedString);
+            }
+
+            var templateText = templateExpression.TryGetTemplateText();
+
+            return templateText == null
+                ? null
+                : new LogMessageTemplate(templateExpression, messageTemplateParser.Parse(templateText));
+        }
+
+        /// <summary>
+        /// Reports whether an expression is a ZLogger 2.x message template, that is an interpolated string
+        /// bound to one of the <c>ZLogger*InterpolatedStringHandler</c> ref structs. An interpolated string
+        /// handed to a plain <c>string</c> parameter, as in <c>Log.Information($"...")</c>, is not one: it is
+        /// formatted before the logger ever sees it, which is what the compile time constant check is about.
+        /// </summary>
+        public static bool IsZLoggerTemplateHandler([CanBeNull] this ICSharpExpression expression)
+        {
+            if (!(expression is IInterpolatedStringExpression interpolatedString))
+            {
+                return false;
+            }
+
+            var handlerConstructor = interpolatedString.HandlerConstructorReference?.Resolve()
+                .DeclaredElement as IConstructor;
+
+            return ZLoggerTemplateHandler.IsHandlerType(handlerConstructor?.GetContainingType()
+                ?.GetClrName());
+        }
+
         public static MessageTemplateTokenInformation GetTokenInformation(
             this ICSharpExpression templateExpression,
             MessageTemplateToken token)
@@ -192,6 +250,17 @@ namespace ReSharper.Structured.Logging.Extensions
             this ICSharpExpression templateExpression,
             MessageTemplateToken token)
         {
+            // A token of an interpolated template already carries the offset of the property name relative
+            // to the start of the expression, so there is no opening quote to skip. There is no literal to
+            // alter either, and a null alterer is what keeps the template quick fixes unavailable
+            if (templateExpression is IInterpolatedStringExpression)
+            {
+                var nameStartOffset = templateExpression.GetDocumentRange()
+                    .TextRange.StartOffset + token.StartIndex;
+
+                return (new TextRange(nameStartOffset, nameStartOffset + token.Length), null);
+            }
+
             if (templateExpression is IAdditiveExpression additiveExpression &&
                 additiveExpression.ConstantValue.IsString())
             {

@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 
+using JetBrains.Annotations;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
@@ -31,16 +32,36 @@ namespace ReSharper.Structured.Logging.Highlighting
         private readonly DocumentRange _documentRange;
 
         public LogMessageIsSentenceWarning(IStringLiteralAlterer stringLiteral, Regex regex)
+            : this(stringLiteral.Expression.GetDocumentRange(), stringLiteral, regex)
+        {
+        }
+
+        /// <summary>
+        /// The overload for a template that is not a string literal, such as the interpolated string of a
+        /// ZLogger 2.x call. <see cref="StringLiteral"/> stays <c>null</c>, which keeps
+        /// <c>RemoveTrailingPeriodFix</c> unavailable rather than letting it rewrite the template as a
+        /// plain quoted string.
+        /// </summary>
+        public LogMessageIsSentenceWarning(DocumentRange documentRange, Regex regex)
+            : this(documentRange, null, regex)
+        {
+        }
+
+        private LogMessageIsSentenceWarning(
+            DocumentRange documentRange,
+            [CanBeNull] IStringLiteralAlterer stringLiteral,
+            Regex regex)
         {
             StringLiteral = stringLiteral;
             Regex = regex;
-            _documentRange = stringLiteral.Expression.GetDocumentRange();
+            _documentRange = documentRange;
         }
 
         public string ErrorStripeToolTip => ToolTip;
 
         public string ToolTip => Message;
 
+        [CanBeNull]
         public IStringLiteralAlterer StringLiteral { get; }
 
         public Regex Regex { get; }

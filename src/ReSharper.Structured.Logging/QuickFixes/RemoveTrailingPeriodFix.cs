@@ -33,14 +33,17 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         public override bool IsAvailable(IUserDataHolder cache)
         {
-            return _stringLiteral.Expression.GetDocumentRange()
-                .IsValid();
+            // A template that is not a string literal, such as the interpolated string of a ZLogger 2.x
+            // call, carries no alterer and cannot be rewritten as a plain quoted string
+            return _stringLiteral != null
+                   && _stringLiteral.Expression.GetDocumentRange()
+                       .IsValid();
         }
 
         /// <inheritdoc />
         protected override ITreeNode TryGetContextTreeNode()
         {
-            return _stringLiteral.Expression;
+            return _stringLiteral?.Expression;
         }
 
         protected override IBulbActionCommand ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)

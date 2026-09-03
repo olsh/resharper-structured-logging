@@ -33,37 +33,33 @@ namespace ReSharper.Structured.Logging.Analyzer
             ElementProblemAnalyzerData data,
             IHighlightingConsumer consumer)
         {
-            var templateExpression = element.GetTemplateExpression(_templateParameterNameAttributeProvider.Value);
-            var templateText = templateExpression?.TryGetTemplateText();
-            if (templateText == null)
-            {
-                return;
-            }
-
-            var messageTemplate = _messageTemplateParser.Parse(templateText);
-            if (messageTemplate.NamedProperties == null)
+            var messageTemplate = element.TryGetLogMessageTemplate(
+                _templateParameterNameAttributeProvider.Value,
+                _messageTemplateParser);
+            var namedProperties = messageTemplate?.Template.NamedProperties;
+            if (namedProperties == null)
             {
                 return;
             }
 
             var holeArguments = element.GetTemplateHoleArguments(_templateParameterNameAttributeProvider.Value);
-            var usedPropertyNames = messageTemplate.NamedProperties.Select(n => n.PropertyName)
+            var usedPropertyNames = namedProperties.Select(n => n.PropertyName)
                 .ToArray();
 
-            foreach (var duplicates in messageTemplate.NamedProperties
+            foreach (var duplicates in namedProperties
                          .GroupBy(n => n.PropertyName)
                          .Where(g => g.Count() > 1))
             {
                 foreach (var token in duplicates)
                 {
-                    var holeIndex = Array.IndexOf(messageTemplate.NamedProperties, token);
+                    var holeIndex = Array.IndexOf(namedProperties, token);
                     var argument = holeArguments != null && holeIndex >= 0 && holeIndex < holeArguments.Count
                         ? holeArguments[holeIndex]
                         : null;
 
                     consumer.AddHighlighting(
                         new DuplicateTemplatePropertyWarning(
-                            templateExpression.GetTokenInformation(token),
+                            messageTemplate.Expression.GetTokenInformation(token),
                             token,
                             argument,
                             usedPropertyNames));

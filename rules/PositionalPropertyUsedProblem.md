@@ -12,3 +12,5 @@ Log.Error("Disk quota {Quota} MB exceeded by {User}", quota, user);
 ```
 
 Also applies to [custom logging wrappers](../README.md#custom-logging-wrappers).
+
+Does not apply to [ZLogger](../README.md#zlogger) 2.x interpolated templates, which have no positional holes.
