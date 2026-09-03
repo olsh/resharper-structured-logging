@@ -19,16 +19,20 @@ namespace ReSharper.Structured.Logging.Analyzer
     [ElementProblemAnalyzer(typeof(IInvocationExpression))]
     public class ComplexObjectDestructureAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
-        private static readonly IClrTypeName GenericDictionaryFqn = new ClrTypeName("System.Collections.Generic.Dictionary`2");
+        private static readonly IClrTypeName GenericDictionaryFqn =
+            new ClrTypeName("System.Collections.Generic.Dictionary`2");
 
         private readonly MessageTemplateParser _messageTemplateParser;
 
         private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
-        public ComplexObjectDestructureAnalyzer(MessageTemplateParser messageTemplateParser, CodeAnnotationsCache codeAnnotationsCache)
+        public ComplexObjectDestructureAnalyzer(
+            MessageTemplateParser messageTemplateParser,
+            CodeAnnotationsCache codeAnnotationsCache)
         {
             _messageTemplateParser = messageTemplateParser;
-            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
+            _templateParameterNameAttributeProvider =
+                codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
         }
 
         protected override void Run(
@@ -89,31 +93,28 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var templateArgumentIndex = templateArgument.IndexOf();
-            var complexObject = element.ArgumentList.Arguments
-                .Where(a => a.IndexOf() > templateArgumentIndex)
-                .Where(CheckIfDestructureNeeded)
-                .ToArray();
-
-            if (complexObject.Length == 0)
+            var holeArguments = element.GetTemplateHoleArguments(templateArgument);
+            if (holeArguments == null)
             {
                 return;
             }
 
-            foreach (var argument in complexObject)
+            var holeCount = Math.Min(holeArguments.Count, messageTemplate.NamedProperties.Length);
+            for (var index = 0; index < holeCount; index++)
             {
-                var index = argument.IndexOf() - templateArgumentIndex - 1;
-                if (index < messageTemplate.NamedProperties.Length)
+                var namedProperty = messageTemplate.NamedProperties[index];
+                if (namedProperty.Destructuring != Destructuring.Default)
                 {
-                    var namedProperty = messageTemplate.NamedProperties[index];
-                    if (namedProperty.Destructuring != Destructuring.Default)
-                    {
-                        continue;
-                    }
-
-                    consumer.AddHighlighting(
-                        new ComplexObjectDestructuringWarning(templateArgument.Value.GetTokenInformation(namedProperty)));
+                    continue;
                 }
+
+                if (!CheckIfDestructureNeeded(holeArguments[index]))
+                {
+                    continue;
+                }
+
+                consumer.AddHighlighting(
+                    new ComplexObjectDestructuringWarning(templateArgument.Value.GetTokenInformation(namedProperty)));
             }
         }
 
@@ -159,7 +160,8 @@ namespace ReSharper.Structured.Logging.Analyzer
             }
 
             // ReSharper disable once StyleCop.SA1305
-            var iType = argument.GetExpressionType().ToIType();
+            var iType = argument.GetExpressionType()
+                .ToIType();
             if (iType == null)
             {
                 return false;

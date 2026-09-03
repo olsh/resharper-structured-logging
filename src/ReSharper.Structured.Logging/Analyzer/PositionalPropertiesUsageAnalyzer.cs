@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CodeAnnotations;
@@ -18,10 +19,13 @@ namespace ReSharper.Structured.Logging.Analyzer
 
         private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
-        public PositionalPropertiesUsageAnalyzer(MessageTemplateParser messageTemplateParser, CodeAnnotationsCache codeAnnotationsCache)
+        public PositionalPropertiesUsageAnalyzer(
+            MessageTemplateParser messageTemplateParser,
+            CodeAnnotationsCache codeAnnotationsCache)
         {
             _messageTemplateParser = messageTemplateParser;
-            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
+            _templateParameterNameAttributeProvider =
+                codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
         }
 
         protected override void Run(
@@ -42,9 +46,25 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
+            var holeArguments = element.GetTemplateHoleArguments(_templateParameterNameAttributeProvider.Value);
+            var usedPropertyNames = messageTemplate.PositionalProperties.Select(p => p.PropertyName)
+                .ToArray();
+
             foreach (var property in messageTemplate.PositionalProperties)
             {
-                consumer.AddHighlighting(new PositionalPropertyUsedWarning(templateExpression.GetTokenInformation(property)));
+                // A positional hole names the argument it takes, so {1} is filled by the second value
+                var argument = holeArguments != null
+                               && property.TryGetPositionalValue(out var position)
+                               && position < holeArguments.Count
+                    ? holeArguments[position]
+                    : null;
+
+                consumer.AddHighlighting(
+                    new PositionalPropertyUsedWarning(
+                        templateExpression.GetTokenInformation(property),
+                        property,
+                        argument,
+                        usedPropertyNames));
             }
         }
     }

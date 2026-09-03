@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 
 using JetBrains.ReSharper.Feature.Services.Daemon;
-using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CodeAnnotations;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 
@@ -20,10 +19,13 @@ namespace ReSharper.Structured.Logging.Analyzer
 
         private readonly Lazy<TemplateParameterNameAttributeProvider> _templateParameterNameAttributeProvider;
 
-        public AnonymousTypeDestructureAnalyzer(MessageTemplateParser messageTemplateParser, CodeAnnotationsCache codeAnnotationsCache)
+        public AnonymousTypeDestructureAnalyzer(
+            MessageTemplateParser messageTemplateParser,
+            CodeAnnotationsCache codeAnnotationsCache)
         {
             _messageTemplateParser = messageTemplateParser;
-            _templateParameterNameAttributeProvider = codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
+            _templateParameterNameAttributeProvider =
+                codeAnnotationsCache.GetLazyProvider<TemplateParameterNameAttributeProvider>();
         }
 
         protected override void Run(
@@ -44,10 +46,8 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var anonymousObjectsArguments = element.ArgumentList.Arguments
-                .Where(a => a.Value is IAnonymousObjectCreationExpression)
-                .ToArray();
-            if (anonymousObjectsArguments.Length == 0)
+            var holeArguments = element.GetTemplateHoleArguments(templateArgument);
+            if (holeArguments == null || !holeArguments.Any(a => a.Value is IAnonymousObjectCreationExpression))
             {
                 return;
             }
@@ -64,21 +64,22 @@ namespace ReSharper.Structured.Logging.Analyzer
                 return;
             }
 
-            var templateArgumentIndex = templateArgument.IndexOf();
-            foreach (var argument in anonymousObjectsArguments)
+            var holeCount = Math.Min(holeArguments.Count, messageTemplate.NamedProperties.Length);
+            for (var index = 0; index < holeCount; index++)
             {
-                var index = argument.IndexOf() - templateArgumentIndex - 1;
-                if (index < messageTemplate.NamedProperties.Length)
+                if (!(holeArguments[index].Value is IAnonymousObjectCreationExpression))
                 {
-                    var namedProperty = messageTemplate.NamedProperties[index];
-                    if (namedProperty.Destructuring != Destructuring.Default)
-                    {
-                        continue;
-                    }
-
-                    var tokenInformation = templateArgument.Value.GetTokenInformation(namedProperty);
-                    consumer.AddHighlighting(new AnonymousObjectDestructuringWarning(tokenInformation));
+                    continue;
                 }
+
+                var namedProperty = messageTemplate.NamedProperties[index];
+                if (namedProperty.Destructuring != Destructuring.Default)
+                {
+                    continue;
+                }
+
+                var tokenInformation = templateArgument.Value.GetTokenInformation(namedProperty);
+                consumer.AddHighlighting(new AnonymousObjectDestructuringWarning(tokenInformation));
             }
         }
     }
