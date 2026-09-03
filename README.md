@@ -109,8 +109,9 @@ logger.ZLogInformation($"Started at {startedAt:@StartedAt:yyyy-MM-dd}");
 [duplicate properties](rules/TemplateDuplicatePropertyProblem.md),
 [log event messages should be fragments](rules/LogMessageIsSentenceProblem.md) and
 [statement dimming](#dimming-logging-statements) apply to these call sites. The remaining analyzers do not:
-an interpolated template is a compile-time constant by construction, it has no positional properties, and
-ZLogger serializes with `:json` rather than with Serilog's destructuring operators.
+an interpolated template is a compile-time constant by construction, it has no positional properties,
+ZLogger serializes with `:json` rather than with Serilog's destructuring operators, and the arguments that
+follow the template are ZLogger's own `context` and caller-info parameters rather than template arguments.
 
 The naming analyzer only reports a hole it could suggest a rename for: one with an explicit `:@name`, or one
 holding a plain identifier. `$"{user.Name}"` and `$"{GetCount()}"` are logged under those expressions
