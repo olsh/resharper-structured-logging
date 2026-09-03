@@ -19,7 +19,7 @@ and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`.
 | [Message template highlighting](#highlighting) | — | [2021.2](https://www.jetbrains.com/help/resharper/Code_Analysis__String_Formatting_Methods.html) |
 | [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md) | ✔ | — |
 | [Complex object is not destructured](rules/ComplexObjectDestructuringProblem.md) | ✔ | — |
-| [Complex object is not destructured in context](rules/ComplexObjectInContextDestructuringProblem.md) | — | — |
+| [Complex object is not destructured in context](rules/ComplexObjectInContextDestructuringProblem.md) | ✔ | — |
 | [Contextual logger mismatch](rules/ContextualLoggerProblem.md) | ✔ | — |
 | [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) | ✔ | — |
 | [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md) | ✔ | [2025.2](https://www.jetbrains.com/help/resharper/DuplicateItemInLoggerTemplate.html), Serilog-style calls only |

@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
@@ -24,25 +25,25 @@ namespace ReSharper.Structured.Logging.Highlighting
     {
         public const string SeverityId = "ComplexObjectInContextDestructuringProblem";
 
-        private readonly IInvocationExpression _invocationExpression;
-
-        public ComplexObjectDestructuringInContextWarning(IInvocationExpression invocationExpression)
+        public ComplexObjectDestructuringInContextWarning([NotNull] IInvocationExpression invocationExpression)
         {
-            _invocationExpression = invocationExpression;
+            InvocationExpression = invocationExpression;
         }
 
         public string ErrorStripeToolTip => ToolTip;
+
+        [NotNull] public IInvocationExpression InvocationExpression { get; }
 
         public string ToolTip => Message;
 
         public DocumentRange CalculateRange()
         {
-            return _invocationExpression.GetDocumentRange();
+            return InvocationExpression.GetDocumentRange();
         }
 
         public bool IsValid()
         {
-            return _invocationExpression.GetDocumentRange().IsValid();
+            return InvocationExpression.GetDocumentRange().IsValid();
         }
     }
 }
