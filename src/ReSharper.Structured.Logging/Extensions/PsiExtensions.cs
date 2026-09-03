@@ -7,9 +7,11 @@ using JetBrains.DocumentModel;
 using JetBrains.Metadata.Reader.API;
 using JetBrains.Metadata.Reader.Impl;
 using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Impl.Resolve;
 using JetBrains.ReSharper.Psi.CSharp.Parsing;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.CSharp.Util;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Util;
@@ -24,16 +26,104 @@ namespace ReSharper.Structured.Logging.Extensions
     {
         private static readonly IClrTypeName LogContextFqn = new ClrTypeName("Serilog.Context.LogContext");
 
-        private static readonly IClrTypeName LoggerMessageFqn = new ClrTypeName("Microsoft.Extensions.Logging.LoggerMessage");
+        private static readonly IClrTypeName LoggerMessageFqn =
+            new ClrTypeName("Microsoft.Extensions.Logging.LoggerMessage");
 
         [CanBeNull]
-        public static ICSharpArgument GetTemplateArgument(this IInvocationExpression invocationExpression, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
+        public static ICSharpArgument GetTemplateArgument(
+            this IInvocationExpression invocationExpression,
+            TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
         {
-            var templateParameterName = invocationExpression.GetTemplateParameterName(templateParameterNameAttributeProvider);
+            var templateParameterName =
+                invocationExpression.GetTemplateParameterName(templateParameterNameAttributeProvider);
 
             return string.IsNullOrEmpty(templateParameterName)
-                       ? null
-                       : invocationExpression.FindTemplateArgument(templateParameterName);
+                ? null
+                : invocationExpression.FindTemplateArgument(templateParameterName);
+        }
+
+        /// <summary>
+        /// Returns the arguments that fill the template holes, ordered by the parameter they are bound to,
+        /// or <c>null</c> when the hole values cannot be tied to expressions because they were passed as a
+        /// single array instead of being expanded.
+        /// </summary>
+        /// <remarks>
+        /// A hole value is any argument bound to a parameter declared after the template parameter. That covers
+        /// both the <c>params</c> overload and the generic ones Serilog resolves for short argument lists, and it
+        /// excludes the dedicated exception slot, the event id and the extension receiver, which all come before
+        /// the template. Binding through <see cref="ICSharpArgumentInfo.MatchingParameter"/> rather than through
+        /// the argument position keeps the mapping correct for named, reordered and omitted optional arguments.
+        /// </remarks>
+        [CanBeNull]
+        public static IReadOnlyList<ICSharpArgument> GetTemplateHoleArguments(
+            this IInvocationExpression invocationExpression,
+            [NotNull] ICSharpArgument templateArgument)
+        {
+            var templateParameter = templateArgument.MatchingParameter?.Element;
+            if (templateParameter == null)
+            {
+                return null;
+            }
+
+            var templateParameterIndex = templateParameter.IndexOf();
+            var holeArguments = new List<(int ParameterIndex, int ArgumentIndex, ICSharpArgument Argument)>();
+            foreach (var argument in invocationExpression.ArgumentList.Arguments)
+            {
+                var parameterInstance = argument.MatchingParameter;
+                var parameter = parameterInstance?.Element;
+                if (parameter == null || !Equals(
+                        parameter.ContainingParametersOwner,
+                        templateParameter.ContainingParametersOwner))
+                {
+                    continue;
+                }
+
+                var parameterIndex = parameter.IndexOf();
+                if (parameterIndex <= templateParameterIndex)
+                {
+                    continue;
+                }
+
+                // A single array passed to the params parameter hides the individual values,
+                // so no hole can be tied to an expression
+                if (parameter.IsParams && parameterInstance.Expanded != ArgumentsUtil.ExpandedKind.Expanded)
+                {
+                    return null;
+                }
+
+                holeArguments.Add((parameterIndex, argument.IndexOf(), argument));
+            }
+
+            // Several arguments share the parameter index when the params parameter is expanded,
+            // their source order is the hole order
+            return holeArguments
+                .OrderBy(a => a.ParameterIndex)
+                .ThenBy(a => a.ArgumentIndex)
+                .Select(a => a.Argument)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// The <see cref="ICSharpArgumentsOwner"/> overload of the hole binder. An attribute template has no
+        /// arguments filling its holes, and the holes of LoggerMessage.Define are filled by generic type
+        /// parameters, so both return <c>null</c>.
+        /// </summary>
+        [CanBeNull]
+        public static IReadOnlyList<ICSharpArgument> GetTemplateHoleArguments(
+            this ICSharpArgumentsOwner argumentsOwner,
+            TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
+        {
+            if (!(argumentsOwner is IInvocationExpression invocationExpression)
+                || invocationExpression.IsLoggerMessageDefineMethod())
+            {
+                return null;
+            }
+
+            var templateArgument = invocationExpression.GetTemplateArgument(templateParameterNameAttributeProvider);
+
+            return templateArgument == null
+                ? null
+                : invocationExpression.GetTemplateHoleArguments(templateArgument);
         }
 
         /// <summary>
@@ -41,7 +131,9 @@ namespace ReSharper.Structured.Logging.Extensions
         /// such as [LoggerMessage(Message = "...")].
         /// </summary>
         [CanBeNull]
-        public static ICSharpExpression GetTemplateExpression(this ICSharpArgumentsOwner argumentsOwner, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
+        public static ICSharpExpression GetTemplateExpression(
+            this ICSharpArgumentsOwner argumentsOwner,
+            TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
         {
             var templateParameterName = argumentsOwner.GetTemplateParameterName(templateParameterNameAttributeProvider);
             if (string.IsNullOrEmpty(templateParameterName))
@@ -58,24 +150,31 @@ namespace ReSharper.Structured.Logging.Extensions
             // An attribute can also carry the template in a named property, e.g. [LoggerMessage(Message = "...")]
             if (argumentsOwner is IAttribute attribute)
             {
-                return attribute.FindTemplatePropertyAssignment(templateParameterName)?.Source;
+                return attribute.FindTemplatePropertyAssignment(templateParameterName)
+                    ?.Source;
             }
 
             return null;
         }
 
-        public static MessageTemplateTokenInformation GetTokenInformation(this ICSharpExpression templateExpression, MessageTemplateToken token)
+        public static MessageTemplateTokenInformation GetTokenInformation(
+            this ICSharpExpression templateExpression,
+            MessageTemplateToken token)
         {
             var (tokenTextRange, tokenArgument) = FindTokenTextRange(templateExpression, token);
-            var tokenDocument = templateExpression.GetDocumentRange().Document;
+            var tokenDocument = templateExpression.GetDocumentRange()
+                .Document;
             var documentRange = new DocumentRange(tokenDocument, tokenTextRange);
 
             return new MessageTemplateTokenInformation(documentRange, tokenArgument);
         }
 
-        private static (TextRange, IStringLiteralAlterer) FindTokenTextRange(this ICSharpExpression templateExpression, MessageTemplateToken token)
+        private static (TextRange, IStringLiteralAlterer) FindTokenTextRange(
+            this ICSharpExpression templateExpression,
+            MessageTemplateToken token)
         {
-            if (templateExpression is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
+            if (templateExpression is IAdditiveExpression additiveExpression &&
+                additiveExpression.ConstantValue.IsString())
             {
                 var concatenatedRange = FindTokenTextRangeInConcatenation(additiveExpression, token);
                 if (concatenatedRange.HasValue)
@@ -84,14 +183,16 @@ namespace ReSharper.Structured.Logging.Extensions
                 }
             }
 
-            var startOffset = templateExpression.GetDocumentRange().TextRange.StartOffset + token.StartIndex + 1;
+            var startOffset = templateExpression.GetDocumentRange()
+                .TextRange.StartOffset + token.StartIndex + 1;
             if (templateExpression.IsVerbatimString())
             {
                 startOffset++;
             }
 
             // ReSharper disable once AssignNullToNotNullAttribute
-            return (new TextRange(startOffset, startOffset + token.Length), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateExpression));
+            return (new TextRange(startOffset, startOffset + token.Length),
+                StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateExpression));
         }
 
         /// <summary>
@@ -99,7 +200,9 @@ namespace ReSharper.Structured.Logging.Extensions
         /// fragment contributes, and returns the range of the fragment the token falls into, or <c>null</c>
         /// when the token lies past the end of the concatenation.
         /// </summary>
-        private static (TextRange, IStringLiteralAlterer)? FindTokenTextRangeInConcatenation(IAdditiveExpression additiveExpression, MessageTemplateToken token)
+        private static (TextRange, IStringLiteralAlterer)? FindTokenTextRangeInConcatenation(
+            IAdditiveExpression additiveExpression,
+            MessageTemplateToken token)
         {
             var arguments = new LinkedList<ExpressionArgumentInfo>();
             FlattenAdditiveExpression(additiveExpression, arguments);
@@ -127,7 +230,8 @@ namespace ReSharper.Structured.Logging.Extensions
 
                     var tokenEndIndex = tokenStartIndex + token.Length;
 
-                    return (new TextRange(tokenStartIndex, end > tokenEndIndex ? tokenEndIndex : end), StringLiteralAltererUtil.TryCreateStringLiteralByExpression(additiveArgument.Expression));
+                    return (new TextRange(tokenStartIndex, end > tokenEndIndex ? tokenEndIndex : end),
+                        StringLiteralAltererUtil.TryCreateStringLiteralByExpression(additiveArgument.Expression));
                 }
 
                 globalOffset += end - start - nonTemplateTokenCount;
@@ -138,7 +242,8 @@ namespace ReSharper.Structured.Logging.Extensions
 
         public static string TryGetTemplateText(this ICSharpExpression templateExpression)
         {
-            if (templateExpression is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
+            if (templateExpression is IAdditiveExpression additiveExpression &&
+                additiveExpression.ConstantValue.IsString())
             {
                 var linkedList = new LinkedList<ExpressionArgumentInfo>();
                 FlattenAdditiveExpression(additiveExpression, linkedList);
@@ -150,43 +255,51 @@ namespace ReSharper.Structured.Logging.Extensions
         }
 
         [CanBeNull]
-        public static IStringLiteralAlterer TryCreateLastTemplateFragmentExpression(this ICSharpExpression templateExpression)
+        public static IStringLiteralAlterer TryCreateLastTemplateFragmentExpression(
+            this ICSharpExpression templateExpression)
         {
-            if (templateExpression is IAdditiveExpression additiveExpression && additiveExpression.ConstantValue.IsString())
+            if (templateExpression is IAdditiveExpression additiveExpression &&
+                additiveExpression.ConstantValue.IsString())
             {
                 var arguments = additiveExpression.Arguments;
                 var argumentInfo = arguments[arguments.Count - 1];
                 if (argumentInfo is ExpressionArgumentInfo expressionArgumentInfo)
                 {
-                    return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(expressionArgumentInfo.Expression);
+                    return StringLiteralAltererUtil.TryCreateStringLiteralByExpression(
+                        expressionArgumentInfo.Expression);
                 }
 
                 return null;
             }
 
-            return templateExpression == null ? null : StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateExpression);
+            return templateExpression == null
+                ? null
+                : StringLiteralAltererUtil.TryCreateStringLiteralByExpression(templateExpression);
         }
 
-        public static bool IsGenericMicrosoftExtensionsLogger([NotNull]this IDeclaredType declared)
+        public static bool IsGenericMicrosoftExtensionsLogger([NotNull] this IDeclaredType declared)
         {
-            return declared.GetClrName().FullName == "Microsoft.Extensions.Logging.ILogger`1";
+            return declared.GetClrName()
+                .FullName == "Microsoft.Extensions.Logging.ILogger`1";
         }
 
-        public static bool IsSerilogContextFactoryLogger([NotNull]this IInvocationExpression invocationExpression)
+        public static bool IsSerilogContextFactoryLogger([NotNull] this IInvocationExpression invocationExpression)
         {
             if (invocationExpression.TypeArguments.Count != 1)
             {
                 return false;
             }
 
-            var declaredElement = invocationExpression.Reference.Resolve().DeclaredElement as IClrDeclaredElement;
+            var declaredElement = invocationExpression.Reference.Resolve()
+                .DeclaredElement as IClrDeclaredElement;
             var containingType = declaredElement?.GetContainingType();
             if (containingType == null)
             {
                 return false;
             }
 
-            if (containingType.GetClrName().FullName == "Serilog.ILogger" && declaredElement.ShortName == "ForContext")
+            if (containingType.GetClrName()
+                    .FullName == "Serilog.ILogger" && declaredElement.ShortName == "ForContext")
             {
                 return true;
             }
@@ -200,7 +313,8 @@ namespace ReSharper.Structured.Logging.Extensions
         /// </summary>
         public static bool IsLoggerMessageDefineMethod(this IInvocationExpression invocationExpression)
         {
-            var typeMember = invocationExpression.Reference?.Resolve().DeclaredElement as ITypeMember;
+            var typeMember = invocationExpression.Reference?.Resolve()
+                .DeclaredElement as ITypeMember;
             var containingType = typeMember?.GetContainingType();
             if (containingType == null)
             {
@@ -212,7 +326,8 @@ namespace ReSharper.Structured.Logging.Extensions
 
         public static bool IsSerilogContextPushPropertyMethod(this IInvocationExpression invocationExpression)
         {
-            var typeMember = invocationExpression.Reference.Resolve().DeclaredElement as ITypeMember;
+            var typeMember = invocationExpression.Reference.Resolve()
+                .DeclaredElement as ITypeMember;
             var containingType = typeMember?.GetContainingType();
             if (containingType == null)
             {
@@ -223,7 +338,7 @@ namespace ReSharper.Structured.Logging.Extensions
         }
 
         [CanBeNull]
-        public static IType GetFirstGenericArgumentType([NotNull]this IDeclaredType declared)
+        public static IType GetFirstGenericArgumentType([NotNull] this IDeclaredType declared)
         {
             var substitution = declared.GetSubstitution();
             var typeParameter = substitution.Domain.FirstOrDefault();
@@ -236,20 +351,20 @@ namespace ReSharper.Structured.Logging.Extensions
         }
 
         [CanBeNull]
-        public static ITypeUsage GetFirstTypeArgumentNode([CanBeNull]this ITypeUsage typeUsage)
+        public static ITypeUsage GetFirstTypeArgumentNode([CanBeNull] this ITypeUsage typeUsage)
         {
             return (typeUsage as IUserTypeUsage)?.ScalarTypeName?.TypeArgumentList?.TypeArgumentNodes
                 .FirstOrDefault();
         }
 
         [CanBeNull]
-        public static ITypeUsage GetFirstTypeArgumentNode([CanBeNull]this IInvocationExpression invocationExpression)
+        public static ITypeUsage GetFirstTypeArgumentNode([CanBeNull] this IInvocationExpression invocationExpression)
         {
             return (invocationExpression?.InvokedExpression as IReferenceExpression)?.TypeArgumentList
                 ?.TypeArgumentNodes.FirstOrDefault();
         }
 
-        private static bool IsVerbatimString([CanBeNull]this IExpression expression)
+        private static bool IsVerbatimString([CanBeNull] this IExpression expression)
         {
             return expression?.FirstChild?.NodeType == CSharpTokenType.STRING_LITERAL_VERBATIM;
         }
@@ -281,20 +396,26 @@ namespace ReSharper.Structured.Logging.Extensions
         /// member is not a logging member. A <c>null</c> result is the plugin-wide "not a logging call" signal.
         /// </summary>
         [CanBeNull]
-        public static string GetTemplateParameterName(this ICSharpArgumentsOwner argumentsOwner, TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
+        public static string GetTemplateParameterName(
+            this ICSharpArgumentsOwner argumentsOwner,
+            TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
         {
             // An attribute usage resolves the invoked constructor through a dedicated reference
             var declaredElement = argumentsOwner is IAttribute attribute
-                                      ? attribute.ConstructorReference?.Resolve().DeclaredElement
-                                      : argumentsOwner.Reference?.Resolve().DeclaredElement;
+                ? attribute.ConstructorReference?.Resolve()
+                    .DeclaredElement
+                : argumentsOwner.Reference?.Resolve()
+                    .DeclaredElement;
 
             return declaredElement is ITypeMember typeMember
-                       ? templateParameterNameAttributeProvider.GetInfo(typeMember)
-                       : null;
+                ? templateParameterNameAttributeProvider.GetInfo(typeMember)
+                : null;
         }
 
         [CanBeNull]
-        private static ICSharpArgument FindTemplateArgument(this ICSharpArgumentsOwner argumentsOwner, string templateParameterName)
+        private static ICSharpArgument FindTemplateArgument(
+            this ICSharpArgumentsOwner argumentsOwner,
+            string templateParameterName)
         {
             foreach (var argument in argumentsOwner.Arguments)
             {
@@ -308,18 +429,25 @@ namespace ReSharper.Structured.Logging.Extensions
         }
 
         [CanBeNull]
-        private static IPropertyAssignment FindTemplatePropertyAssignment(this IAttribute attribute, string templateParameterName)
+        private static IPropertyAssignment FindTemplatePropertyAssignment(
+            this IAttribute attribute,
+            string templateParameterName)
         {
             // The attribute property mirrors the constructor parameter, e.g. `message` and `Message`
-            return attribute.PropertyAssignments.FirstOrDefault(
-                propertyAssignment => string.Equals(propertyAssignment.PropertyNameIdentifier?.Name, templateParameterName, StringComparison.OrdinalIgnoreCase));
+            return attribute.PropertyAssignments.FirstOrDefault(propertyAssignment => string.Equals(
+                propertyAssignment.PropertyNameIdentifier?.Name,
+                templateParameterName,
+                StringComparison.OrdinalIgnoreCase));
         }
 
-        private static void FlattenAdditiveExpression(IAdditiveExpression additiveExpression, LinkedList<ExpressionArgumentInfo> list)
+        private static void FlattenAdditiveExpression(
+            IAdditiveExpression additiveExpression,
+            LinkedList<ExpressionArgumentInfo> list)
         {
             foreach (var argumentInfo in additiveExpression.Arguments)
             {
-                if (argumentInfo is ExpressionArgumentInfo expressionArgumentInfo && expressionArgumentInfo.Expression is IAdditiveExpression additive)
+                if (argumentInfo is ExpressionArgumentInfo expressionArgumentInfo &&
+                    expressionArgumentInfo.Expression is IAdditiveExpression additive)
                 {
                     FlattenAdditiveExpression(additive, list);
 

@@ -1,0 +1,17 @@
+﻿using System;
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(Exception exception)
+        {
+            Log.Logger.Error(exception, "Disk quota {Quota} MB exceeded {Other}", 100, |new Exception("second")|(0));
+        }
+    }
+}
+
+------------------------------------------------
+0: Exception should not be passed as a template argument, the exception argument is already used
+NO QUICKFIXES

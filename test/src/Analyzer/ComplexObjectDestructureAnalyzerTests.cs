@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace ReSharper.Structured.Logging.Tests.Analyzer
 {
@@ -27,5 +27,9 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestSerilogCustomExceptionWithoutDestructure() => DoNamedTest2();
 
         [Test] public void TestSerilogParentWithOverriddenToString() => DoNamedTest2();
+
+        [Test] public void TestSerilogNamedArgumentsWithoutDestructure() => DoNamedTest2();
+
+        [Test] public void TestSerilogArrayArgumentsWithoutDestructure() => DoNamedTest2();
     }
 }

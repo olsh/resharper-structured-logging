@@ -1,8 +1,10 @@
-using JetBrains.DocumentModel;
+using JetBrains.Annotations;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
+using JetBrains.ReSharper.Psi.CSharp.Tree;
 
 using ReSharper.Structured.Logging.Models;
+using ReSharper.Structured.Logging.Serilog.Parsing;
 using ReSharper.Structured.Logging.Settings;
 
 namespace ReSharper.Structured.Logging.Highlighting
@@ -19,31 +21,23 @@ namespace ReSharper.Structured.Logging.Highlighting
         CSharpLanguage.Name,
         OverlapResolve = OverlapResolveKind.WARNING,
         ToolTipFormatString = Message)]
-    public class DuplicateTemplatePropertyWarning : IHighlighting
+    public class DuplicateTemplatePropertyWarning : TemplatePropertyWarningBase, IHighlighting
     {
         private const string Message = "Duplicate properties in message template";
 
         public const string SeverityId = "TemplateDuplicatePropertyProblem";
 
-        private readonly DocumentRange _documentRange;
-
-        public DuplicateTemplatePropertyWarning(MessageTemplateTokenInformation tokenInformation)
+        public DuplicateTemplatePropertyWarning(
+            [NotNull] MessageTemplateTokenInformation tokenInformation,
+            [NotNull] PropertyToken namedProperty,
+            [CanBeNull] ICSharpArgument argument,
+            [NotNull] string[] usedPropertyNames)
+            : base(tokenInformation, namedProperty, argument, usedPropertyNames)
         {
-            _documentRange = tokenInformation.DocumentRange;
         }
 
         public string ErrorStripeToolTip => ToolTip;
 
         public string ToolTip => Message;
-
-        public DocumentRange CalculateRange()
-        {
-            return _documentRange;
-        }
-
-        public bool IsValid()
-        {
-            return _documentRange.IsValid();
-        }
     }
 }
