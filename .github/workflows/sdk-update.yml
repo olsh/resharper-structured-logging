@@ -1,0 +1,113 @@
+name: SDK update
+
+on:
+  schedule:
+    # Daily, so that an EAP is picked up the morning after JetBrains publishes it
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      sdk-version:
+        description: Adopt this SDK version instead of the one the wave policy picks
+        type: string
+
+concurrency:
+  group: sdk-update
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: true
+
+jobs:
+  propose:
+    name: Propose SDK update
+    if: github.repository == 'olsh/resharper-structured-logging'
+    runs-on: ubuntu-latest
+
+    steps:
+      # The pull request has to run the Build workflow, and one opened with the built in token never
+      # triggers a workflow, so the branch and the pull request go through a personal access token
+      - name: Check the automation token
+        env:
+          AUTOMATION_TOKEN: ${{ secrets.AUTOMATION_TOKEN }}
+        run: |
+          if [ -z "$AUTOMATION_TOKEN" ]; then
+            echo "::error::The AUTOMATION_TOKEN secret is missing. Create a fine grained personal access token for this repository with read and write access to contents and pull requests."
+            exit 1
+          fi
+
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.AUTOMATION_TOKEN }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Look for a newer SDK
+        id: sdk
+        env:
+          SDK_VERSION_OVERRIDE: ${{ inputs.sdk-version }}
+        run: |
+          if [ -n "$SDK_VERSION_OVERRIDE" ]; then
+            ./build.sh UpdateSdkVersion --sdk-version-override "$SDK_VERSION_OVERRIDE"
+          else
+            ./build.sh UpdateSdkVersion
+          fi
+
+      - name: Open the update pull request
+        if: steps.sdk.outputs.sdk-update-available == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.AUTOMATION_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          SDK_VERSION: ${{ steps.sdk.outputs.sdk-version }}
+          PREVIOUS_SDK_VERSION: ${{ steps.sdk.outputs.previous-sdk-version }}
+        run: |
+          set -euo pipefail
+
+          branch="sdk-update/$SDK_VERSION"
+
+          if [ -n "$(gh pr list --state open --head "$branch" --json number --jq '.[].number')" ]; then
+            echo "A pull request for $SDK_VERSION is already open"
+            exit 0
+          fi
+
+          # A wave whose build never went green must not keep the next one from being proposed
+          for number in $(gh pr list --state open --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("sdk-update/")) | .number'); do
+            gh pr close "$number" --comment "Superseded by the update to $SDK_VERSION." --delete-branch
+          done
+
+          cat > "$RUNNER_TEMP/pull-request-body.md" <<BODY
+          The JetBrains SDK moved from \`$PREVIOUS_SDK_VERSION\` to [\`$SDK_VERSION\`](https://www.nuget.org/packages/JetBrains.ReSharper.SDK/$SDK_VERSION).
+
+          Merging this publishes. An \`SdkVersion\` change landing on \`master\` runs the release path of the Build workflow, which pushes both plugins to JetBrains Marketplace and creates the GitHub release, and auto-merge is already enabled here.
+
+          When the build is red, the usual suspects are:
+
+          - [ ] binding redirects in \`test/src/app.config\` that the new SDK needs
+          - [ ] \`.gold\` expectations that moved with the SDK's rendering
+          - [ ] SDK API breaks in the analyzers and the quick fixes
+          - [ ] \`build.gradle\`, the IntelliJ Platform Gradle Plugin or the Gradle wrapper
+          BODY
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch --create "$branch"
+          git commit --all --message "Bump JetBrains SDK to $SDK_VERSION"
+          # Nothing but this workflow writes to sdk-update/*, and any leftover branch has no open
+          # pull request left by this point
+          git push --force --set-upstream origin "$branch"
+
+          gh pr create \
+            --base master \
+            --head "$branch" \
+            --title "Bump JetBrains SDK to $SDK_VERSION" \
+            --body-file "$RUNNER_TEMP/pull-request-body.md"
+
+          gh pr merge "$branch" --auto --squash --delete-branch
