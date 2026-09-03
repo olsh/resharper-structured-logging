@@ -13,7 +13,7 @@ and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`
 
 ## Analyzers
 
-| Analyzer | Quick fix | Built into ReSharper/Rider |
+| Analyzer | Quick fix | Built into R#/Rider |
 | --- | :---: | --- |
 | [Message template highlighting](#highlighting) | — | [2021.2](https://www.jetbrains.com/help/resharper/Code_Analysis__String_Formatting_Methods.html) |
 | [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md) | ✔ | — |
