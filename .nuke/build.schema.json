@@ -31,7 +31,8 @@
         "PublishReSharperPlugin",
         "PublishRiderPlugin",
         "RunIde",
-        "Test"
+        "Test",
+        "UpdateSdkVersion"
       ]
     },
     "Verbosity": {
@@ -117,6 +118,10 @@
         },
         "RunIdeSolution": {
           "type": "string"
+        },
+        "SdkVersionOverride": {
+          "type": "string",
+          "description": "Adopt this SDK version instead of the one the wave policy picks"
         }
       }
     },
