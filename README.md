@@ -13,7 +13,7 @@ and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`
 
 ## Analyzers
 
-| Analyzer | Quick fix | Built into R#/Rider |
+| Analyzer | Quick fix | Adopted by R#/Rider |
 | --- | :---: | --- |
 | [Message template highlighting](#highlighting) | — | [2021.2](https://www.jetbrains.com/help/resharper/Code_Analysis__String_Formatting_Methods.html) |
 | [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md) | ✔ | — |
@@ -28,7 +28,7 @@ and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`
 | [Inconsistent log property naming in context](rules/InconsistentContextLogPropertyNaming.md) | ✔ | — |
 | [Log event messages should be fragments, not sentences](rules/LogMessageIsSentenceProblem.md) | ✔ | — |
 
-The last column lists the ReSharper/Rider release that ships an equivalent feature. Template
+The last column names the ReSharper/Rider release that adopted the feature. Template
 highlighting became a built-in feature in 2021.2 and the extension no longer provides it. The other two
 rows are still reported by the extension, because the built-in inspections do not fully replace them:
 
