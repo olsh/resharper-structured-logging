@@ -47,8 +47,8 @@ namespace ReSharper.Structured.Logging.Highlighting
         public ITypeElement ExpectedType { get; }
 
         /// <summary>
-        /// The parameter the logger is declared on, or <c>null</c> when the warning comes from a
-        /// Serilog <c>ForContext&lt;T&gt;()</c> call.
+        /// The parameter the logger is declared on, or <c>null</c> when the warning comes from a factory
+        /// call such as <c>ForContext&lt;T&gt;()</c> or <c>CreateLogger&lt;T&gt;()</c>.
         /// </summary>
         [CanBeNull]
         public ICSharpParameterDeclaration ParameterDeclaration { get; }

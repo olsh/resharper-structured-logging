@@ -32,5 +32,15 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
         [Test] public void TestMicrosoftExpressionBodiedConstructor() => DoNamedTest();
 
         [Test] public void TestMicrosoftCovariantMemberIsNotChanged() => DoNamedTest();
+
+        [Test] public void TestMicrosoftFactoryWrongContextType() => DoNamedTest();
+
+        [Test] public void TestMicrosoftFactoryGenericMemberIsChanged() => DoNamedTest();
+
+        [Test] public void TestMicrosoftFactoryCovariantMemberIsNotChanged() => DoNamedTest();
+
+        [Test] public void TestMicrosoftFactoryLocalVariable() => DoNamedTest();
+
+        [Test] public void TestMicrosoftFactoryImplicitlyTypedLocalVariable() => DoNamedTest();
     }
 }

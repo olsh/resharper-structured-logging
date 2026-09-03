@@ -82,22 +82,46 @@ namespace ReSharper.Structured.Logging.QuickFixes
                 .FullName;
         }
 
-        private static bool HasSingleDeclarator([NotNull] IFieldDeclaration fieldDeclaration)
+        private static bool HasSingleDeclarator([NotNull] IMultipleDeclarationMember declarationMember)
         {
-            var multipleDeclaration = (fieldDeclaration as IMultipleDeclarationMember)?.MultipleDeclaration;
+            var multipleDeclaration = declarationMember.MultipleDeclaration;
 
             return multipleDeclaration == null || multipleDeclaration.Declarators.Count <= 1;
         }
 
         /// <summary>
-        /// Locates the type argument of every field or property the logger parameter is assigned to,
-        /// so that the type keeps compiling after the parameter type is changed.
+        /// Locates the type argument of every field, property or variable the logger is assigned to,
+        /// so that the type keeps compiling after the logger type is changed.
         /// </summary>
         [NotNull]
         private IList<ITypeUsage> FindAssignedMemberTypeArguments()
         {
             var result = new List<ITypeUsage>();
-            if (_parameterDeclaration == null || !_parameterDeclaration.IsValid())
+
+            // Only members logging the very same wrong type are rewritten. ILogger<T> is covariant,
+            // so an ILogger<object> member is legitimate and has to be left alone.
+            var wrongTypeName = GetContextTypeName(_typeArgument);
+            if (wrongTypeName == null)
+            {
+                return result;
+            }
+
+            // A ForContext<T>() or CreateLogger<T>() call has no parameter to walk from,
+            // the logger goes straight from the invocation into the member.
+            if (_parameterDeclaration == null)
+            {
+                var invocationTypeArgument = GetWrongLoggerTypeArgument(
+                    FindMemberTypeUsage(_typeArgument.GetContainingNode<IInvocationExpression>()),
+                    wrongTypeName);
+                if (invocationTypeArgument != null)
+                {
+                    result.Add(invocationTypeArgument);
+                }
+
+                return result;
+            }
+
+            if (!_parameterDeclaration.IsValid())
             {
                 return result;
             }
@@ -105,14 +129,6 @@ namespace ReSharper.Structured.Logging.QuickFixes
             var parameter = _parameterDeclaration.DeclaredElement;
             var typeDeclaration = _parameterDeclaration.GetContainingNode<ITypeDeclaration>();
             if (parameter == null || typeDeclaration == null)
-            {
-                return result;
-            }
-
-            // Only members logging the very same wrong type are rewritten. ILogger<T> is covariant,
-            // so an ILogger<object> member is legitimate and has to be left alone.
-            var wrongTypeName = GetContextTypeName(_typeArgument);
-            if (wrongTypeName == null)
             {
                 return result;
             }
@@ -143,11 +159,21 @@ namespace ReSharper.Structured.Logging.QuickFixes
             return result;
         }
 
+        /// <summary>
+        /// The declared type of the field, property or variable the expression is stored in, or
+        /// <c>null</c> when the value is consumed some other way - returned or passed as an argument,
+        /// for instance - where there is nothing that can be rewritten along with it.
+        /// </summary>
         [CanBeNull]
-        private ITypeUsage FindMemberTypeUsage([NotNull] IReferenceExpression referenceExpression)
+        private ITypeUsage FindMemberTypeUsage([CanBeNull] ICSharpExpression expression)
         {
-            // Primary constructor: private readonly ILogger<B> _log = log;
-            var initializer = ExpressionInitializerNavigator.GetByValue(referenceExpression);
+            if (expression == null)
+            {
+                return null;
+            }
+
+            // Initializer: private readonly ILogger<B> _log = log;
+            var initializer = ExpressionInitializerNavigator.GetByValue(expression);
             if (initializer != null)
             {
                 var initializedField = FieldDeclarationNavigator.GetByInitial(initializer);
@@ -156,12 +182,21 @@ namespace ReSharper.Structured.Logging.QuickFixes
                     return HasSingleDeclarator(initializedField) ? initializedField.TypeUsage : null;
                 }
 
+                var initializedVariable = LocalVariableDeclarationNavigator.GetByInitial(initializer);
+                if (initializedVariable != null)
+                {
+                    // An implicitly typed variable already follows whatever the initializer returns
+                    return initializedVariable.IsVar || !HasSingleDeclarator(initializedVariable)
+                        ? null
+                        : initializedVariable.TypeUsage;
+                }
+
                 return PropertyDeclarationNavigator.GetByInitial(initializer)
                     ?.TypeUsage;
             }
 
-            // Regular constructor: _log = log;
-            var assignment = AssignmentExpressionNavigator.GetBySource(referenceExpression);
+            // Assignment: _log = log;
+            var assignment = AssignmentExpressionNavigator.GetBySource(expression);
             if (assignment == null || assignment.AssignmentType != AssignmentType.EQ)
             {
                 return null;
@@ -179,7 +214,7 @@ namespace ReSharper.Structured.Logging.QuickFixes
             foreach (var declaration in member.GetDeclarations())
             {
                 // Never reach into another file - the quick fix only rewrites what the user can see.
-                if (declaration.GetSourceFile() != _parameterDeclaration.GetSourceFile())
+                if (declaration.GetSourceFile() != expression.GetSourceFile())
                 {
                     continue;
                 }

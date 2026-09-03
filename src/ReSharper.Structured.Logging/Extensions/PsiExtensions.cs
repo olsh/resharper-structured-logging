@@ -24,11 +24,18 @@ namespace ReSharper.Structured.Logging.Extensions
 {
     public static class PsiExtensions
     {
+        private const string CreateLoggerMethodName = "CreateLogger";
+
+        private const string ForContextMethodName = "ForContext";
+
         private const string PushPropertyMethodName = "PushProperty";
 
         private const string PushScopePropertyMethodName = "PushScopeProperty";
 
         private static readonly IClrTypeName LogContextFqn = new ClrTypeName("Serilog.Context.LogContext");
+
+        private static readonly IClrTypeName LoggerFactoryExtensionsFqn =
+            new ClrTypeName("Microsoft.Extensions.Logging.LoggerFactoryExtensions");
 
         private static readonly IClrTypeName LoggerMessageFqn =
             new ClrTypeName("Microsoft.Extensions.Logging.LoggerMessage");
@@ -36,6 +43,10 @@ namespace ReSharper.Structured.Logging.Extensions
         private static readonly IClrTypeName NLogLoggerFqn = new ClrTypeName("NLog.Logger");
 
         private static readonly IClrTypeName ScopeContextFqn = new ClrTypeName("NLog.ScopeContext");
+
+        private static readonly IClrTypeName SerilogLogFqn = new ClrTypeName("Serilog.Log");
+
+        private static readonly IClrTypeName SerilogLoggerFqn = new ClrTypeName("Serilog.ILogger");
 
         [CanBeNull]
         public static ICSharpArgument GetTemplateArgument(
@@ -291,28 +302,36 @@ namespace ReSharper.Structured.Logging.Extensions
                 .FullName == "Microsoft.Extensions.Logging.ILogger`1";
         }
 
-        public static bool IsSerilogContextFactoryLogger([NotNull] this IInvocationExpression invocationExpression)
+        /// <summary>
+        /// Matches the calls that build a logger categorised for a type: Serilog's
+        /// <c>ILogger.ForContext&lt;T&gt;()</c> and the <c>Log.ForContext&lt;T&gt;()</c> static facade, and
+        /// <c>ILoggerFactory.CreateLogger&lt;T&gt;()</c>. Requiring a single type argument leaves out the
+        /// overloads that name the category some other way, such as <c>ForContext(string, object)</c>,
+        /// <c>CreateLogger(string)</c> and the <c>Type</c> ones.
+        /// </summary>
+        public static bool IsContextualLoggerFactoryMethod([NotNull] this IInvocationExpression invocationExpression)
         {
             if (invocationExpression.TypeArguments.Count != 1)
             {
                 return false;
             }
 
-            var declaredElement = invocationExpression.Reference.Resolve()
-                .DeclaredElement as IClrDeclaredElement;
-            var containingType = declaredElement?.GetContainingType();
+            var typeMember = invocationExpression.Reference?.Resolve()
+                .DeclaredElement as ITypeMember;
+            var containingType = typeMember?.GetContainingType();
             if (containingType == null)
             {
                 return false;
             }
 
-            if (containingType.GetClrName()
-                    .FullName == "Serilog.ILogger" && declaredElement.ShortName == "ForContext")
+            var containingTypeName = containingType.GetClrName();
+            if (SerilogLoggerFqn.Equals(containingTypeName) || SerilogLogFqn.Equals(containingTypeName))
             {
-                return true;
+                return typeMember.ShortName == ForContextMethodName;
             }
 
-            return false;
+            return LoggerFactoryExtensionsFqn.Equals(containingTypeName)
+                   && typeMember.ShortName == CreateLoggerMethodName;
         }
 
         /// <summary>

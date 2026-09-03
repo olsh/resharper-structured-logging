@@ -13,6 +13,15 @@ class B {}
 ```csharp
 class A
 {
+    private static readonly ILogger Logger = Log.ForContext<B>();
+}
+
+class B { }
+```
+
+```csharp
+class A
+{
 	ILogger<B> _log;
 	
 	public A(ILogger<B> log)
@@ -33,6 +42,20 @@ class A(ILogger<B> log)
 class B { } 
 ```
 
+```csharp
+class A
+{
+	ILogger _log;
+
+	public A(ILoggerFactory loggerFactory)
+	{
+		_log = loggerFactory.CreateLogger<B>();
+	}
+}
+
+class B { }
+```
+
 Compliant Solution:
 ```csharp
 class A
@@ -41,6 +64,15 @@ class A
 }
 
 class B {} 
+```
+
+```csharp
+class A
+{
+    private static readonly ILogger Logger = Log.ForContext<A>();
+}
+
+class B { }
 ```
 
 ```csharp
@@ -64,4 +96,18 @@ class A(ILogger<A> log)
 }
 
 class B {} 
+```
+
+```csharp
+class A
+{
+	ILogger _log;
+
+	public A(ILoggerFactory loggerFactory)
+	{
+		_log = loggerFactory.CreateLogger<A>();
+	}
+}
+
+class B { }
 ```
