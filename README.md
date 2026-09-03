@@ -7,10 +7,9 @@
 
 An extension for ReSharper and Rider IDE that highlights structured logging templates and contains some useful analyzers
 
-At the moment it supports Serilog, NLog, Microsoft.Extensions.Logging and [ZLogger](#zlogger),
+At the moment it supports Serilog, NLog, Microsoft.Extensions.Logging and ZLogger,
 including templates declared with `Microsoft.Extensions.Logging.LoggerMessageAttribute`,
 `ZLogger.ZLoggerMessageAttribute` and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`.
-[Custom logging wrappers](#custom-logging-wrappers) are supported as well
 
 ## Analyzers
 
@@ -38,87 +37,6 @@ inspection does not fully replace it:
 * A template that is not a compile-time constant is reported by the IDE as a hint tied to
   [CA2254](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2254),
   while the extension reports it as a warning. The quick fix comes from ReSharper.
-
-## Custom Logging Wrappers
-
-Wrapping a logger in a helper of your own normally hides the message template from the analyzers, because the helper is
-not one of the methods listed above. Annotating the helper brings the highlighting and every analyzer back:
-
-```csharp
-public static class LoggerExtensions
-{
-    [MessageTemplateFormatMethod("messageTemplate")]
-    public static void LogInformation(this ILogger logger, string messageTemplate, params object[] propertyValues)
-    {
-        logger.Information(messageTemplate, propertyValues);
-    }
-}
-```
-
-`MessageTemplateFormatMethodAttribute` ships with Serilog (`Serilog.Core`) and with NLog (`NLog`). Only the attribute
-name is matched, so a project that references neither can declare its own in any namespace:
-
-```csharp
-[AttributeUsage(AttributeTargets.Method)]
-public sealed class MessageTemplateFormatMethodAttribute : Attribute
-{
-    public MessageTemplateFormatMethodAttribute(string messageTemplateParameterName)
-    {
-        MessageTemplateParameterName = messageTemplateParameterName;
-    }
-
-    public string MessageTemplateParameterName { get; }
-}
-```
-
-Alternatively, mark the template parameter with `StructuredMessageTemplateAttribute` from
-[JetBrains.Annotations](https://www.nuget.org/packages/JetBrains.Annotations), the annotation the built-in R#/Rider
-template highlighting also understands:
-
-```csharp
-public static void LogInformation(
-    this ILogger logger,
-    [StructuredMessageTemplate] string messageTemplate,
-    params object[] propertyValues)
-```
-
-An exception parameter declared before the template parameter is recognized on a wrapper too, so
-[exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) keeps working on the
-wrapper's overloads
-
-## ZLogger
-
-ZLogger 1.x takes the template as a string, so every analyzer applies to it as it does to any other logger.
-
-ZLogger 2.x replaced those overloads with interpolated string handlers, and its templates are interpolated
-strings instead: `logger.ZLogInformation($"Connected to {host}")`. The property name of a hole is the source
-text of its expression, unless the format specifier gives one explicitly:
-
-```csharp
-// logs the property `host`
-logger.ZLogInformation($"Connected to {host}");
-
-// logs the property `Host`
-logger.ZLogInformation($"Connected to {host:@Host}");
-
-// logs the property `StartedAt`, rendered with the `yyyy-MM-dd` format
-logger.ZLogInformation($"Started at {startedAt:@StartedAt:yyyy-MM-dd}");
-```
-
-[Inconsistent log property naming](rules/InconsistentLogPropertyNaming.md),
-[duplicate properties](rules/TemplateDuplicatePropertyProblem.md),
-[log event messages should be fragments](rules/LogMessageIsSentenceProblem.md) and
-[statement dimming](#dimming-logging-statements) apply to these call sites. The remaining analyzers do not:
-an interpolated template is a compile-time constant by construction, it has no positional properties,
-ZLogger serializes with `:json` rather than with Serilog's destructuring operators, and the arguments that
-follow the template are ZLogger's own `context` and caller-info parameters rather than template arguments.
-
-The naming analyzer only reports a hole it could suggest a rename for: one with an explicit `:@name`, or one
-holding a plain identifier. `$"{user.Name}"` and `$"{GetCount()}"` are logged under those expressions
-verbatim, but they are left alone, because no property name could be suggested for them. They still count as
-[duplicate properties](rules/TemplateDuplicatePropertyProblem.md) when the same expression is repeated.
-
-Quick fixes are not offered on an interpolated template, only the warnings.
 
 ## Dimming Logging Statements
 
