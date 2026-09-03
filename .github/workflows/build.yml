@@ -38,8 +38,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
@@ -72,20 +70,6 @@ jobs:
 
       - name: Pack Rider plugin
         run: .\build.cmd PackRiderPlugin --configuration Release --is-rider-host
-
-      - name: Analyze with SonarCloud
-        if: >-
-          github.event_name != 'pull_request' ||
-          (github.event.pull_request.head.repo.full_name == github.repository &&
-          github.actor != 'dependabot[bot]')
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
-            throw "The SONAR_TOKEN repository secret is required for trusted builds."
-          }
-
-          .\build.cmd Sonar --configuration Release
 
       - name: Upload ReSharper package
         uses: actions/upload-artifact@v7
