@@ -10,6 +10,10 @@
 *.sln.docstates
 .claude/settings.local.json
 
+# Skills bundled by the IDE into the project, regenerated on open
+.claude/skills/
+.codex/skills/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
