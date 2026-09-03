@@ -24,6 +24,9 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
 
         [Test] public void TestSerilogContextExplicitDestructure() => DoNamedTest2();
 
+        // The shape the destructuring quick fixes produce
+        [Test] public void TestSerilogContextNamedExplicitDestructure() => DoNamedTest2();
+
         [Test] public void TestSerilogCustomExceptionWithoutDestructure() => DoNamedTest2();
 
         [Test] public void TestSerilogParentWithOverriddenToString() => DoNamedTest2();
