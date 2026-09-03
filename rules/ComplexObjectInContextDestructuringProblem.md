@@ -27,3 +27,5 @@ LogContext.PushProperty("User", new User(), true);
 
 LogContext.PushProperty("User", new User(), false);
 ```
+
+Serilog only: NLog's `ScopeContext.PushProperty` has no destructuring flag to set, so it is not reported.

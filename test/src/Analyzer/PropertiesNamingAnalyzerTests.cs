@@ -16,6 +16,12 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
 
         [Test] public void TestSerilogContextInterpolatedStringProperty() => DoNamedTest2();
 
+        [Test] public void TestNlogScopeContextInvalidNamedProperty() => DoNamedTest2();
+
+        [Test] public void TestNlogScopeContextValidNamedProperty() => DoNamedTest2();
+
+        [Test] public void TestNlogLoggerScopePropertyInvalidNamedProperty() => DoNamedTest2();
+
         [Test] public void TestSerilogInvalidNamedPropertyWithDot() => DoNamedTest2();
 
         [Test] public void TestSerilogInvalidSyntax() => DoNamedTest2();

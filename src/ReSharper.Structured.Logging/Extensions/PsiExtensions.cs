@@ -24,10 +24,18 @@ namespace ReSharper.Structured.Logging.Extensions
 {
     public static class PsiExtensions
     {
+        private const string PushPropertyMethodName = "PushProperty";
+
+        private const string PushScopePropertyMethodName = "PushScopeProperty";
+
         private static readonly IClrTypeName LogContextFqn = new ClrTypeName("Serilog.Context.LogContext");
 
         private static readonly IClrTypeName LoggerMessageFqn =
             new ClrTypeName("Microsoft.Extensions.Logging.LoggerMessage");
+
+        private static readonly IClrTypeName NLogLoggerFqn = new ClrTypeName("NLog.Logger");
+
+        private static readonly IClrTypeName ScopeContextFqn = new ClrTypeName("NLog.ScopeContext");
 
         [CanBeNull]
         public static ICSharpArgument GetTemplateArgument(
@@ -324,6 +332,10 @@ namespace ReSharper.Structured.Logging.Extensions
             return LoggerMessageFqn.Equals(containingType.GetClrName());
         }
 
+        /// <summary>
+        /// Serilog only, unlike <see cref="IsContextPushPropertyMethod"/>: the destructuring analysis this
+        /// feeds is about the optional <c>destructureObjects</c> flag, which no other logger declares.
+        /// </summary>
         public static bool IsSerilogContextPushPropertyMethod(this IInvocationExpression invocationExpression)
         {
             var typeMember = invocationExpression.Reference.Resolve()
@@ -334,7 +346,32 @@ namespace ReSharper.Structured.Logging.Extensions
                 return false;
             }
 
-            return LogContextFqn.Equals(containingType.GetClrName()) && typeMember.ShortName == "PushProperty";
+            return LogContextFqn.Equals(containingType.GetClrName()) && typeMember.ShortName == PushPropertyMethodName;
+        }
+
+        /// <summary>
+        /// Matches the scope property calls that name the property in their first argument: Serilog's
+        /// <c>LogContext.PushProperty</c>, NLog's <c>ScopeContext.PushProperty</c> and NLog's
+        /// <c>Logger.PushScopeProperty</c>. The generic NLog overloads carry the same short name,
+        /// so they are matched as well.
+        /// </summary>
+        public static bool IsContextPushPropertyMethod(this IInvocationExpression invocationExpression)
+        {
+            var typeMember = invocationExpression.Reference?.Resolve()
+                .DeclaredElement as ITypeMember;
+            var containingType = typeMember?.GetContainingType();
+            if (containingType == null)
+            {
+                return false;
+            }
+
+            var containingTypeName = containingType.GetClrName();
+            if (LogContextFqn.Equals(containingTypeName) || ScopeContextFqn.Equals(containingTypeName))
+            {
+                return typeMember.ShortName == PushPropertyMethodName;
+            }
+
+            return NLogLoggerFqn.Equals(containingTypeName) && typeMember.ShortName == PushScopePropertyMethodName;
         }
 
         [CanBeNull]

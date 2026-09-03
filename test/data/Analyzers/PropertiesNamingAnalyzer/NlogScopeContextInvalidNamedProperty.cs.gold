@@ -1,0 +1,22 @@
+﻿using NLog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            using (ScopeContext.PushProperty(|"test"|(0), 1))
+            {
+            }
+
+            using (ScopeContext.PushProperty(|"myProperty"|(1), (object)1))
+            {
+            }
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Property name 'test' does not match naming rules. Suggested name is 'Test'.
+(1): ReSharper Warning: Property name 'myProperty' does not match naming rules. Suggested name is 'MyProperty'.

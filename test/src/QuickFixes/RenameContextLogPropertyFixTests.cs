@@ -9,5 +9,9 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
         protected override string SubPath => "RenameContextLogPropertyFix";
 
         [Test] public void TestSerilogContextProperty() => DoNamedTest();
+
+        [Test] public void TestNlogScopeContextProperty() => DoNamedTest();
+
+        [Test] public void TestNlogLoggerScopeProperty() => DoNamedTest();
     }
 }

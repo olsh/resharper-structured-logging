@@ -94,7 +94,7 @@ public class PropertiesNamingAnalyzer : ElementProblemAnalyzer<ICSharpArgumentsO
         IContextBoundSettingsStore settingsStore,
         Regex ignoredPropertiesRegex)
     {
-        if (!element.IsSerilogContextPushPropertyMethod())
+        if (!element.IsContextPushPropertyMethod())
         {
             return;
         }

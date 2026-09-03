@@ -27,6 +27,9 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         // The shape the destructuring quick fixes produce
         [Test] public void TestSerilogContextNamedExplicitDestructure() => DoNamedTest2();
 
+        // NLog has no destructuring flag to add, so the warning stays away from its scope properties
+        [Test] public void TestNlogScopeContextWithoutDestructure() => DoNamedTest2();
+
         [Test] public void TestSerilogCustomExceptionWithoutDestructure() => DoNamedTest2();
 
         [Test] public void TestSerilogParentWithOverriddenToString() => DoNamedTest2();
