@@ -38,6 +38,10 @@ rows are still reported by the extension, because the built-in inspections do no
   [CA2254](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2254),
   while the extension reports it as a warning. The quick fix comes from ReSharper.
 
+## Highlighting
+
+![Highlighting](https://github.com/olsh/resharper-structured-logging/raw/master/images/highlighting.png)
+
 ## Installation ReSharper
 
 Look for `Structured Logging` in ReSharper -> Extension manager.
@@ -47,10 +51,6 @@ Look for `Structured Logging` in ReSharper -> Extension manager.
 
 Look for `Structured Logging` in Settings -> Plugins -> Browse repositories.
 [JetBrains Plugins Repository](https://plugins.jetbrains.com/plugin/12832-structured-logging)
-
-## Highlighting
-
-![Highlighting](https://github.com/olsh/resharper-structured-logging/raw/master/images/highlighting.png)
 
 ## Dimming Logging Statements
 
