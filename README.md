@@ -20,10 +20,10 @@ and `Microsoft.Extensions.Logging.LoggerMessage.Define`/`DefineScope`
 | [Complex object is not destructured](rules/ComplexObjectDestructuringProblem.md) | ✔ | — |
 | [Complex object is not destructured in context](rules/ComplexObjectInContextDestructuringProblem.md) | — | — |
 | [Contextual logger mismatch](rules/ContextualLoggerProblem.md) | ✔ | — |
-| [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) | — | — |
-| [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md) | — | [2025.2](https://www.jetbrains.com/help/resharper/DuplicateItemInLoggerTemplate.html), Serilog-style calls only |
+| [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) | ✔ | — |
+| [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md) | ✔ | [2025.2](https://www.jetbrains.com/help/resharper/DuplicateItemInLoggerTemplate.html), Serilog-style calls only |
 | [Template should be a compile-time constant](rules/TemplateIsNotCompileTimeConstantProblem.md) | ✔ | [2025.1](https://www.jetbrains.com/help/resharper/NonStaticLoggerTemplate.html), as a hint |
-| [Prefer named properties instead of positional ones](rules/PositionalPropertyUsedProblem.md) | — | — |
+| [Prefer named properties instead of positional ones](rules/PositionalPropertyUsedProblem.md) | ✔ | — |
 | [Inconsistent log property naming](rules/InconsistentLogPropertyNaming.md) | ✔ | — |
 | [Inconsistent log property naming in context](rules/InconsistentContextLogPropertyNaming.md) | ✔ | — |
 | [Log event messages should be fragments, not sentences](rules/LogMessageIsSentenceProblem.md) | ✔ | — |
