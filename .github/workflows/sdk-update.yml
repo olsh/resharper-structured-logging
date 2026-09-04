@@ -2,8 +2,9 @@ name: SDK update
 
 on:
   schedule:
-    # Daily, so that an EAP is picked up the morning after JetBrains publishes it
-    - cron: '0 5 * * *'
+    # Daily, so that an EAP is picked up the morning after JetBrains publishes it. Off the top of
+    # the hour: GitHub delays or silently drops schedule events in its busiest slot, which is :00
+    - cron: '37 5 * * *'
   workflow_dispatch:
     inputs:
       sdk-version:
