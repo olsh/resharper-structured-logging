@@ -226,6 +226,27 @@ class Build : NukeBuild
             PublishExtensionVersion();
         });
 
+    // The Kotlin compiler already warns about deprecated platform API, but every Gradle line is
+    // logged at Debug, so the warning sits among hundreds of others and nobody reads it. Marketplace
+    // was the first thing to report it, and by then the plugin had shipped. This fails the build
+    Target VerifyRiderPlugin => _ => _
+        .DependsOn(PackRiderPlugin)
+        .Requires(() => IsRiderHost)
+        .Executes(() =>
+        {
+            Gradle(
+                $"verifyPlugin -PPluginVersion={ExtensionVersion} -PProductVersion={RiderProductVersion} -PDotNetOutputDirectory={OutputDirectory} -PDotNetProjectName={ProjectName}",
+                logger:
+                (_, s) =>
+                {
+                    // Gradle writes warnings to stderr
+                    // By default logger will write stderr as errors
+                    // Keep Gradle warnings from being reported as CI build errors
+                    // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+                    Serilog.Log.Debug(s);
+                });
+        });
+
     Target PublishReSharperPlugin => _ => _
         .DependsOn(Pack)
         .Requires(() => !IsRiderHost)

@@ -104,8 +104,21 @@ jobs:
       - name: Test Rider plugin
         run: .\build.cmd Test --configuration Release --is-rider-host
 
-      - name: Pack Rider plugin
-        run: .\build.cmd PackRiderPlugin --configuration Release --is-rider-host
+      # VerifyRiderPlugin depends on PackRiderPlugin, so this packs and verifies in one NUKE
+      # run. Keeping them as separate steps would enter the packaging target twice. Running it
+      # before the uploads and the publish steps is what keeps a plugin that fails
+      # verification from reaching Marketplace
+      - name: Pack and verify Rider plugin
+        run: .\build.cmd VerifyRiderPlugin --configuration Release --is-rider-host
+
+      # The verifier report only reaches the log at Debug level, so keep a readable copy
+      - name: Upload plugin verifier report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: plugin-verifier-report-${{ env.EXTENSION_VERSION }}
+          path: gradle-build/reports/pluginVerifier/
+          if-no-files-found: warn
 
       - name: Upload ReSharper package
         uses: actions/upload-artifact@v7
