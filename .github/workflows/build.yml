@@ -83,17 +83,14 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      # No Gradle cache: what it would hold is the Rider distribution, several gigabytes that go
+      # stale on every SDK bump and leave no room on the runner to unpack the new one. Restoring it
+      # took as long as downloading Rider afresh, so there is nothing to win here either
       - name: Set up Java
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
-          cache: gradle
-          cache-dependency-path: |
-            build.gradle
-            settings.gradle
-            gradle.properties
-            gradle/wrapper/gradle-wrapper.properties
 
       - name: Validate solution
         run: dotnet sln ReSharper.Structured.Logging.slnx list
