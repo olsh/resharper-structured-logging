@@ -32,6 +32,27 @@ dependencies {
 }
 
 intellijPlatform {
+    pluginVerification {
+        // failureLevel is left at its convention, so the build fails on compatibility problems,
+        // internal API and override-only API. Deprecated API is reported rather than fatal: it is
+        // a warning, not a break, and failing on it would hold a release and turn every sdk-update
+        // pull request red as soon as JetBrains deprecates anything. The verifier prints its
+        // verdict to the build log and writes the report uploaded by the workflow
+
+        // The plugin ID predates these rules and is what Marketplace already has, so it cannot be
+        // changed without orphaning every installed copy. Marketplace grandfathers long-existing
+        // plugins; the standalone verifier does not, and without this it rejects the plugin as
+        // structurally invalid and verifies nothing at all
+        freeArgs = ['-mute', 'ForbiddenPluginIdPrefix,TemplateWordInPluginId']
+
+        ides {
+            // The Rider the plugin was just built against, which is also the one it ships for.
+            // Anything else would download a second multi-gigabyte distribution the runner has no
+            // room for, and 'recommended' skips the EAP builds this needs to cover
+            current()
+        }
+    }
+
     publishing {
         token    = providers.environmentVariable('PUBLISH_TOKEN')
         channels = [PluginChannel]
