@@ -13,5 +13,15 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestSerilogStaticLogCorrectContextType() => DoNamedTest2();
 
         [Test] public void TestSerilogStaticLogWrongContextType() => DoNamedTest2();
+
+        [Test] public void TestSerilogStaticLogPassedToConstructorIsIgnored() => DoNamedTest2();
+
+        [Test] public void TestSerilogStaticLogReturnedChainIsIgnored() => DoNamedTest2();
+
+        [Test] public void TestSerilogStaticLogChainedCallIsReported() => DoNamedTest2();
+
+        [Test] public void TestSerilogStaticLogInlineCallIsReported() => DoNamedTest2();
+
+        [Test] public void TestSerilogStaticLogPropertyIsReported() => DoNamedTest2();
     }
 }

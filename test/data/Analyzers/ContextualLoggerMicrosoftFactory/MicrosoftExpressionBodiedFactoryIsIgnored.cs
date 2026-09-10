@@ -1,0 +1,8 @@
+using Microsoft.Extensions.Logging;
+
+static class WorkerLoggerFactory
+{
+    public static ILogger<Worker> Create(ILoggerFactory loggerFactory) => loggerFactory.CreateLogger<Worker>();
+}
+
+class Worker { }
