@@ -31,7 +31,7 @@ The corresponding NUKE targets are `PublishReSharperPlugin` and `PublishRiderPlu
 
 `master` follows the prerelease train for most of a cycle, and the whole build derives its identity from that one `SdkVersion` — the version, the `Wave` range the package declares, the Rider `productVersion` and the Marketplace channel — so a release cut from it reaches EAP users only. The `sdk-version` input overrides the SDK for a single run without touching the file:
 
-```
+```bash
 gh workflow run build.yml --ref master -f publish=true -f sdk-version=2026.2.1
 ```
 
