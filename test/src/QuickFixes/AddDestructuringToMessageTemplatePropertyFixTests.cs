@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+
 using ReSharper.Structured.Logging.QuickFixes;
 
 namespace ReSharper.Structured.Logging.Tests.QuickFixes

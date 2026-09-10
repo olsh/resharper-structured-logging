@@ -6,7 +6,9 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using NuGet.Versioning;
+
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
@@ -16,6 +18,7 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Tools.NUnit;
 using Nuke.Common.Utilities.Collections;
+
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.Tools.NUnit.NUnitTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -375,7 +378,8 @@ class Build : NukeBuild
                 RegexOptions.None,
                 RegexTimeout));
 
-            Serilog.Log.Information("Updated the JetBrains SDK from {Current} to {Target}", SdkVersionFromProps, targetVersion);
+            Serilog.Log.Information("Updated the JetBrains SDK from {Current} to {Target}", SdkVersionFromProps,
+                targetVersion);
             ReportSummary(_ => _.AddPair("SDK", $"{SdkVersionFromProps} -> {targetVersion}"));
 
             PublishGitHubOutput("sdk-update-available", "true");

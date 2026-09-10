@@ -5,8 +5,11 @@ charset = utf-8
 indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
+# Roslyn honours the two dotnet_ keys; the ReSharper formatter behind Rider and its agent hooks
+# reads neither, and collapses the groups on every reformat without the resharper_ one
 dotnet_separate_import_directive_groups = true
 dotnet_sort_system_directives_first = true
+resharper_csharp_blank_lines_between_using_groups = 1
 indent_size = 4
 
 [{*.csproj,*.json,*.yml,*.xml,*.props,*.nuspec,*.config}]
