@@ -30,5 +30,9 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestMicrosoftLocalVariableIsReported() => DoNamedTest2();
 
         [Test] public void TestMicrosoftUsedLocalVariableIsReported() => DoNamedTest2();
+
+        [Test] public void TestMicrosoftReassignedLocalVariableIsReported() => DoNamedTest2();
+
+        [Test] public void TestMicrosoftReassignedEscapingLocalVariableIsIgnored() => DoNamedTest2();
     }
 }
