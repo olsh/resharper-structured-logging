@@ -13,6 +13,13 @@ on:
         description: Publish the packages to JetBrains Marketplace and create the GitHub release
         type: boolean
         default: false
+      # While master follows the EAP train, this is how a fix reaches the current stable wave: the
+      # packages, the Wave range, the Rider build and the Marketplace channel all follow the override,
+      # so no maintenance branch is needed. Deliberately without a default, so that every other run
+      # evaluates it to an empty string
+      sdk-version:
+        description: Build against this SDK version instead of the one in Directory.Build.props
+        type: string
 
 concurrency:
   # A dispatched release gets a group to itself, keyed on the run, so that a push landing while it
@@ -33,6 +40,12 @@ jobs:
     permissions:
       contents: read
 
+    # NUKE resolves its SdkVersionOverride parameter from this, so every build.cmd step below picks it
+    # up without repeating it on each command line. Every non-dispatch run gets an empty string, which
+    # NUKE reads as unset, so it builds against Directory.Build.props exactly as it does today
+    env:
+      SDK_VERSION_OVERRIDE: ${{ inputs.sdk-version }}
+
     outputs:
       version: ${{ steps.version.outputs.value }}
       publish: ${{ steps.publish-decision.outputs.value }}
@@ -46,7 +59,9 @@ jobs:
 
       # A new SDK is the only change that has to reach users as a new build, and it is what the SDK
       # update workflow merges here, so an SdkVersion change landing on master is a release. Every
-      # other release stays a manual dispatch with the publish input
+      # other release stays a manual dispatch with the publish input.
+      # The sdk-version input never rewrites Directory.Build.props, so the comparison below keeps
+      # meaning exactly what it means today, and a dispatched run never reaches it
       - name: Decide whether to publish
         id: publish-decision
         shell: bash
@@ -167,6 +182,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           VERSION: ${{ needs.build.outputs.version }}
+          SDK_VERSION_OVERRIDE: ${{ inputs.sdk-version }}
         run: |
           if [ -z "$VERSION" ]; then
             echo "::error::The build job did not report an extension version"
@@ -179,4 +195,13 @@ jobs:
             *) prerelease= ;;
           esac
 
-          gh release create "$VERSION" --target "$GITHUB_SHA" --title "$VERSION" --generate-notes $prerelease
+          # An overridden SDK leaves Directory.Build.props alone, so the tagged commit no longer records
+          # what the packages were built against and the notes have to. --notes is prepended to the
+          # generated ones rather than replacing them
+          notes=()
+          if [ -n "$SDK_VERSION_OVERRIDE" ]; then
+            notes=(--notes "Built against the JetBrains SDK \`$SDK_VERSION_OVERRIDE\`, which is not the one this commit declares in \`Directory.Build.props\`.")
+          fi
+
+          gh release create "$VERSION" --target "$GITHUB_SHA" --title "$VERSION" \
+            --generate-notes "${notes[@]}" $prerelease

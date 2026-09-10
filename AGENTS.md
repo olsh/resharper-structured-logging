@@ -14,6 +14,7 @@ Run commands from the repository root:
 - `build.cmd PackRiderPlugin --is-rider-host`: build and package the Rider plugin through Gradle.
 - `build.cmd RunIde --is-rider-host [--run-ide-solution <path>]`: launch a sandboxed Rider with the plugin installed for manual testing; the optional solution path is opened on start, for example `--run-ide-solution test/manual/Issue130/Issue130.slnx`.
 - `build.cmd UpdateSdkVersion [--sdk-version-override <version>]`: adopt a newer JetBrains SDK in `Directory.Build.props`; see "Adopting a new SDK".
+- `--sdk-version-override <version>` on any other target builds against that SDK instead of the one `Directory.Build.props` declares, leaving the file alone: `build.cmd Test --sdk-version-override 2026.2.1` checks a change against another wave, and `build.cmd RunIde --is-rider-host --sdk-version-override 2026.2.1` sandboxes that Rider. NUKE also reads it from the `SDK_VERSION_OVERRIDE` environment variable. The output directories are not keyed by SDK version, so run `build.cmd Clean` when switching the override locally; otherwise the leftovers of the previous SDK are mixed into the build and every test fails in `OneTimeSetUp` with an assembly resolution error. CI starts from a fresh runner and is unaffected.
 - `dotnet sln ReSharper.Structured.Logging.slnx list`: verify that solution project links resolve.
 
 The build requires a compatible .NET SDK; Rider packaging also requires a JDK 17 or newer to run Gradle. The JDK that the Rider build itself compiles against is derived from the target Rider version and provisioned automatically by the Foojay toolchain resolver configured in `settings.gradle`, so it does not need to be installed by hand. Generated output appears in `bin/`, `gradle-build/`, and repository-root package files and must not be committed.
@@ -26,9 +27,25 @@ The published version and the tag are `<SdkVersion>.<workflow run number>`, wher
 
 The corresponding NUKE targets are `PublishReSharperPlugin` and `PublishRiderPlugin --is-rider-host`; both read the token from the `MARKETPLACE_TOKEN` environment variable and refuse to run without it.
 
+## Releasing to the stable wave while master tracks an EAP
+
+`master` follows the prerelease train for most of a cycle, and the whole build derives its identity from that one `SdkVersion` — the version, the `Wave` range the package declares, the Rider `productVersion` and the Marketplace channel — so a release cut from it reaches EAP users only. The `sdk-version` input overrides the SDK for a single run without touching the file:
+
+```bash
+gh workflow run build.yml --ref master -f publish=true -f sdk-version=2026.2.1
+```
+
+Everything follows the override, so a stable value routes the Rider plugin to the `default` channel and drops the prerelease flag on its own. There is no maintenance branch to cut, and the source cannot drift from the wave it ships for. The same dispatch with `publish=false` is a dry run.
+
+Because the file is untouched, the tagged commit still declares master's SDK; the release notes record the effective one instead. That also keeps the `SdkVersion` push trigger meaning exactly what it means, which is why the value cannot simply be flipped and flipped back — either flip would publish.
+
+A maintenance branch is still the only place a stable fix can live if it ever has to *diverge* from `master`. The input covers the common case where the source is identical.
+
+One thing the default does not get right: GitHub gives the Latest badge to any new stable release, so publishing an override for an *older* wave after a newer stable has shipped takes the badge from it. Correct that with `gh release edit <tag> --latest=false`. Releasing an older wave alongside a *prerelease* is fine, since a prerelease never holds the badge.
+
 ## Adopting a new SDK
 
-The `SDK update` workflow polls nuget.org daily and proposes the bump itself. `build.cmd UpdateSdkVersion` is what it runs: the target reads the versions published for all four SDK packages, keeps only those every one of them has, and picks a target under the wave policy. While the adopted version is stable only a higher wave qualifies, because a same-wave patch is already covered by the `Wave` dependency range the package declares; once it is a prerelease the whole train is followed, `eap01` through `rc01` to the stable release that closes the wave. `--sdk-version-override <version>` adopts a specific version instead, which is the way to take a same-wave patch.
+The `SDK update` workflow polls nuget.org daily and proposes the bump itself. `build.cmd UpdateSdkVersion` is what it runs: the target reads the versions published for all four SDK packages, keeps only those every one of them has, and picks a target under the wave policy. While the adopted version is stable only a higher wave qualifies, because a same-wave patch is already covered by the `Wave` dependency range the package declares; once it is a prerelease the whole train is followed, `eap01` through `rc01` to the stable release that closes the wave. `--sdk-version-override <version>` adopts a specific version instead, which is the way to take a same-wave patch. Note the flag means "use this SDK version instead of the one in `Directory.Build.props`" for every target, and only `UpdateSdkVersion` acts on that by rewriting the file; everywhere else it just builds against the version.
 
 The workflow then commits the bump to `sdk-update/<version>`, opens a pull request with auto-merge enabled, and lets `Build and test` decide. Green merges to `master`, which publishes; red leaves the pull request open, which is the normal outcome for a wave change. Expect to fix binding redirects in `test/src/app.config`, `.gold` expectations, SDK API breaks, and sometimes `build.gradle` and the Gradle wrapper. A stale red pull request is closed as superseded when the next version comes along.
 

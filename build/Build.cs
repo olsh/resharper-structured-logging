@@ -6,9 +6,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-
 using NuGet.Versioning;
-
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
@@ -18,7 +16,6 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Tools.NUnit;
 using Nuke.Common.Utilities.Collections;
-
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.Tools.NUnit.NUnitTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -31,14 +28,28 @@ class Build : NukeBuild
 
     protected override void OnBuildInitialized()
     {
-        SdkVersion = XDocument
+        SdkVersionFromProps = XDocument
             .Load((RootDirectory / "Directory.Build.props").ToString())
             .Descendants()
             .Single(x => x.Name.LocalName == "SdkVersion")
             .Value;
-        SdkVersion.NotNull("Unable to detect SDK version");
+        SdkVersionFromProps.NotNull("Unable to detect SDK version");
 
-        var versionMatch = Regex.Match(SdkVersion, @"(?<version>[\d\.]+)(?<suffix>-.*)?", RegexOptions.None, RegexTimeout);
+        // Everything a release declares is derived from this one value, so overriding it is all it takes
+        // to build the same source for another wave. The file itself is left alone, which keeps the
+        // SdkVersion push trigger meaning what it means
+        SdkVersion = string.IsNullOrEmpty(SdkVersionOverride) ? SdkVersionFromProps : SdkVersionOverride;
+
+        if (SdkVersion != SdkVersionFromProps)
+        {
+            Serilog.Log.Information(
+                "The effective JetBrains SDK is {Effective}; Directory.Build.props declares {Declared}",
+                SdkVersion,
+                SdkVersionFromProps);
+        }
+
+        var versionMatch = Regex.Match(SdkVersion, @"(?<version>[\d\.]+)(?<suffix>-.*)?", RegexOptions.None,
+            RegexTimeout);
 
         SdkVersionWithoutSuffix = versionMatch.Groups["version"]
             .ToString();
@@ -49,6 +60,7 @@ class Build : NukeBuild
             ? SdkVersion
             : $"{versionMatch.Groups["version"]}.{GitHubActions.RunNumber}{versionMatch.Groups["suffix"]}";
         var sdkMatch = Regex.Match(SdkVersion, @"\d{2}(\d{2}).(\d).*", RegexOptions.None, RegexTimeout);
+        Assert.True(sdkMatch.Success, $"Unable to derive a wave version from the SDK version '{SdkVersion}'");
         WaveMajorVersion = int.Parse(sdkMatch.Groups[1]
             .Value + sdkMatch.Groups[2]
             .Value);
@@ -67,8 +79,10 @@ class Build : NukeBuild
 
     [Parameter] readonly AbsolutePath RunIdeSolution;
 
-    [Parameter("Adopt this SDK version instead of the one the wave policy picks")]
-    readonly string SdkVersionOverride;
+    // UpdateSdkVersion adopts this version into Directory.Build.props; every other target builds against
+    // it and leaves the file alone, which is how a fix reaches the current stable wave while master
+    // follows the EAP train
+    [Parameter("Use this SDK version instead of the one in Directory.Build.props")] readonly string SdkVersionOverride;
 
     [LocalPath("./gradlew.bat")] readonly Tool Gradle;
 
@@ -113,7 +127,8 @@ class Build : NukeBuild
                 var suffix = Regex.Replace(
                     SdkVersionSuffix,
                     @"\d+",
-                    x => int.Parse(x.Value).ToString(),
+                    x => int.Parse(x.Value)
+                        .ToString(),
                     RegexOptions.None,
                     RegexTimeout);
                 productVersion += $"{suffix.ToUpperInvariant()}-SNAPSHOT";
@@ -145,6 +160,10 @@ class Build : NukeBuild
 
     string SdkVersion { get; set; }
 
+    // What the file literally declares, which is what UpdateSdkVersion compares against and reports;
+    // SdkVersion above is the one the build actually uses
+    string SdkVersionFromProps { get; set; }
+
     string SdkVersionSuffix { get; set; }
 
     string SdkVersionWithoutSuffix { get; set; }
@@ -167,6 +186,9 @@ class Build : NukeBuild
                 .SetProjectFile(Project)
                 .SetConfiguration(Configuration)
                 .SetVersionPrefix(ExtensionVersion)
+                // The projects pin their SDK packages to $(SdkVersion), and an override does not rewrite
+                // the file, so a global property is what carries it into the restore
+                .SetProperty("SdkVersion", SdkVersion)
                 .SetOutputDirectory(OutputDirectory));
         });
 
@@ -176,6 +198,9 @@ class Build : NukeBuild
             DotNetBuild(s => s
                 .SetProjectFile(TestProject)
                 .SetConfiguration(Configuration)
+                // The test projects pin the SDK test packages the same way, so without this the plugin
+                // would be tested against one wave and shipped for another
+                .SetProperty("SdkVersion", SdkVersion)
                 .SetOutputDirectory(TestProjectOutputDirectory));
 
             NUnit3(s => s.SetInputFiles(TestProjectOutputDirectory / $"{TestProjectName}.dll"));
@@ -315,10 +340,12 @@ class Build : NukeBuild
         .Executes(async () =>
         {
             var availableVersions = await GetPublishedSdkVersions();
-            var currentVersion = NuGetVersion.Parse(SdkVersion);
+            // This target is the one that changes the file, so it compares against what the file says
+            // rather than against the version an override would have the rest of the build use
+            var currentVersion = NuGetVersion.Parse(SdkVersionFromProps);
 
             NuGetVersion targetVersion;
-            if (SdkVersionOverride != null)
+            if (!string.IsNullOrEmpty(SdkVersionOverride))
             {
                 var requestedVersion = NuGetVersion.Parse(SdkVersionOverride);
                 targetVersion = availableVersions
@@ -332,7 +359,7 @@ class Build : NukeBuild
 
             if (targetVersion == null || targetVersion.Equals(currentVersion))
             {
-                Serilog.Log.Information("The JetBrains SDK {Version} is up to date", SdkVersion);
+                Serilog.Log.Information("The JetBrains SDK {Version} is up to date", SdkVersionFromProps);
                 PublishGitHubOutput("sdk-update-available", "false");
 
                 return;
@@ -348,12 +375,12 @@ class Build : NukeBuild
                 RegexOptions.None,
                 RegexTimeout));
 
-            Serilog.Log.Information("Updated the JetBrains SDK from {Current} to {Target}", SdkVersion, targetVersion);
-            ReportSummary(_ => _.AddPair("SDK", $"{SdkVersion} -> {targetVersion}"));
+            Serilog.Log.Information("Updated the JetBrains SDK from {Current} to {Target}", SdkVersionFromProps, targetVersion);
+            ReportSummary(_ => _.AddPair("SDK", $"{SdkVersionFromProps} -> {targetVersion}"));
 
             PublishGitHubOutput("sdk-update-available", "true");
             PublishGitHubOutput("sdk-version", targetVersion.ToString());
-            PublishGitHubOutput("previous-sdk-version", SdkVersion);
+            PublishGitHubOutput("previous-sdk-version", SdkVersionFromProps);
         });
 
     static async Task<IReadOnlyCollection<NuGetVersion>> GetPublishedSdkVersions()
