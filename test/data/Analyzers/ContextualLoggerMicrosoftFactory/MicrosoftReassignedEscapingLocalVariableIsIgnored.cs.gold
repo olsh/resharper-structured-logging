@@ -1,0 +1,23 @@
+﻿using Microsoft.Extensions.Logging;
+
+class A
+{
+    public void Configure(ILoggerFactory loggerFactory, Worker worker)
+    {
+        ILogger log = loggerFactory.CreateLogger<Worker>();
+        log = loggerFactory.CreateLogger<B>();
+
+        worker.Attach(log);
+    }
+}
+
+class Worker
+{
+    public void Attach(ILogger logger)
+    {
+    }
+}
+
+class B { }
+
+---------------------------------------------------------

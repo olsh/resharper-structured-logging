@@ -1,0 +1,16 @@
+﻿using Microsoft.Extensions.Logging;
+
+class Worker
+{
+    public ILogger Logger { get; set; }
+}
+
+class A
+{
+    public Worker Create(ILoggerFactory loggerFactory)
+    {
+        return new Worker { Logger = loggerFactory.CreateLogger<Worker>() };
+    }
+}
+
+---------------------------------------------------------

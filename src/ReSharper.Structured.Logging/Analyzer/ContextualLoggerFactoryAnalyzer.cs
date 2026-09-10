@@ -8,10 +8,15 @@ using ReSharper.Structured.Logging.Highlighting;
 
 namespace ReSharper.Structured.Logging.Analyzer
 {
-    [ElementProblemAnalyzer(typeof(IInvocationExpression))]
+    [ElementProblemAnalyzer(
+        typeof(IInvocationExpression),
+        HighlightingTypes = new[] { typeof(ContextualLoggerWarning) })]
     public class ContextualLoggerFactoryAnalyzer : ElementProblemAnalyzer<IInvocationExpression>
     {
-        protected override void Run(IInvocationExpression element, ElementProblemAnalyzerData data, IHighlightingConsumer consumer)
+        protected override void Run(
+            IInvocationExpression element,
+            ElementProblemAnalyzerData data,
+            IHighlightingConsumer consumer)
         {
             if (!element.IsContextualLoggerFactoryMethod())
             {
@@ -36,6 +41,13 @@ namespace ReSharper.Structured.Logging.Analyzer
             if (contextType.GetScalarType()
                     ?.GetClrName()
                     .FullName == containingNode.CLRName)
+            {
+                return;
+            }
+
+            // A composition root builds loggers for the types it wires up, so its own type would be
+            // the wrong context there. Only a logger that stays behind is this type's logger.
+            if (!element.IsOwnLoggerOfContainingType(containingNode))
             {
                 return;
             }

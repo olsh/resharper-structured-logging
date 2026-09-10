@@ -1,0 +1,16 @@
+﻿using Microsoft.Extensions.Logging;
+
+class A
+{
+    public void Configure(ILoggerFactory loggerFactory)
+    {
+        var log = |loggerFactory.CreateLogger<B>()|(0);
+
+        log.LogInformation("Configured");
+    }
+}
+
+class B { }
+
+---------------------------------------------------------
+(0): ReSharper Warning: Incorrect type is used for contextual logger

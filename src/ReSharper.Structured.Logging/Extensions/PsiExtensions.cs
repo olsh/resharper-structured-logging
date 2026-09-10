@@ -404,6 +404,236 @@ namespace ReSharper.Structured.Logging.Extensions
         }
 
         /// <summary>
+        /// Reports whether the logger the call produces ends up being the containing type's own logger.
+        /// A logger that leaves the type - returned, handed to a constructor or a method, stored on some
+        /// other object - was built on behalf of somebody else, which is what a factory method or a
+        /// composition root does, and there the context type is meant to name that somebody.
+        /// </summary>
+        public static bool IsOwnLoggerOfContainingType(
+            [NotNull] this IInvocationExpression invocationExpression,
+            [NotNull] ITypeDeclaration typeDeclaration)
+        {
+            return StaysInContainingType(invocationExpression, typeDeclaration, null);
+        }
+
+        /// <summary>
+        /// The three shapes that keep a logger where it was built: it initializes a member or a local, it
+        /// is assigned to one, or it is spent on the spot as the qualifier of a further call. Anything
+        /// else - an argument, a return, an object initializer, a lambda body - hands it to somebody
+        /// else, so an unrecognized shape deliberately answers no: a missed warning beats a false one.
+        /// </summary>
+        private static bool StaysInContainingType(
+            [NotNull] ICSharpExpression expression,
+            [NotNull] ITypeDeclaration typeDeclaration,
+            [CanBeNull] HashSet<IDeclaredElement> visitedVariables)
+        {
+            var value = GetConsumedExpression(expression);
+
+            var initializer = ExpressionInitializerNavigator.GetByValue(value);
+            if (initializer != null)
+            {
+                if (FieldDeclarationNavigator.GetByInitial(initializer) != null
+                    || PropertyDeclarationNavigator.GetByInitial(initializer) != null)
+                {
+                    return true;
+                }
+
+                var variableDeclaration = LocalVariableDeclarationNavigator.GetByInitial(initializer);
+
+                return variableDeclaration != null
+                       && EveryReadStaysInContainingType(
+                           variableDeclaration.DeclaredElement,
+                           typeDeclaration,
+                           visitedVariables);
+            }
+
+            var assignment = AssignmentExpressionNavigator.GetBySource(value);
+            if (assignment != null)
+            {
+                return IsStoredInContainingType(assignment, typeDeclaration, visitedVariables);
+            }
+
+            return ReferenceExpressionNavigator.GetByQualifierExpression(value) != null;
+        }
+
+        /// <summary>
+        /// Climbs to the expression that is actually consumed. Parentheses, a cast, the null forgiving
+        /// operator, the branches of a conditional and the operands of ?? all pass the very same logger
+        /// on, and so does a chained call handing back a logger of the same type: in a chain it is the
+        /// last call that decides where the logger goes.
+        /// </summary>
+        [NotNull]
+        private static ICSharpExpression GetConsumedExpression([NotNull] ICSharpExpression expression)
+        {
+            while (true)
+            {
+                var parent = GetValuePreservingParent(expression);
+                if (parent == null)
+                {
+                    return expression;
+                }
+
+                expression = parent;
+            }
+        }
+
+        [CanBeNull]
+        private static ICSharpExpression GetValuePreservingParent([NotNull] ICSharpExpression expression)
+        {
+            var parenthesized = ParenthesizedExpressionNavigator.GetByExpression(expression);
+            if (parenthesized != null)
+            {
+                return parenthesized;
+            }
+
+            var cast = CastExpressionNavigator.GetByOp(expression);
+            if (cast != null)
+            {
+                return cast;
+            }
+
+            var suppressed = SuppressNullableWarningExpressionNavigator.GetByOperand(expression);
+            if (suppressed != null)
+            {
+                return suppressed;
+            }
+
+            var conditional = ConditionalTernaryExpressionNavigator.GetByAnyBranch(expression);
+            if (conditional != null)
+            {
+                return conditional;
+            }
+
+            var nullCoalescing = NullCoalescingExpressionNavigator.GetByAnyOperand(expression);
+            if (nullCoalescing != null)
+            {
+                return nullCoalescing;
+            }
+
+            return GetChainedLoggerCall(expression);
+        }
+
+        /// <summary>
+        /// The call written on top of this one when it hands back a logger of the same type. Comparing
+        /// the types is what tells the Serilog ForContext("Job", id) that continues the chain from the
+        /// Information(...) that spends it.
+        /// </summary>
+        [CanBeNull]
+        private static IInvocationExpression GetChainedLoggerCall([NotNull] ICSharpExpression expression)
+        {
+            var qualifiedReference = ReferenceExpressionNavigator.GetByQualifierExpression(expression);
+            if (qualifiedReference == null)
+            {
+                return null;
+            }
+
+            var chainedCall = InvocationExpressionNavigator.GetByInvokedExpression(qualifiedReference);
+
+            return chainedCall != null && Equals(chainedCall.Type(), expression.Type()) ? chainedCall : null;
+        }
+
+        /// <summary>
+        /// Whether an assignment parks the logger inside the containing type. A member of another type
+        /// takes the logger away exactly like a constructor argument does; a local keeps it here only
+        /// for as long as nothing reading it back carries it out.
+        /// </summary>
+        private static bool IsStoredInContainingType(
+            [NotNull] IAssignmentExpression assignment,
+            [NotNull] ITypeDeclaration typeDeclaration,
+            [CanBeNull] HashSet<IDeclaredElement> visitedVariables)
+        {
+            // ??= fills a member the way = does, the arithmetic compound ones cannot apply to a logger
+            if (assignment.AssignmentType != AssignmentType.EQ
+                && assignment.AssignmentType != AssignmentType.DOUBLE_QUEST_EQ)
+            {
+                return false;
+            }
+
+            var target = (assignment.Dest as IReferenceExpression)?.Reference.Resolve()
+                .DeclaredElement;
+            if (target is ITypeMember member)
+            {
+                return Equals(member.GetContainingType(), typeDeclaration.DeclaredElement);
+            }
+
+            return target is ILocalVariable localVariable
+                   && EveryReadStaysInContainingType(localVariable, typeDeclaration, visitedVariables);
+        }
+
+        /// <summary>
+        /// Whether every read of the variable keeps the logger inside the containing type. The reads are
+        /// found by walking the function the variable lives in, because an element problem analyzer has
+        /// no search engine at hand; the writes are left out, otherwise the very assignment that led
+        /// here would count as a read carrying the logger away.
+        /// </summary>
+        private static bool EveryReadStaysInContainingType(
+            [CanBeNull] IDeclaredElement variable,
+            [NotNull] ITypeDeclaration typeDeclaration,
+            [CanBeNull] HashSet<IDeclaredElement> visitedVariables)
+        {
+            if (variable == null)
+            {
+                return false;
+            }
+
+            // A pair such as first = second; second = first; would otherwise never settle
+            var visited = visitedVariables ?? new HashSet<IDeclaredElement>();
+            if (!visited.Add(variable))
+            {
+                return true;
+            }
+
+            var declaration = variable.GetDeclarations()
+                .FirstOrDefault();
+            if (declaration == null)
+            {
+                return false;
+            }
+
+            // A local cannot be read outside the function it is declared in; one declared in a lambda
+            // sitting in a member initializer has no function declaration to narrow the walk down to.
+            var scope = (ITreeNode)declaration.GetContainingNode<ICSharpFunctionDeclaration>()
+                        ?? typeDeclaration;
+            foreach (var referenceExpression in scope.Descendants<IReferenceExpression>())
+            {
+                if (IsReadOf(referenceExpression, variable)
+                    && !StaysInContainingType(referenceExpression, typeDeclaration, visited))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Whether the reference reads the variable rather than merely naming it as the target of a
+        /// plain assignment. Leaving the stores out is what keeps the very assignment that led here
+        /// from counting as a read that carries the logger away.
+        /// </summary>
+        private static bool IsReadOf(
+            [NotNull] IReferenceExpression referenceExpression,
+            [NotNull] IDeclaredElement variable)
+        {
+            // The cheap name check first, so that only the candidates are actually resolved
+            if (referenceExpression.NameIdentifier?.Name != variable.ShortName)
+            {
+                return false;
+            }
+
+            if (!variable.Equals(
+                    referenceExpression.Reference.Resolve()
+                        .DeclaredElement))
+            {
+                return false;
+            }
+
+            var write = AssignmentExpressionNavigator.GetByDest(referenceExpression);
+
+            return write == null || write.AssignmentType != AssignmentType.EQ;
+        }
+
+        /// <summary>
         /// LoggerMessage.Define and DefineScope bind template holes to generic type parameters,
         /// so the arguments that follow the template are not the values of those holes.
         /// </summary>
