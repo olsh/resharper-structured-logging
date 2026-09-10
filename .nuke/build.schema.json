@@ -122,7 +122,7 @@
         },
         "SdkVersionOverride": {
           "type": "string",
-          "description": "Adopt this SDK version instead of the one the wave policy picks"
+          "description": "Use this SDK version instead of the one in Directory.Build.props"
         }
       }
     },
