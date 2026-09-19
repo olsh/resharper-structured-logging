@@ -46,12 +46,12 @@ namespace ReSharper.Structured.Logging.Analyzer
 
         private void CheckComplexObjectInContext(IInvocationExpression element, IHighlightingConsumer consumer)
         {
-            if (!element.IsSerilogContextPushPropertyMethod())
+            if (!element.IsSerilogContextPropertyMethod())
             {
                 return;
             }
 
-            // Skip the analysis if explicit destructuring specified > 2 parameters
+            // A third argument states the destructuring explicitly, so there is nothing to report
             if (element.ArgumentList.Arguments.Count != 2)
             {
                 return;

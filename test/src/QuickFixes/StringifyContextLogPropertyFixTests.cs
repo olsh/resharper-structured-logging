@@ -12,5 +12,9 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
 
         // The flag is appended after the last argument rather than spliced into the list
         [Test] public void TestSerilogContextNamedArguments() => DoNamedTest();
+
+        [Test] public void TestSerilogForContextComplexObject() => DoNamedTest();
+
+        [Test] public void TestSerilogEnrichWithPropertyComplexObject() => DoNamedTest();
     }
 }

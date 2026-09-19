@@ -10,6 +10,8 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
 
         [Test] public void TestSerilogContextProperty() => DoNamedTest();
 
+        [Test] public void TestSerilogForContextProperty() => DoNamedTest();
+
         [Test] public void TestNlogScopeContextProperty() => DoNamedTest();
 
         [Test] public void TestNlogLoggerScopeProperty() => DoNamedTest();
