@@ -1,0 +1,21 @@
+﻿using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(ILogger logger, int quota, string user)
+        {
+            {caret}Log.{spotstart#1}DiskQuotaExceeded{spotend#1}(logger, quota, user);
+        }
+    }
+
+    internal static partial class Log
+    {
+      [LoggerMessage(Level = LogLevel.Error, Message = "Disk quota {arg0} exceeded by {arg1}")]
+      public static partial void DiskQuotaExceeded(ILogger logger, int arg0, string arg1);
+    }
+}
+
+LOOKUP ITEMS IN HOTSPOTS:
+  spot#1 [Count: 1, Focus: HardAtStart] DiskQuotaExceeded
