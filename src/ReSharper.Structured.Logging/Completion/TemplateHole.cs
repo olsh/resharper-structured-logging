@@ -129,7 +129,8 @@ internal sealed class TemplateHole
         }
 
         var nameEndIndex = FindNameEndIndex(templateText, caretIndex);
-        var suffixEndIndex = FindSuffixEndIndex(templateText, nameEndIndex);
+
+        var holeEnd = FindHoleEnd(templateText, nameEndIndex);
         var holes = CountHoles(messageTemplateParser, templateText, holeStartIndex);
 
         return new TemplateHole(
@@ -139,8 +140,8 @@ internal sealed class TemplateHole
                 new DocumentRange(
                     contentRange.Value.StartOffset.Shift(nameStartIndex),
                     contentRange.Value.StartOffset.Shift(nameEndIndex)),
-                IsClosingBraceAhead(templateText, suffixEndIndex),
-                suffixEndIndex - nameEndIndex),
+                holeEnd.HasClosingBrace,
+                holeEnd.SuffixEndIndex - nameEndIndex),
             holes.HolesBefore,
             holes.HolesAfter,
             holes.UsedPropertyNames);
@@ -293,28 +294,92 @@ internal sealed class TemplateHole
     }
 
     /// <summary>
-    /// Where the alignment and format that follow the name end. They run to the end of the hole, which
-    /// an unterminated hole does not have, so the run is cut at the first space: a format can hold one,
-    /// but so can the words of the message, and swallowing those would be the worse mistake.
+    /// Where the hole ends: how far past the name its alignment and format run, and whether a brace
+    /// closes it there. A brace only closes the hole when everything between it and the name is a
+    /// well formed alignment and format, so a brace further off in the message closes nothing, and
+    /// neither does the first half of an escaped <c>}}</c> that some text away happens to reach.
+    /// Message punctuation is left outside: a comma that begins no alignment and a colon that begins
+    /// no format are text the hole has to be closed in front of.
     /// </summary>
-    private static int FindSuffixEndIndex([NotNull] string templateText, int nameEndIndex)
+    private static (int SuffixEndIndex, bool HasClosingBrace) FindHoleEnd(
+        [NotNull] string templateText,
+        int nameEndIndex)
     {
-        if (nameEndIndex >= templateText.Length ||
-            (templateText[nameEndIndex] != ',' && templateText[nameEndIndex] != ':'))
+        if (nameEndIndex >= templateText.Length)
         {
-            return nameEndIndex;
+            return (nameEndIndex, false);
         }
 
-        var suffixEndIndex = nameEndIndex;
-        while (suffixEndIndex < templateText.Length &&
-               !char.IsWhiteSpace(templateText[suffixEndIndex]) &&
-               templateText[suffixEndIndex] != '{' &&
-               templateText[suffixEndIndex] != '}')
+        if (templateText[nameEndIndex] == '}')
         {
-            suffixEndIndex++;
+            return (nameEndIndex, true);
         }
 
-        return suffixEndIndex;
+        var alignmentEndIndex = nameEndIndex;
+        if (templateText[nameEndIndex] == ',')
+        {
+            alignmentEndIndex = FindAlignmentEndIndex(templateText, nameEndIndex);
+            if (alignmentEndIndex == nameEndIndex)
+            {
+                return (nameEndIndex, false);
+            }
+
+            if (alignmentEndIndex < templateText.Length && templateText[alignmentEndIndex] == '}')
+            {
+                return (alignmentEndIndex, true);
+            }
+        }
+
+        if (alignmentEndIndex >= templateText.Length || templateText[alignmentEndIndex] != ':')
+        {
+            return (alignmentEndIndex, false);
+        }
+
+        // A format runs to the brace and may hold a space on the way
+        var formatEndIndex = alignmentEndIndex + 1;
+        while (formatEndIndex < templateText.Length && IsValidInsideHole(templateText[formatEndIndex]))
+        {
+            formatEndIndex++;
+        }
+
+        if (formatEndIndex < templateText.Length && templateText[formatEndIndex] == '}')
+        {
+            return (formatEndIndex, true);
+        }
+
+        // With no brace to run to there is nothing to tell the format from the words after it, so it
+        // ends at the first space: a format may hold one, but so may the message
+        var unterminatedEndIndex = alignmentEndIndex + 1;
+        while (unterminatedEndIndex < templateText.Length &&
+               templateText[unterminatedEndIndex] != ' ' &&
+               IsValidInsideHole(templateText[unterminatedEndIndex]))
+        {
+            unterminatedEndIndex++;
+        }
+
+        return (unterminatedEndIndex == alignmentEndIndex + 1 ? alignmentEndIndex : unterminatedEndIndex,
+            false);
+    }
+
+    /// <summary>
+    /// Where the alignment after the comma ends, or the index of the comma itself when what follows it
+    /// is not one. An alignment is an optional minus and a run of digits.
+    /// </summary>
+    private static int FindAlignmentEndIndex([NotNull] string templateText, int commaIndex)
+    {
+        var alignmentEndIndex = commaIndex + 1;
+        if (alignmentEndIndex < templateText.Length && templateText[alignmentEndIndex] == '-')
+        {
+            alignmentEndIndex++;
+        }
+
+        var digitsStartIndex = alignmentEndIndex;
+        while (alignmentEndIndex < templateText.Length && char.IsDigit(templateText[alignmentEndIndex]))
+        {
+            alignmentEndIndex++;
+        }
+
+        return alignmentEndIndex == digitsStartIndex ? commaIndex : alignmentEndIndex;
     }
 
     /// <summary>
@@ -360,22 +425,15 @@ internal sealed class TemplateHole
         return (holesBefore, holesAfter, usedPropertyNames);
     }
 
-    private static bool IsClosingBraceAhead([NotNull] string templateText, int nameEndIndex)
+    /// <summary>
+    /// The characters the template parser reads as part of a hole, minus the braces that open and close
+    /// one. It is a wide set: the alignment and the format between them take nearly anything.
+    /// </summary>
+    private static bool IsValidInsideHole(char c)
     {
-        for (var index = nameEndIndex; index < templateText.Length; index++)
-        {
-            if (templateText[index] == '}')
-            {
-                return true;
-            }
-
-            if (templateText[index] == '{')
-            {
-                return false;
-            }
-        }
-
-        return false;
+        return c != '{' &&
+               c != '}' &&
+               (char.IsLetterOrDigit(c) || char.IsPunctuation(c) || c == ' ' || c == '+');
     }
 
     private static bool IsDestructuringOperator(char c)
