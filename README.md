@@ -1,4 +1,4 @@
-<img src="https://github.com/olsh/resharper-structured-logging/raw/master/images/logo.png" width="64" height="64" alt="Structured Logging logo">
+﻿<img src="https://github.com/olsh/resharper-structured-logging/raw/master/images/logo.png" width="64" height="64" alt="Structured Logging logo">
 
 # ReSharper Structured Logging
 
@@ -78,7 +78,13 @@ and only when there is none is `Log` created next to the type doing the logging.
 The action is not offered when the template is not a compile-time constant, which
 [the analyzer above](rules/TemplateIsNotCompileTimeConstantProblem.md) asks to be fixed first, when the hole
 values are passed as one array instead of being expanded, when a hole has no type to name in a signature,
-or on `BeginScope`. Serilog, NLog and ZLogger have no source generator to convert to.
+or on `BeginScope`. Nor on a positional template such as `"{0} {1}"`: the generator matches holes to
+parameters by name, so converting would have to rename the structured properties, and
+[renaming them](rules/PositionalPropertyUsedProblem.md) is a separate decision to take first.
+
+The action only converts `Microsoft.Extensions.Logging` calls: Serilog and NLog have no
+source generator to convert to, and ZLogger has one of its own in `[ZLoggerMessage]`, which this action does
+not generate.
 
 ## Custom Logging Wrappers
 

@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 using ReSharper.Structured.Logging.ContextActions;
 
@@ -40,9 +40,10 @@ namespace ReSharper.Structured.Logging.Tests.ContextActions
         [Test]
         public void TestMicrosoftUnrelatedLogClass() => DoNamedTest();
 
-        // {0} cannot name a parameter, so the holes are renamed along with the message
+        // A suitable class in another namespace cannot be reached by an unqualified name, so a new one is
+        // created in the namespace of the call
         [Test]
-        public void TestMicrosoftPositionalTemplate() => DoNamedTest();
+        public void TestMicrosoftOtherNamespaceLogClass() => DoNamedTest();
 
         // The destructuring operator, the alignment and the format stay in the message untouched
         [Test]

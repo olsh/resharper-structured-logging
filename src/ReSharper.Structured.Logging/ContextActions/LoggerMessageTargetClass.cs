@@ -6,7 +6,6 @@ using JetBrains.Metadata.Reader.Impl;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Util;
 
@@ -97,7 +96,36 @@ namespace ReSharper.Structured.Logging.ContextActions
         [CanBeNull]
         public static IClassLikeDeclaration TryFind([NotNull] IInvocationExpression invocationExpression)
         {
-            return TryFindInFile(invocationExpression) ?? TryFindInNamespace(invocationExpression);
+            var psiModule = invocationExpression.GetPsiModule();
+            var sourceFile = invocationExpression.GetSourceFile();
+            IClassLikeDeclaration candidate = null;
+
+            // Only the types of the namespace around the call are considered, and a namespace holds no nested
+            // types, so the unqualified name the action writes at the call site always resolves. A class in
+            // another namespace, or one nested in some other type, would need qualifying or would not resolve.
+            foreach (var typeElement in GetNamespaceTypeElements(invocationExpression))
+            {
+                foreach (var declaration in typeElement.GetDeclarations())
+                {
+                    // Only a file of this project, so the action never reaches into a dependency
+                    if (!(declaration is IClassDeclaration classDeclaration)
+                        || !Equals(declaration.GetPsiModule(), psiModule)
+                        || !IsSuitable(classDeclaration))
+                    {
+                        continue;
+                    }
+
+                    // A class declared in the file being edited keeps the generated method next to the call
+                    if (Equals(declaration.GetSourceFile(), sourceFile))
+                    {
+                        return classDeclaration;
+                    }
+
+                    candidate = candidate ?? classDeclaration;
+                }
+            }
+
+            return candidate;
         }
 
         /// <summary>
@@ -171,50 +199,6 @@ namespace ReSharper.Structured.Logging.ContextActions
             // this project has settled on
             return classDeclaration.IsStatic && classDeclaration.IsPartial
                                              && HasLoggerMessageMember(classDeclaration);
-        }
-
-        [CanBeNull]
-        private static IClassLikeDeclaration TryFindInFile([NotNull] IInvocationExpression invocationExpression)
-        {
-            if (!(invocationExpression.GetContainingFile() is ICSharpFile file))
-            {
-                return null;
-            }
-
-            foreach (var classDeclaration in file.Descendants<IClassDeclaration>())
-            {
-                if (IsSuitable(classDeclaration))
-                {
-                    return classDeclaration;
-                }
-            }
-
-            return null;
-        }
-
-        [CanBeNull]
-        private static IClassLikeDeclaration TryFindInNamespace([NotNull] IInvocationExpression invocationExpression)
-        {
-            var psiModule = invocationExpression.GetPsiModule();
-            foreach (var typeElement in GetNamespaceTypeElements(invocationExpression))
-            {
-                foreach (var declaration in typeElement.GetDeclarations())
-                {
-                    // Only a file of this project, so the action never reaches into a dependency
-                    if (!(declaration is IClassDeclaration classDeclaration)
-                        || !Equals(declaration.GetPsiModule(), psiModule))
-                    {
-                        continue;
-                    }
-
-                    if (IsSuitable(classDeclaration))
-                    {
-                        return classDeclaration;
-                    }
-                }
-            }
-
-            return null;
         }
     }
 }

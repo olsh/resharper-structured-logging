@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -82,9 +82,9 @@ namespace ReSharper.Structured.Logging.ContextActions
         public ICSharpExpression LoggerExpression { get; }
 
         /// <summary>
-        /// The C# expression to write after <c>Message =</c>, quotes and all. It is the original template,
-        /// except that positional holes have been renamed, because the generator binds holes to parameters by
-        /// name and no parameter can be called <c>0</c>.
+        /// The C# expression to write after <c>Message =</c>, quotes and all. It is the text of the original
+        /// template expression, carried over untouched so that its escapes, its verbatim prefix and any
+        /// concatenation of literals still mean exactly what they meant at the call site.
         /// </summary>
         [NotNull]
         public string MessageLiteralText { get; }
@@ -137,7 +137,8 @@ namespace ReSharper.Structured.Logging.ContextActions
             }
 
             // Microsoft.Extensions.Logging only. The plugin-wide "this is a logging call" signal would also
-            // answer for Serilog, NLog and ZLogger, none of which has a source generator to convert to.
+            // answer for Serilog and NLog, which have no source generator, and for ZLogger, whose generator is
+            // its own [ZLoggerMessage] rather than the one this action writes for.
             var method = invocationExpression.Reference?.Resolve()
                 .DeclaredElement as IMethod;
             var containingType = method?.GetContainingType();
@@ -187,7 +188,7 @@ namespace ReSharper.Structured.Logging.ContextActions
             }
 
             var template = messageTemplateParser.Parse(templateText);
-            var parameters = TryBuildParameters(template, holeArguments, templateText, out var messageText);
+            var parameters = TryBuildParameters(template, holeArguments);
             if (parameters == null)
             {
                 return null;
@@ -196,7 +197,10 @@ namespace ReSharper.Structured.Logging.ContextActions
             return new LoggerMessageCallModel(
                 invocationExpression,
                 loggerExpression,
-                BuildMessageLiteralText(templateArgument.Value, templateText, messageText),
+
+                // The template is carried over exactly as it was written, which is the only way to be sure
+                // that its escapes, its verbatim prefix and any concatenation still mean what they meant
+                templateArgument.Value.GetText(),
                 LoggerMessageMethodNameSuggestion.Suggest(template, "Log" + (level.Value.LevelName ?? "Message")),
                 level.Value.LevelName,
                 level.Value.LevelExpression,
@@ -216,38 +220,13 @@ namespace ReSharper.Structured.Logging.ContextActions
         }
 
         /// <summary>
-        /// The expression to write after <c>Message =</c>. A template that came through unchanged as a single
-        /// literal keeps its own text, so a verbatim string and every escape stay exactly as they were
-        /// written; only a rewritten one is quoted afresh, keeping whichever kind of literal it started as.
-        /// </summary>
-        [NotNull]
-        private static string BuildMessageLiteralText(
-            [NotNull] ICSharpExpression templateExpression,
-            [NotNull] string templateText,
-            [NotNull] string messageText)
-        {
-            var templateExpressionText = templateExpression.GetText();
-            if (string.Equals(templateText, messageText, StringComparison.Ordinal)
-                && templateExpression is ICSharpLiteralExpression)
-            {
-                return templateExpressionText;
-            }
-
-            var quote = templateExpressionText.StartsWith("@", StringComparison.Ordinal) ? "@\"" : "\"";
-
-            return quote + messageText + "\"";
-        }
-
-        [NotNull]
-        private static string BuildPositionalName(int position)
-        {
-            return "arg" + position;
-        }
-
-        /// <summary>
         /// The parameter name of every hole of a named template, or <c>null</c> when two holes would end up
         /// sharing one, which is what DuplicateTemplatePropertyProblem asks to be fixed first.
         /// </summary>
+        /// <remarks>
+        /// Names are compared ignoring case, because that is how the generator matches a hole to a parameter:
+        /// <c>{URL}</c> and <c>{Url}</c> would both bind to whichever parameter came first.
+        /// </remarks>
         [CanBeNull]
         private static IReadOnlyList<string> BuildNamedHoleNames([CanBeNull] PropertyToken[] namedProperties)
         {
@@ -260,51 +239,12 @@ namespace ReSharper.Structured.Logging.ContextActions
             foreach (var namedProperty in namedProperties)
             {
                 var name = ToParameterName(namedProperty.PropertyName);
-                if (name == null || names.Contains(name, StringComparer.Ordinal))
+                if (name == null || names.Contains(name, StringComparer.OrdinalIgnoreCase))
                 {
                     return null;
                 }
 
                 names.Add(name);
-            }
-
-            return names;
-        }
-
-        /// <summary>
-        /// Names the holes of a positional template <c>arg0</c>, <c>arg1</c> and so on, and rewrites the
-        /// message so that every hole names the parameter filling it, since the generator matches the two by
-        /// name and <c>{0}</c> would bind to nothing.
-        /// </summary>
-        [CanBeNull]
-        private static IReadOnlyList<string> BuildPositionalHoleNames(
-            [NotNull] PropertyToken[] positionalProperties,
-            int holeArgumentCount,
-            ref string messageText)
-        {
-            // Rewriting back to front keeps the offsets of the holes still to come correct
-            foreach (var positionalProperty in positionalProperties.OrderByDescending(p => p.StartIndex))
-            {
-                if (positionalProperty.StartIndex < 0
-                    || !positionalProperty.TryGetPositionalValue(out var position)
-                    || position >= holeArgumentCount)
-                {
-                    return null;
-                }
-
-                // A hole is a brace, an optional destructuring hint, the name, and then any alignment and
-                // format, so replacing exactly the name keeps the rest of the hole intact
-                var nameStartIndex = positionalProperty.StartIndex
-                                     + (positionalProperty.Destructuring == Destructuring.Default ? 1 : 2);
-
-                messageText = messageText.Remove(nameStartIndex, positionalProperty.PropertyName.Length)
-                    .Insert(nameStartIndex, BuildPositionalName(position));
-            }
-
-            var names = new List<string>(holeArgumentCount);
-            for (var index = 0; index < holeArgumentCount; index++)
-            {
-                names.Add(BuildPositionalName(index));
             }
 
             return names;
@@ -403,18 +343,13 @@ namespace ReSharper.Structured.Logging.ContextActions
         }
 
         /// <summary>
-        /// Builds one parameter per hole, and the message text for the attribute, or <c>null</c> when the call
-        /// cannot be converted.
+        /// Builds one parameter per hole, or <c>null</c> when the call cannot be converted.
         /// </summary>
         [CanBeNull]
         private static IReadOnlyList<LoggerMessageParameter> TryBuildParameters(
             [NotNull] MessageTemplate template,
-            [NotNull] IReadOnlyList<ICSharpArgument> holeArguments,
-            [NotNull] string templateText,
-            out string messageText)
+            [NotNull] IReadOnlyList<ICSharpArgument> holeArguments)
         {
-            messageText = templateText;
-
             // A template mixing {Named} and {0} holes is already broken, and which argument fills which hole
             // is guesswork, so it is left alone
             if (template.IsMixedTemplate)
@@ -422,10 +357,16 @@ namespace ReSharper.Structured.Logging.ContextActions
                 return null;
             }
 
-            var positionalProperties = template.PositionalProperties;
-            var holeNames = positionalProperties != null
-                ? BuildPositionalHoleNames(positionalProperties, holeArguments.Count, ref messageText)
-                : BuildNamedHoleNames(template.NamedProperties);
+            // A positional template cannot survive the move. The generator matches holes to parameters by
+            // name and nothing can be called 0, so the property keys would have to change, which quietly
+            // rewrites whatever queries and dashboards read them. Renaming the holes is what
+            // PositionalPropertyUsedProblem is for, and doing that first makes the call convertible.
+            if (template.PositionalProperties != null)
+            {
+                return null;
+            }
+
+            var holeNames = BuildNamedHoleNames(template.NamedProperties);
 
             // A call passing more or fewer values than the template has holes is a defect of its own, and the
             // generated signature would bake it in
@@ -533,11 +474,12 @@ namespace ReSharper.Structured.Logging.ContextActions
 
             if (char.IsDigit(name[0]))
             {
-                name = BuildPositionalName(0) + name;
+                name = "arg" + name;
             }
 
-            // The logger, the exception and the level are bound by type, so a hole may not take their names
-            if (ReservedParameterNames.Contains(name, StringComparer.Ordinal))
+            // The logger, the exception and the level are bound by type, so a hole may not take their names.
+            // Case is ignored, since that is how the generator matches a hole to a parameter.
+            if (ReservedParameterNames.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
                 name += "Value";
             }

@@ -1,4 +1,4 @@
-using JetBrains.ReSharper.FeaturesTestFramework.Intentions;
+﻿using JetBrains.ReSharper.FeaturesTestFramework.Intentions;
 using JetBrains.ReSharper.TestFramework;
 
 using NUnit.Framework;
@@ -45,7 +45,22 @@ namespace ReSharper.Structured.Logging.Tests.ContextActions
         [Test]
         public void TestMicrosoftDuplicatePropertiesNotAvailable() => DoNamedTest();
 
-        // Serilog has no source generator to convert to
+        // LoggerMessage matches holes to parameters by name and nothing can be called 0, so converting would
+        // have to rename the structured keys. PositionalPropertyUsedProblem is what renames them.
+        [Test]
+        public void TestMicrosoftPositionalTemplateNotAvailable() => DoNamedTest();
+
+        // Microsoft.Extensions.Logging fills positional holes in order of appearance, so {1} {0} binds the
+        // first argument to the key 1. Converting by index would have swapped the values.
+        [Test]
+        public void TestMicrosoftReorderedPositionalTemplateNotAvailable() => DoNamedTest();
+
+        // The generator matches a hole to a parameter ignoring case, so {URL} and {Url} would collide
+        [Test]
+        public void TestMicrosoftCaseInsensitiveDuplicatePropertiesNotAvailable() => DoNamedTest();
+
+        // Only Microsoft.Extensions.Logging is converted. Serilog and NLog have no source generator, and
+        // the one ZLogger has is its own [ZLoggerMessage], which this action does not generate.
         [Test]
         public void TestSerilogNotAvailable() => DoNamedTest();
     }
