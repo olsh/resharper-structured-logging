@@ -26,6 +26,10 @@ namespace ReSharper.Structured.Logging.Wiki
                 CreateSeverityUrl(ExceptionPassedAsTemplateArgumentWarning.SeverityId)
             },
             {
+                ExceptionLoggedAsTextWarning.SeverityId,
+                CreateSeverityUrl(ExceptionLoggedAsTextWarning.SeverityId)
+            },
+            {
                 TemplateIsNotCompileTimeConstantWarning.SeverityId,
                 CreateSeverityUrl(TemplateIsNotCompileTimeConstantWarning.SeverityId)
             },

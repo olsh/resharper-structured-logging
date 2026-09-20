@@ -26,6 +26,8 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         private readonly bool _exceptionArgumentOccupied;
 
+        [CanBeNull] private readonly ICSharpExpression _exceptionExpression;
+
         private readonly IInvocationExpression _invocationExpression;
 
         [CanBeNull] private readonly PropertyToken _namedProperty;
@@ -37,11 +39,27 @@ namespace ReSharper.Structured.Logging.QuickFixes
         public MoveExceptionArgumentFix([NotNull] ExceptionPassedAsTemplateArgumentWarning error)
         {
             _exceptionArgument = error.ExceptionArgument;
+            _exceptionExpression = error.ExceptionArgument.Value;
             _templateArgument = error.TemplateArgument;
             _invocationExpression = error.InvocationExpression;
             _tokenInformation = error.TokenInformation;
             _namedProperty = error.NamedProperty;
             _exceptionArgumentOccupied = error.ExceptionArgumentOccupied;
+        }
+
+        /// <summary>
+        /// The argument logs only a piece of the exception, so the exception to pass on is the receiver the
+        /// text was read from rather than the argument itself.
+        /// </summary>
+        public MoveExceptionArgumentFix([NotNull] ExceptionLoggedAsTextWarning error)
+        {
+            _exceptionArgument = error.ExceptionTextArgument;
+            _exceptionExpression = error.ExceptionExpression;
+            _templateArgument = error.TemplateArgument;
+            _invocationExpression = error.InvocationExpression;
+            _tokenInformation = error.TokenInformation;
+            _namedProperty = error.NamedProperty;
+            _exceptionArgumentOccupied = false;
         }
 
         public override string Text => "Pass exception to the exception argument";
@@ -51,9 +69,31 @@ namespace ReSharper.Structured.Logging.QuickFixes
             // Moving the exception when another one already fills the dedicated argument
             // would pass two exceptions, which does not compile
             return !_exceptionArgumentOccupied
+                   && !HasRemainingNamedArgument()
                    && _invocationExpression.IsValid()
                    && _exceptionArgument.IsValid()
                    && _templateArgument.IsValid();
+        }
+
+        /// <summary>
+        /// Reports whether an argument the call keeps is a named one. Inserting the exception shifts every
+        /// argument after it one place along, and dropping a hole value resolves the call to a different
+        /// overload, whose hole parameters carry different names: Serilog's <c>propertyValue0</c> and
+        /// <c>propertyValue1</c> become a single <c>propertyValue</c>. Either is enough to stop a name from
+        /// binding, so the fix stays away from such a call rather than rewriting it into code that does not
+        /// compile. The argument being moved does not count, as its name goes away with it.
+        /// </summary>
+        private bool HasRemainingNamedArgument()
+        {
+            foreach (var argument in _invocationExpression.ArgumentList.Arguments)
+            {
+                if (argument.NameIdentifier != null && !Equals(argument, _exceptionArgument))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
@@ -75,11 +115,10 @@ namespace ReSharper.Structured.Logging.QuickFixes
                     ModificationUtil.ReplaceChild(literalExpression, factory.CreateExpression($"\"{templateText}\""));
                 }
 
-                var exceptionExpression = _exceptionArgument.Value;
-                if (exceptionExpression != null)
+                if (_exceptionExpression != null)
                 {
                     _invocationExpression.AddArgumentBefore(
-                        factory.CreateArgument(ParameterKind.VALUE, exceptionExpression),
+                        factory.CreateArgument(ParameterKind.VALUE, _exceptionExpression),
                         _templateArgument);
                 }
 

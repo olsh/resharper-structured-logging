@@ -22,6 +22,7 @@ including templates declared with `Microsoft.Extensions.Logging.LoggerMessageAtt
 | [Destructuring or stringification operator has no effect on a scalar value](rules/RedundantDestructuringOperatorProblem.md) | ✔ | — |
 | [Contextual logger mismatch](rules/ContextualLoggerProblem.md) | ✔ | — |
 | [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) | ✔ | — |
+| [Exception logged as text](rules/ExceptionLoggedAsTextProblem.md) | ✔ | — |
 | [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md) | ✔ | [2025.2](https://www.jetbrains.com/help/resharper/DuplicateItemInLoggerTemplate.html), Serilog-style calls only |
 | [Template should be a compile-time constant](rules/TemplateIsNotCompileTimeConstantProblem.md) | ✔ | [2025.1](https://www.jetbrains.com/help/resharper/NonStaticLoggerTemplate.html), as a hint |
 | [Prefer named properties instead of positional ones](rules/PositionalPropertyUsedProblem.md) | ✔ | — |
@@ -38,6 +39,46 @@ inspection does not fully replace it:
 * A template that is not a compile-time constant is reported by the IDE as a hint tied to
   [CA2254](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2254),
   while the extension reports it as a warning. The quick fix comes from ReSharper.
+
+## Custom Logging Wrappers
+
+A project that logs through its own wrapper rather than calling the logger directly is analyzed as well, once
+the wrapper says which parameter carries the template. Annotate the method with
+`MessageTemplateFormatMethodAttribute`, naming the parameter:
+
+```csharp
+[MessageTemplateFormatMethod("messageTemplate")]
+public void LogError(Exception exception, string messageTemplate, params object[] propertyValues)
+```
+
+or annotate the parameter itself with JetBrains.Annotations' `StructuredMessageTemplateAttribute`, which the
+built-in ReSharper and Rider template highlighting understands too:
+
+```csharp
+public void LogError(Exception exception, [StructuredMessageTemplate] string messageTemplate, params object[] propertyValues)
+```
+
+Either way the arguments that follow the template parameter are taken as the hole values, so a wrapper is held
+to the same rules as a direct call. Rules that move an argument, such as
+[Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md), additionally need
+the wrapper to declare an overload that takes the exception before the template.
+
+## ZLogger
+
+ZLogger 1.x `ZLog*` calls take a plain `string format` and behave like any other template.
+
+ZLogger 2.x replaced those overloads with an interpolated string handler, so the template and its holes live
+inside the interpolated string:
+
+```csharp
+logger.ZLogError($"Could not open socket {host:@Host} on {port}");
+```
+
+The holes are the interpolations, named after `:@name` where one is given and after the source text of the
+expression otherwise, and the parameters that follow the template are ZLogger's own `context` together with the
+caller-info arguments the compiler fills in. That changes what several rules mean, and each rule documents how
+it applies. Destructuring is Serilog syntax and has no counterpart here: ZLogger serializes with the `:json`
+format instead, and the `@` of a hole introduces a name.
 
 ## Dimming Logging Statements
 

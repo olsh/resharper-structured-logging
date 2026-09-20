@@ -1,0 +1,17 @@
+﻿using System;
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(Exception exception, int quota)
+        {
+            Log.Logger.Error(propertyValue0: quota, |propertyValue1: exception.Message|(0), messageTemplate: "Disk quota {Quota} MB exceeded {Error}");
+        }
+    }
+}
+
+------------------------------------------------
+0: Exception should be passed to the exception argument instead of its text
+NO QUICKFIXES
