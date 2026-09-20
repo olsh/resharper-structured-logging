@@ -1,4 +1,4 @@
-#### Destructuring operator has no effect on a scalar value
+#### Destructuring or stringification operator has no effect on a scalar value
 
 Serilog logs a string, a primitive, an enum, a `Guid`, a `DateTime`, a `DateTimeOffset`, a `TimeSpan` and a `Uri`
 as a scalar whatever the operator says, and Microsoft.Extensions.Logging ignores the operator altogether.

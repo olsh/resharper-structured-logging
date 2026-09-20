@@ -9,6 +9,7 @@ using JetBrains.Util;
 
 using ReSharper.Structured.Logging.Highlighting;
 using ReSharper.Structured.Logging.Models;
+using ReSharper.Structured.Logging.Serilog.Parsing;
 using ReSharper.Structured.Logging.Services;
 
 namespace ReSharper.Structured.Logging.QuickFixes
@@ -16,14 +17,19 @@ namespace ReSharper.Structured.Logging.QuickFixes
     [QuickFix]
     public class RemoveDestructuringFromMessageTemplatePropertyFix : QuickFixBase
     {
+        private readonly Destructuring _destructuring;
+
         private readonly MessageTemplateTokenInformation _tokenInformation;
 
         public RemoveDestructuringFromMessageTemplatePropertyFix([NotNull] RedundantDestructuringOperatorWarning error)
         {
             _tokenInformation = error.TokenInformation;
+            _destructuring = error.NamedProperty.Destructuring;
         }
 
-        public override string Text => "Remove destructuring operator";
+        public override string Text => _destructuring == Destructuring.Stringify
+            ? "Remove stringification operator"
+            : "Remove destructuring operator";
 
         public override bool IsAvailable(IUserDataHolder cache)
         {

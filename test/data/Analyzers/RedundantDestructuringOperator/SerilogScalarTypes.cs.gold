@@ -32,14 +32,14 @@ namespace ConsoleApp
 }
 
 ---------------------------------------------------------
-(0): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(1): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(2): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(3): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(4): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(5): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(6): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(7): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(8): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(9): ReSharper Warning: Destructuring operator has no effect on a scalar value
-(10): ReSharper Warning: Destructuring operator has no effect on a scalar value
+(0): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(1): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(2): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(3): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(4): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(5): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(6): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(7): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(8): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(9): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+(10): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value

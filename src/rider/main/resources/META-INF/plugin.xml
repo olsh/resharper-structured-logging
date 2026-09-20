@@ -17,7 +17,7 @@
     <p>The plugin reports:</p>
     <ul>
       <li>Anonymous or complex objects that are not destructured, including inside a logging context</li>
-      <li>A destructuring operator that has no effect because the value is a scalar</li>
+      <li>A destructuring or stringification operator that has no effect because the value is a scalar</li>
       <li>A contextual logger that does not match the type it is used in</li>
       <li>An exception passed as a template argument instead of the exception parameter</li>
       <li>Duplicate properties in a template</li>

@@ -25,7 +25,7 @@ namespace ReSharper.Structured.Logging.Highlighting
     {
         public const string SeverityId = "RedundantDestructuringOperatorProblem";
 
-        private const string Message = "Destructuring operator has no effect on a scalar value";
+        private const string Message = "Destructuring or stringification operator has no effect on a scalar value";
 
         public RedundantDestructuringOperatorWarning(
             [NotNull] MessageTemplateTokenInformation tokenInformation,

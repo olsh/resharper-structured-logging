@@ -11,5 +11,7 @@ namespace ConsoleApp
     }
 }
 
----------------------------------------------------------
-(0): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
+------------------------------------------------
+0: Destructuring or stringification operator has no effect on a scalar value
+QUICKFIXES:
+Remove destructuring operator
