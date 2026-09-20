@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
+using System.Linq;
 
 using JetBrains.Annotations;
 using JetBrains.Application.Progress;
@@ -92,14 +92,17 @@ namespace ReSharper.Structured.Logging.ContextActions
                                 ?? LoggerMessageTargetClass.FindFreeClassName(invocationExpression);
 
                 var methodName = LoggerMessageMethodNameSuggestion.MakeUnique(model.SuggestedMethodName, existingClass);
-                var methodDeclaration = CreateMethodDeclaration(factory, psiModule, model, methodName);
+
+                // The signature and the call are rendered from the same list, so their order cannot drift
+                var parameters = CollectParameters(psiModule, model);
+                var methodDeclaration = CreateMethodDeclaration(factory, psiModule, model, parameters, methodName);
                 if (methodDeclaration == null)
                 {
                     return null;
                 }
 
                 // The call is built before the original is replaced, since its expressions come from it
-                var callExpression = CreateCallExpression(factory, model, className, methodName);
+                var callExpression = CreateCallExpression(factory, parameters, className, methodName);
 
                 // A new class reaches the file already holding the method, so that the whole declaration is laid
                 // out in one piece; an existing class simply takes the method
@@ -174,27 +177,58 @@ namespace ReSharper.Structured.Logging.ContextActions
         /// Appends one parameter to the signature under construction, as a <c>$n</c> placeholder so that the
         /// factory imports the type rather than writing its full name out.
         /// </summary>
-        private static void AppendParameter(
-            [NotNull] StringBuilder signature,
-            [NotNull] ICollection<object> arguments,
-            [CanBeNull] IType type,
-            [NotNull] string name)
+        private static string BuildPlaceholders(int count)
         {
-            if (type == null)
+            return string.Join(
+                ", ",
+                Enumerable.Range(0, count)
+                    .Select(index => "$" + index));
+        }
+
+        /// <summary>
+        /// Every parameter of the generated method, in signature order: the logger, then the level and the
+        /// exception when the call has them, then one per template hole. The logger, the level and the
+        /// exception are typed by what the generator binds by type rather than by what the call passed, so an
+        /// <c>ILogger&lt;T&gt;</c> argument still lands on an <c>ILogger</c> parameter.
+        /// </summary>
+        /// <remarks>
+        /// The signature and the call are rendered from this one list, which is what keeps the order of the
+        /// arguments and the order of the parameters from drifting apart.
+        /// </remarks>
+        [NotNull]
+        private static IReadOnlyList<LoggerMessageParameter> CollectParameters(
+            [NotNull] IPsiModule psiModule,
+            [NotNull] LoggerMessageCallModel model)
+        {
+            var parameters = new List<LoggerMessageParameter>(model.Parameters.Count + 3)
             {
-                return;
+                new LoggerMessageParameter(
+                    "logger",
+                    TypeFactory.CreateTypeByCLRName(LoggerFqn, psiModule),
+                    model.LoggerExpression)
+            };
+
+            if (model.LevelExpression != null)
+            {
+                parameters.Add(
+                    new LoggerMessageParameter(
+                        "level",
+                        TypeFactory.CreateTypeByCLRName(LogLevelFqn, psiModule),
+                        model.LevelExpression));
             }
 
-            if (arguments.Count > 0)
+            if (model.ExceptionExpression != null)
             {
-                signature.Append(", ");
+                parameters.Add(
+                    new LoggerMessageParameter(
+                        "exception",
+                        TypeFactory.CreateTypeByCLRName(ExceptionFqn, psiModule),
+                        model.ExceptionExpression));
             }
 
-            signature.Append('$')
-                .Append(arguments.Count)
-                .Append(' ')
-                .Append(name);
-            arguments.Add(type);
+            parameters.AddRange(model.Parameters);
+
+            return parameters;
         }
 
         /// <summary>
@@ -251,51 +285,16 @@ namespace ReSharper.Structured.Logging.ContextActions
         [NotNull]
         private static ICSharpExpression CreateCallExpression(
             [NotNull] CSharpElementFactory factory,
-            [NotNull] LoggerMessageCallModel model,
+            [NotNull] IReadOnlyList<LoggerMessageParameter> parameters,
             [NotNull] string className,
             [NotNull] string methodName)
         {
-            var arguments = new List<object>();
-            var call = new StringBuilder(className).Append('.')
-                .Append(methodName)
-                .Append('(');
+            var arguments = parameters.Select(parameter => (object)parameter.Value)
+                .ToArray();
 
-            foreach (var expression in CollectCallArguments(model))
-            {
-                if (arguments.Count > 0)
-                {
-                    call.Append(", ");
-                }
-
-                call.Append('$')
-                    .Append(arguments.Count);
-                arguments.Add(expression);
-            }
-
-            call.Append(')');
-
-            return factory.CreateExpression(call.ToString(), arguments.ToArray());
-        }
-
-        [NotNull]
-        private static IEnumerable<ICSharpExpression> CollectCallArguments([NotNull] LoggerMessageCallModel model)
-        {
-            yield return model.LoggerExpression;
-
-            if (model.LevelExpression != null)
-            {
-                yield return model.LevelExpression;
-            }
-
-            if (model.ExceptionExpression != null)
-            {
-                yield return model.ExceptionExpression;
-            }
-
-            foreach (var parameter in model.Parameters)
-            {
-                yield return parameter.Value;
-            }
+            return factory.CreateExpression(
+                $"{className}.{methodName}({BuildPlaceholders(arguments.Length)})",
+                arguments);
         }
 
         [CanBeNull]
@@ -303,40 +302,20 @@ namespace ReSharper.Structured.Logging.ContextActions
             [NotNull] CSharpElementFactory factory,
             [NotNull] IPsiModule psiModule,
             [NotNull] LoggerMessageCallModel model,
+            [NotNull] IReadOnlyList<LoggerMessageParameter> parameters,
             [NotNull] string methodName)
         {
-            var arguments = new List<object>();
-            var signature = new StringBuilder("public static partial void ").Append(methodName)
-                .Append('(');
+            // The types go in as $n placeholders so that the factory imports them rather than writing their
+            // full names out
+            var signature = string.Join(
+                ", ",
+                parameters.Select((parameter, index) => "$" + index + " " + parameter.Name));
+            var parameterTypes = parameters.Select(parameter => (object)parameter.Type)
+                .ToArray();
 
-            AppendParameter(signature, arguments, TypeFactory.CreateTypeByCLRName(LoggerFqn, psiModule), "logger");
-            if (model.LevelExpression != null)
-            {
-                AppendParameter(
-                    signature,
-                    arguments,
-                    TypeFactory.CreateTypeByCLRName(LogLevelFqn, psiModule),
-                    "level");
-            }
-
-            if (model.ExceptionExpression != null)
-            {
-                AppendParameter(
-                    signature,
-                    arguments,
-                    TypeFactory.CreateTypeByCLRName(ExceptionFqn, psiModule),
-                    "exception");
-            }
-
-            foreach (var parameter in model.Parameters)
-            {
-                AppendParameter(signature, arguments, parameter.Type, parameter.Name);
-            }
-
-            signature.Append(");");
-
-            if (!(factory.CreateTypeMemberDeclaration(signature.ToString(), arguments.ToArray()) is IMethodDeclaration
-                    methodDeclaration))
+            if (!(factory.CreateTypeMemberDeclaration(
+                    $"public static partial void {methodName}({signature});",
+                    parameterTypes) is IMethodDeclaration methodDeclaration))
             {
                 return null;
             }
