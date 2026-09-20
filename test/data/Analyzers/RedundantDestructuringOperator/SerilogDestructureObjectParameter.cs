@@ -1,0 +1,12 @@
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(object value)
+        {
+            Log.Logger.Information("Value {@Value}", value);
+        }
+    }
+}

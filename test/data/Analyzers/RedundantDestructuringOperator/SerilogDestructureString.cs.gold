@@ -1,14 +1,12 @@
-﻿using System;
 using Serilog;
 
 namespace ConsoleApp
 {
     public static class Program
     {
-        public static void Main()
+        public static void Main(string userName)
         {
-        	int? a = 1;
-            Log.Logger.Information("|{$MyProperty}|(0)", a);
+            Log.Logger.Information("User |{@UserName}|(0) logged in", userName);
         }
     }
 }

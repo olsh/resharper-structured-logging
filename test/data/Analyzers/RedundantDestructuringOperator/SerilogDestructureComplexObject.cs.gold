@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Serilog;
 
 namespace ConsoleApp
@@ -7,11 +7,9 @@ namespace ConsoleApp
     {
         public static void Main()
         {
-        	int? a = 1;
-            Log.Logger.Information("|{$MyProperty}|(0)", a);
+            Log.Logger.Information("Generator {@Generator}", new Random());
         }
     }
 }
 
 ---------------------------------------------------------
-(0): ReSharper Warning: Destructuring operator has no effect on a scalar value

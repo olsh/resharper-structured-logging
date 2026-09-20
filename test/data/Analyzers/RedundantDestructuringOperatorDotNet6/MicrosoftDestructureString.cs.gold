@@ -1,0 +1,15 @@
+using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    public class Program
+    {
+        public Program(ILogger<Program> logger, string userName)
+        {
+            logger.LogInformation("User |{@UserName}|(0) logged in", userName);
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Destructuring operator has no effect on a scalar value

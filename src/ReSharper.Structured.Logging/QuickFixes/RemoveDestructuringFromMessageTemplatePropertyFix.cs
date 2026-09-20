@@ -14,21 +14,16 @@ using ReSharper.Structured.Logging.Services;
 namespace ReSharper.Structured.Logging.QuickFixes
 {
     [QuickFix]
-    public class AddDestructuringToMessageTemplatePropertyFix : QuickFixBase
+    public class RemoveDestructuringFromMessageTemplatePropertyFix : QuickFixBase
     {
         private readonly MessageTemplateTokenInformation _tokenInformation;
 
-        public AddDestructuringToMessageTemplatePropertyFix([NotNull] AnonymousObjectDestructuringWarning error)
+        public RemoveDestructuringFromMessageTemplatePropertyFix([NotNull] RedundantDestructuringOperatorWarning error)
         {
             _tokenInformation = error.TokenInformation;
         }
 
-        public AddDestructuringToMessageTemplatePropertyFix([NotNull] ComplexObjectDestructuringWarning error)
-        {
-            _tokenInformation = error.TokenInformation;
-        }
-
-        public override string Text => "Add destructuring to property";
+        public override string Text => "Remove destructuring operator";
 
         public override bool IsAvailable(IUserDataHolder cache)
         {
@@ -38,9 +33,9 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
-            // The operator goes right after the opening brace of the hole
+            // The operator is the character right after the opening brace of the hole
             var operatorIndex = _tokenInformation.RelativeStartIndex + 1;
-            MessageTemplateLiteralRewriter.Rewrite(_tokenInformation, text => text.Insert(operatorIndex, "@"));
+            MessageTemplateLiteralRewriter.Rewrite(_tokenInformation, text => text.Remove(operatorIndex, 1));
 
             return null;
         }

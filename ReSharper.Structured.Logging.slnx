@@ -9,6 +9,7 @@
         <File Path="rules/InconsistentLogPropertyNaming.md"/>
         <File Path="rules/LogMessageIsSentenceProblem.md"/>
         <File Path="rules/PositionalPropertyUsedProblem.md"/>
+        <File Path="rules/RedundantDestructuringOperatorProblem.md"/>
         <File Path="rules/TemplateDuplicatePropertyProblem.md"/>
         <File Path="rules/TemplateIsNotCompileTimeConstantProblem.md"/>
     </Folder>

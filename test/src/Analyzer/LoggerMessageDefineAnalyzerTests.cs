@@ -24,5 +24,10 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestDefineWithOptions() => DoNamedTest2();
 
         [Test] public void TestDefineScopeValidProperty() => DoNamedTest2();
+
+        // The holes bind to the generic type arguments, so a scalar one makes the operator redundant
+        [Test] public void TestDefineRedundantDestructuring() => DoNamedTest2();
+
+        [Test] public void TestDefineRedundantDestructuringComplexType() => DoNamedTest2();
     }
 }

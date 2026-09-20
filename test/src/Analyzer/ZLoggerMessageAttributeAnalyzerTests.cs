@@ -27,5 +27,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestLevelOnlyConstructor() => DoNamedTest2();
 
         [Test] public void TestParameterlessConstructor() => DoNamedTest2();
+
+        [Test] public void TestRedundantDestructuring() => DoNamedTest2();
     }
 }

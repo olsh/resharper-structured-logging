@@ -59,5 +59,8 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         // Destructuring is Serilog syntax; ZLogger serializes with ':json' instead, so the destructuring
         // analyzers stay out of interpolated templates
         [Test] public void TestComplexObjectNoDestructuring() => DoNamedTest2();
+
+        // The '@' of an explicit ZLogger name is not a destructuring operator, so a scalar hole is not redundant
+        [Test] public void TestScalarExplicitNameNotRedundant() => DoNamedTest2();
     }
 }

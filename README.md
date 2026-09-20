@@ -19,6 +19,7 @@ including templates declared with `Microsoft.Extensions.Logging.LoggerMessageAtt
 | [Anonymous object is not destructured](rules/AnonymousObjectDestructuringProblem.md) | ✔ | — |
 | [Complex object is not destructured](rules/ComplexObjectDestructuringProblem.md) | ✔ | — |
 | [Complex object is not destructured in context](rules/ComplexObjectInContextDestructuringProblem.md) | ✔ | — |
+| [Destructuring operator has no effect on a scalar value](rules/RedundantDestructuringOperatorProblem.md) | ✔ | — |
 | [Contextual logger mismatch](rules/ContextualLoggerProblem.md) | ✔ | — |
 | [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) | ✔ | — |
 | [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md) | ✔ | [2025.2](https://www.jetbrains.com/help/resharper/DuplicateItemInLoggerTemplate.html), Serilog-style calls only |
