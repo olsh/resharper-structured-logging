@@ -22,6 +22,7 @@ including templates declared with `Microsoft.Extensions.Logging.LoggerMessageAtt
 | [Destructuring or stringification operator has no effect on a scalar value](rules/RedundantDestructuringOperatorProblem.md) | ✔ | — |
 | [Contextual logger mismatch](rules/ContextualLoggerProblem.md) | ✔ | — |
 | [Exception passed as a template argument](rules/ExceptionPassedAsTemplateArgumentProblem.md) | ✔ | — |
+| [Exception logged as text](rules/ExceptionLoggedAsTextProblem.md) | ✔ | — |
 | [Duplicate properties in a template](rules/TemplateDuplicatePropertyProblem.md) | ✔ | [2025.2](https://www.jetbrains.com/help/resharper/DuplicateItemInLoggerTemplate.html), Serilog-style calls only |
 | [Template should be a compile-time constant](rules/TemplateIsNotCompileTimeConstantProblem.md) | ✔ | [2025.1](https://www.jetbrains.com/help/resharper/NonStaticLoggerTemplate.html), as a hint |
 | [Prefer named properties instead of positional ones](rules/PositionalPropertyUsedProblem.md) | ✔ | — |

@@ -42,6 +42,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
                    || highlighting is AnonymousObjectDestructuringWarning
                    || highlighting is ContextualLoggerWarning
                    || highlighting is ExceptionPassedAsTemplateArgumentWarning
+                   || highlighting is ExceptionLoggedAsTextWarning
                    || highlighting is ComplexObjectDestructuringWarning
                    || highlighting is ComplexObjectDestructuringInContextWarning
                    || highlighting is RedundantDestructuringOperatorWarning

@@ -11,7 +11,8 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
     [TestFixture]
     [TestNetFramework46]
     [TestPackages(NugetPackages.SerilogNugetPackage)]
-    public class MoveExceptionArgumentFixAvailabilityTests : CSharpQuickFixAvailabilityTestBase<MoveExceptionArgumentFix>
+    public class
+        MoveExceptionArgumentFixAvailabilityTests : CSharpQuickFixAvailabilityTestBase<MoveExceptionArgumentFix>
     {
         protected override string RelativeTestDataPath => @"QuickFixes\MoveExceptionArgumentFix";
 
@@ -24,5 +25,8 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
 
         [Test]
         public void TestSerilogExceptionArgumentOccupiedByNewExceptionNotAvailable() => DoNamedTest();
+
+        [Test]
+        public void TestSerilogExceptionMessageAvailable() => DoNamedTest();
     }
 }

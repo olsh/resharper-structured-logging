@@ -4,6 +4,7 @@
         <File Path="rules/ComplexObjectDestructuringProblem.md"/>
         <File Path="rules/ComplexObjectInContextDestructuringProblem.md"/>
         <File Path="rules/ContextualLoggerProblem.md"/>
+        <File Path="rules/ExceptionLoggedAsTextProblem.md"/>
         <File Path="rules/ExceptionPassedAsTemplateArgumentProblem.md"/>
         <File Path="rules/InconsistentContextLogPropertyNaming.md"/>
         <File Path="rules/InconsistentLogPropertyNaming.md"/>

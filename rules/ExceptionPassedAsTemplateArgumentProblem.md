@@ -16,6 +16,10 @@ catch (Exception exception)
 }
 ```
 
+When a hole is filled with a piece of the exception rather than the exception itself, as in
+`Log.Error("Disk quota exceeded {Error}", exception.Message)`,
+[Exception logged as text](ExceptionLoggedAsTextProblem.md) reports it instead.
+
 Also applies to [custom logging wrappers](../README.md#custom-logging-wrappers).
 
 Does not apply to [ZLogger](../README.md#zlogger) 2.x interpolated templates. The arguments after the template

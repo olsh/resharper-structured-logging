@@ -26,6 +26,8 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         private readonly bool _exceptionArgumentOccupied;
 
+        [CanBeNull] private readonly ICSharpExpression _exceptionExpression;
+
         private readonly IInvocationExpression _invocationExpression;
 
         [CanBeNull] private readonly PropertyToken _namedProperty;
@@ -37,11 +39,27 @@ namespace ReSharper.Structured.Logging.QuickFixes
         public MoveExceptionArgumentFix([NotNull] ExceptionPassedAsTemplateArgumentWarning error)
         {
             _exceptionArgument = error.ExceptionArgument;
+            _exceptionExpression = error.ExceptionArgument.Value;
             _templateArgument = error.TemplateArgument;
             _invocationExpression = error.InvocationExpression;
             _tokenInformation = error.TokenInformation;
             _namedProperty = error.NamedProperty;
             _exceptionArgumentOccupied = error.ExceptionArgumentOccupied;
+        }
+
+        /// <summary>
+        /// The argument logs only a piece of the exception, so the exception to pass on is the receiver the
+        /// text was read from rather than the argument itself.
+        /// </summary>
+        public MoveExceptionArgumentFix([NotNull] ExceptionLoggedAsTextWarning error)
+        {
+            _exceptionArgument = error.ExceptionTextArgument;
+            _exceptionExpression = error.ExceptionExpression;
+            _templateArgument = error.TemplateArgument;
+            _invocationExpression = error.InvocationExpression;
+            _tokenInformation = error.TokenInformation;
+            _namedProperty = error.NamedProperty;
+            _exceptionArgumentOccupied = false;
         }
 
         public override string Text => "Pass exception to the exception argument";
@@ -75,11 +93,10 @@ namespace ReSharper.Structured.Logging.QuickFixes
                     ModificationUtil.ReplaceChild(literalExpression, factory.CreateExpression($"\"{templateText}\""));
                 }
 
-                var exceptionExpression = _exceptionArgument.Value;
-                if (exceptionExpression != null)
+                if (_exceptionExpression != null)
                 {
                     _invocationExpression.AddArgumentBefore(
-                        factory.CreateArgument(ParameterKind.VALUE, exceptionExpression),
+                        factory.CreateArgument(ParameterKind.VALUE, _exceptionExpression),
                         _templateArgument);
                 }
 

@@ -1,0 +1,13 @@
+﻿using System;
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(Exception exception)
+        {
+            Log.Logger.Error("Import failed {Code} {Detail}", exception.HResult, exception.Data["key"]);
+        }
+    }
+}

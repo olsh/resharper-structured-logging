@@ -20,6 +20,7 @@
       <li>A destructuring or stringification operator that has no effect because the value is a scalar</li>
       <li>A contextual logger that does not match the type it is used in</li>
       <li>An exception passed as a template argument instead of the exception parameter</li>
+      <li>An exception logged as text through <b>Message</b>, <b>StackTrace</b> or <b>ToString()</b></li>
       <li>Duplicate properties in a template</li>
       <li>Templates that are not compile-time constants</li>
       <li>Positional properties used instead of named ones</li>

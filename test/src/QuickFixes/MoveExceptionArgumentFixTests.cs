@@ -8,10 +8,19 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
     {
         protected override string SubPath => "MoveExceptionArgumentFix";
 
-        [Test] public void TestSerilogTrailingExceptionProperty() => DoNamedTest();
+        [Test]
+        public void TestSerilogTrailingExceptionProperty() => DoNamedTest();
 
-        [Test] public void TestSerilogExceptionPropertyInTheMiddle() => DoNamedTest();
+        [Test]
+        public void TestSerilogExceptionPropertyInTheMiddle() => DoNamedTest();
 
-        [Test] public void TestSerilogDynamicTemplate() => DoNamedTest();
+        [Test]
+        public void TestSerilogDynamicTemplate() => DoNamedTest();
+
+        [Test]
+        public void TestSerilogTrailingExceptionMessageProperty() => DoNamedTest();
+
+        [Test]
+        public void TestSerilogExceptionToStringPropertyInTheMiddle() => DoNamedTest();
     }
 }
