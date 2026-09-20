@@ -27,6 +27,7 @@ internal sealed class TemplateHole
         int holesAfter,
         DocumentRange nameRange,
         bool hasClosingBrace,
+        int suffixLength,
         [NotNull] ISet<string> usedPropertyNames)
     {
         Invocation = invocation;
@@ -35,6 +36,7 @@ internal sealed class TemplateHole
         HolesAfter = holesAfter;
         NameRange = nameRange;
         HasClosingBrace = hasClosingBrace;
+        SuffixLength = suffixLength;
         UsedPropertyNames = usedPropertyNames;
     }
 
@@ -64,6 +66,12 @@ internal sealed class TemplateHole
     public DocumentRange NameRange { get; }
 
     public bool HasClosingBrace { get; }
+
+    /// <summary>
+    /// How many characters of alignment and format sit between the name and the end of the hole. The
+    /// closing brace belongs after them, not after the name.
+    /// </summary>
+    public int SuffixLength { get; }
 
     /// <summary>
     /// The names the template already binds, excluding the hole being typed, so that a name is not
@@ -121,6 +129,7 @@ internal sealed class TemplateHole
         }
 
         var nameEndIndex = FindNameEndIndex(templateText, caretIndex);
+        var suffixEndIndex = FindSuffixEndIndex(templateText, nameEndIndex);
         var holes = CountHoles(messageTemplateParser, templateText, holeStartIndex);
 
         return new TemplateHole(
@@ -131,7 +140,8 @@ internal sealed class TemplateHole
             new DocumentRange(
                 contentRange.Value.StartOffset.Shift(nameStartIndex),
                 contentRange.Value.StartOffset.Shift(nameEndIndex)),
-            IsClosingBraceAhead(templateText, nameEndIndex),
+            IsClosingBraceAhead(templateText, suffixEndIndex),
+            suffixEndIndex - nameEndIndex,
             holes.UsedPropertyNames);
     }
 
@@ -282,9 +292,36 @@ internal sealed class TemplateHole
     }
 
     /// <summary>
+    /// Where the alignment and format that follow the name end. They run to the end of the hole, which
+    /// an unterminated hole does not have, so the run is cut at the first space: a format can hold one,
+    /// but so can the words of the message, and swallowing those would be the worse mistake.
+    /// </summary>
+    private static int FindSuffixEndIndex([NotNull] string templateText, int nameEndIndex)
+    {
+        if (nameEndIndex >= templateText.Length ||
+            (templateText[nameEndIndex] != ',' && templateText[nameEndIndex] != ':'))
+        {
+            return nameEndIndex;
+        }
+
+        var suffixEndIndex = nameEndIndex;
+        while (suffixEndIndex < templateText.Length &&
+               !char.IsWhiteSpace(templateText[suffixEndIndex]) &&
+               templateText[suffixEndIndex] != '{' &&
+               templateText[suffixEndIndex] != '}')
+        {
+            suffixEndIndex++;
+        }
+
+        return suffixEndIndex;
+    }
+
+    /// <summary>
     /// Counts the holes on either side of the one being typed and collects the names they bind. The hole
     /// being typed claims no argument of its own yet, and re-completing a closed one has to keep offering
-    /// the name it already carries, so it is left out of both.
+    /// the name it already carries, so its brace is taken out of the way before parsing. An unterminated
+    /// hole would otherwise run into the hole after it and swallow it: a brace is valid inside a format,
+    /// so the parser reads all of it as one stretch of text and the holes beyond go uncounted.
     /// </summary>
     private static (int HolesBefore, int HolesAfter, ISet<string> UsedPropertyNames) CountHoles(
         [NotNull] MessageTemplateParser messageTemplateParser,
@@ -295,10 +332,14 @@ internal sealed class TemplateHole
         var holesAfter = 0;
         var usedPropertyNames = new HashSet<string>(StringComparer.Ordinal);
 
-        foreach (var token in messageTemplateParser.Parse(templateText)
+        // Replacing the brace rather than removing it keeps every other index where the caller left it
+        var withoutHole = templateText.Remove(holeStartIndex, 1)
+            .Insert(holeStartIndex, " ");
+
+        foreach (var token in messageTemplateParser.Parse(withoutHole)
                      .Tokens)
         {
-            if (!(token is PropertyToken propertyToken) || propertyToken.StartIndex == holeStartIndex)
+            if (!(token is PropertyToken propertyToken))
             {
                 continue;
             }

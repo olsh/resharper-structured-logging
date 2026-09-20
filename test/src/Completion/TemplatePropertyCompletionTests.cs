@@ -16,6 +16,11 @@ namespace ReSharper.Structured.Logging.Tests.Completion
         [Test]
         public void TestSerilogHoleBeforeBoundHole() => DoNamedTest();
 
+        // The same, with this hole left unterminated, which the parser reads as one run of text
+        // together with the hole after it unless the unfinished brace is taken out of the way first
+        [Test]
+        public void TestSerilogHoleBeforeUnterminatedBoundHole() => DoNamedTest();
+
         [Test]
         public void TestSerilogDestructuringOperator() => DoNamedTest();
 

@@ -19,13 +19,17 @@ public sealed class TemplatePropertyLookupItem : TextLookupItem
 {
     private readonly bool _insertClosingBrace;
 
+    private readonly int _suffixLength;
+
     public TemplatePropertyLookupItem(
         [NotNull] string propertyName,
         bool insertClosingBrace,
+        int suffixLength,
         [NotNull] LookupItemPlacement placement)
         : base(propertyName, isDynamic: false)
     {
         _insertClosingBrace = insertClosingBrace;
+        _suffixLength = suffixLength;
 
         // The setter is protected, so the placement can only be given to the item from the inside
         Placement = placement;
@@ -57,8 +61,9 @@ public sealed class TemplatePropertyLookupItem : TextLookupItem
         }
 
         // The hole the name was written into has no closing brace, so it is closed here and the caret
-        // moved past it, which is where the rest of the message goes
-        var braceOffset = nameRange.EndOffset;
+        // moved past it, which is where the rest of the message goes. The alignment and the format
+        // belong inside the hole, so the brace goes after them rather than after the name
+        var braceOffset = nameRange.EndOffset.Shift(_suffixLength);
         textControl.Document.InsertText(braceOffset, "}");
 
         var caretOffset = braceOffset.Shift(1)

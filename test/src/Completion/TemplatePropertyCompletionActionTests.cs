@@ -20,5 +20,9 @@ namespace ReSharper.Structured.Logging.Tests.Completion
 
         [Test]
         public void TestSerilogKeepsClosingBrace() => DoNamedTest();
+
+        // The brace belongs after the format, not between the name and it
+        [Test]
+        public void TestSerilogClosesHoleAfterFormat() => DoNamedTest();
     }
 }

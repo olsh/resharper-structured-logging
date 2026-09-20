@@ -87,6 +87,7 @@ public class MessageTemplatePropertyItemsProvider : CSharpItemsProviderBase<CSha
                     new TemplatePropertyLookupItem(
                         name,
                         !hole.HasClosingBrace,
+                        hole.SuffixLength,
                         new LookupItemPlacement(
                             order.ToString("D4", CultureInfo.InvariantCulture),
                             argumentIndex == firstArgumentIndex
