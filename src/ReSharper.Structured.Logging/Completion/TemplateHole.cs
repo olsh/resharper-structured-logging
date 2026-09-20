@@ -20,7 +20,7 @@ namespace ReSharper.Structured.Logging.Completion;
 /// </summary>
 internal sealed class TemplateHole
 {
-    private TemplateHole(
+    public TemplateHole(
         [NotNull] IInvocationExpression invocation,
         [NotNull] ICSharpArgument templateArgument,
         int holesBefore,
@@ -74,7 +74,7 @@ internal sealed class TemplateHole
 
     /// <summary>
     /// Returns the hole under the caret, or <c>null</c> when the caret is not inside the <c>{...}</c> of
-    /// a logging call's message template.
+    /// a logging call message template.
     /// </summary>
     [CanBeNull]
     public static TemplateHole TryLocate(
@@ -89,37 +89,24 @@ internal sealed class TemplateHole
             return null;
         }
 
-        // A logging element is one the provider can name the template parameter of, which covers
-        // Serilog, NLog, Microsoft.Extensions.Logging, ZLogger 1.x and annotated wrappers alike
         var invocation = literal.GetContainingNode<IInvocationExpression>();
-        var templateArgument = invocation?.GetTemplateArgument(templateParameterNameAttributeProvider);
-        if (templateArgument == null || !ReferenceEquals(templateArgument.Value, literal))
+        var templateArgument = TryGetTemplateArgument(
+            invocation,
+            literal,
+            templateParameterNameAttributeProvider);
+        if (templateArgument == null)
         {
             return null;
         }
 
-        // The holes of LoggerMessage.Define are filled by generic type arguments, which name nothing
-        if (invocation.IsLoggerMessageDefineMethod())
+        var contentRange = TryGetContentRange(literal, caretOffset);
+        if (contentRange == null)
         {
             return null;
         }
 
-        var containingFile = literal.GetContainingFile();
-        if (containingFile == null)
-        {
-            return null;
-        }
-
-        // The content range skips the quotes, the verbatim @ and the raw string delimiters alike, so the
-        // offsets inside it are the offsets the template parser reports
-        var contentRange = containingFile.GetDocumentRange(literal.GetStringLiteralContentTreeRange());
-        if (!contentRange.IsValid() || !contentRange.Contains(caretOffset))
-        {
-            return null;
-        }
-
-        var templateText = contentRange.GetText();
-        var caretIndex = caretOffset.Offset - contentRange.StartOffset.Offset;
+        var templateText = contentRange.Value.GetText();
+        var caretIndex = caretOffset.Offset - contentRange.Value.StartOffset.Offset;
 
         var holeStartIndex = FindHoleStartIndex(templateText, caretIndex);
         if (holeStartIndex < 0)
@@ -127,75 +114,25 @@ internal sealed class TemplateHole
             return null;
         }
 
-        var nameStartIndex = holeStartIndex + 1;
-
-        // {@Name and {$Name name the same property, so both complete, and the operator is left alone
-        if (nameStartIndex < caretIndex &&
-            (templateText[nameStartIndex] == '@' || templateText[nameStartIndex] == '$'))
-        {
-            nameStartIndex++;
-        }
-
-        if (!IsPropertyName(templateText, nameStartIndex, caretIndex))
+        var nameStartIndex = FindNameStartIndex(templateText, holeStartIndex, caretIndex);
+        if (nameStartIndex < 0)
         {
             return null;
         }
 
-        // A name cannot start with a digit, so a hole that does is a positional one, which the
-        // positional properties analyzer and its rename fix are the answer to
-        if (nameStartIndex < templateText.Length && char.IsDigit(templateText[nameStartIndex]))
-        {
-            return null;
-        }
-
-        // The caret sits before the destructuring operator, so a name written here would land in front of it
-        if (caretIndex < templateText.Length &&
-            (templateText[caretIndex] == '@' || templateText[caretIndex] == '$'))
-        {
-            return null;
-        }
-
-        var nameEndIndex = caretIndex;
-        while (nameEndIndex < templateText.Length && IsValidInPropertyName(templateText[nameEndIndex]))
-        {
-            nameEndIndex++;
-        }
-
-        var holesBefore = 0;
-        var holesAfter = 0;
-        var usedPropertyNames = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var token in messageTemplateParser.Parse(templateText)
-                     .Tokens)
-        {
-            // The hole being typed claims no argument of its own yet, and re-completing a closed one
-            // has to keep offering the name it already carries, so it is left out of both counts
-            if (!(token is PropertyToken propertyToken) || propertyToken.StartIndex == holeStartIndex)
-            {
-                continue;
-            }
-
-            if (propertyToken.StartIndex < holeStartIndex)
-            {
-                holesBefore++;
-            }
-            else
-            {
-                holesAfter++;
-            }
-
-            usedPropertyNames.Add(propertyToken.PropertyName);
-        }
+        var nameEndIndex = FindNameEndIndex(templateText, caretIndex);
+        var holes = CountHoles(messageTemplateParser, templateText, holeStartIndex);
 
         return new TemplateHole(
             invocation,
             templateArgument,
-            holesBefore,
-            holesAfter,
+            holes.HolesBefore,
+            holes.HolesAfter,
             new DocumentRange(
-                contentRange.StartOffset.Shift(nameStartIndex),
-                contentRange.StartOffset.Shift(nameEndIndex)),
+                contentRange.Value.StartOffset.Shift(nameStartIndex),
+                contentRange.Value.StartOffset.Shift(nameEndIndex)),
             IsClosingBraceAhead(templateText, nameEndIndex),
-            usedPropertyNames);
+            holes.UsedPropertyNames);
     }
 
     [CanBeNull]
@@ -203,11 +140,59 @@ internal sealed class TemplateHole
     {
         // An interpolated string is not a literal expression, which is what keeps ZLogger 2.x out
         var literal = nodeInFile?.Parent as ICSharpLiteralExpression;
+        if (literal?.Literal == null ||
+            !literal.Literal.GetTokenType()
+                .IsStringLiteral)
+        {
+            return null;
+        }
 
-        return literal?.Literal?.GetTokenType()
-            .IsStringLiteral == true
-            ? literal
-            : null;
+        return literal;
+    }
+
+    /// <summary>
+    /// The argument the literal is passed as, when it is the template of a logging call. A logging
+    /// element is one the provider can name the template parameter of, which covers Serilog, NLog,
+    /// Microsoft.Extensions.Logging, ZLogger 1.x and annotated wrappers alike.
+    /// </summary>
+    [CanBeNull]
+    private static ICSharpArgument TryGetTemplateArgument(
+        [CanBeNull] IInvocationExpression invocation,
+        [NotNull] ICSharpLiteralExpression literal,
+        [NotNull] TemplateParameterNameAttributeProvider templateParameterNameAttributeProvider)
+    {
+        // The holes of LoggerMessage.Define are filled by generic type arguments, which name nothing
+        if (invocation == null || invocation.IsLoggerMessageDefineMethod())
+        {
+            return null;
+        }
+
+        var templateArgument = invocation.GetTemplateArgument(templateParameterNameAttributeProvider);
+
+        // A concatenated template is not supported yet, and neither is a literal passed anywhere but
+        // to the template parameter
+        return ReferenceEquals(templateArgument?.Value, literal) ? templateArgument : null;
+    }
+
+    /// <summary>
+    /// The document range of the literal contents, which skips the quotes, the verbatim <c>@</c> and the
+    /// raw string delimiters alike, so the offsets inside it are the offsets the template parser reports.
+    /// </summary>
+    private static DocumentRange? TryGetContentRange(
+        [NotNull] ICSharpLiteralExpression literal,
+        DocumentOffset caretOffset)
+    {
+        var containingFile = literal.GetContainingFile();
+        if (containingFile == null)
+        {
+            return null;
+        }
+
+        var contentRange = containingFile.GetDocumentRange(literal.GetStringLiteralContentTreeRange());
+
+        return contentRange.IsValid() && contentRange.Contains(caretOffset)
+            ? contentRange
+            : (DocumentRange?)null;
     }
 
     /// <summary>
@@ -247,6 +232,92 @@ internal sealed class TemplateHole
         return (holeStartIndex - runStartIndex + 1) % 2 == 0 ? -1 : holeStartIndex;
     }
 
+    /// <summary>
+    /// Where the name being typed starts, or -1 when nothing can be named at the caret.
+    /// </summary>
+    private static int FindNameStartIndex(
+        [NotNull] string templateText,
+        int holeStartIndex,
+        int caretIndex)
+    {
+        var nameStartIndex = holeStartIndex + 1;
+
+        // {@Name and {$Name name the same property, so both complete, and the operator is left alone
+        if (nameStartIndex < caretIndex && IsDestructuringOperator(templateText[nameStartIndex]))
+        {
+            nameStartIndex++;
+        }
+
+        // Anything else between the brace and the caret is an alignment or a format, not a name
+        for (var index = nameStartIndex; index < caretIndex; index++)
+        {
+            if (!IsValidInPropertyName(templateText[index]))
+            {
+                return -1;
+            }
+        }
+
+        // A name cannot start with a digit, so a hole that does is a positional one, which the
+        // positional properties analyzer and its rename fix are the answer to
+        if (nameStartIndex < templateText.Length && char.IsDigit(templateText[nameStartIndex]))
+        {
+            return -1;
+        }
+
+        // The caret sits before the operator, so a name written here would land in front of it
+        return caretIndex < templateText.Length && IsDestructuringOperator(templateText[caretIndex])
+            ? -1
+            : nameStartIndex;
+    }
+
+    private static int FindNameEndIndex([NotNull] string templateText, int caretIndex)
+    {
+        var nameEndIndex = caretIndex;
+        while (nameEndIndex < templateText.Length && IsValidInPropertyName(templateText[nameEndIndex]))
+        {
+            nameEndIndex++;
+        }
+
+        return nameEndIndex;
+    }
+
+    /// <summary>
+    /// Counts the holes on either side of the one being typed and collects the names they bind. The hole
+    /// being typed claims no argument of its own yet, and re-completing a closed one has to keep offering
+    /// the name it already carries, so it is left out of both.
+    /// </summary>
+    private static (int HolesBefore, int HolesAfter, ISet<string> UsedPropertyNames) CountHoles(
+        [NotNull] MessageTemplateParser messageTemplateParser,
+        [NotNull] string templateText,
+        int holeStartIndex)
+    {
+        var holesBefore = 0;
+        var holesAfter = 0;
+        var usedPropertyNames = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var token in messageTemplateParser.Parse(templateText)
+                     .Tokens)
+        {
+            if (!(token is PropertyToken propertyToken) || propertyToken.StartIndex == holeStartIndex)
+            {
+                continue;
+            }
+
+            if (propertyToken.StartIndex < holeStartIndex)
+            {
+                holesBefore++;
+            }
+            else
+            {
+                holesAfter++;
+            }
+
+            usedPropertyNames.Add(propertyToken.PropertyName);
+        }
+
+        return (holesBefore, holesAfter, usedPropertyNames);
+    }
+
     private static bool IsClosingBraceAhead([NotNull] string templateText, int nameEndIndex)
     {
         for (var index = nameEndIndex; index < templateText.Length; index++)
@@ -265,17 +336,9 @@ internal sealed class TemplateHole
         return false;
     }
 
-    private static bool IsPropertyName([NotNull] string templateText, int startIndex, int endIndex)
+    private static bool IsDestructuringOperator(char c)
     {
-        for (var index = startIndex; index < endIndex; index++)
-        {
-            if (!IsValidInPropertyName(templateText[index]))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return c == '@' || c == '$';
     }
 
     /// <summary>
