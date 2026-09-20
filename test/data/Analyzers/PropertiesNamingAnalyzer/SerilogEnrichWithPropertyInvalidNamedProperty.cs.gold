@@ -1,0 +1,15 @@
+﻿using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            new LoggerConfiguration().Enrich.WithProperty(|"test"|(0), 1);
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Property name 'test' does not match naming rules. Suggested name is 'Test'.

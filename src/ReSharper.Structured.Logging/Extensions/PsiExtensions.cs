@@ -33,7 +33,12 @@ namespace ReSharper.Structured.Logging.Extensions
 
         private const string PushScopePropertyMethodName = "PushScopeProperty";
 
+        private const string WithPropertyMethodName = "WithProperty";
+
         private static readonly IClrTypeName LogContextFqn = new ClrTypeName("Serilog.Context.LogContext");
+
+        private static readonly IClrTypeName LoggerEnrichmentConfigurationFqn =
+            new ClrTypeName("Serilog.Configuration.LoggerEnrichmentConfiguration");
 
         private static readonly IClrTypeName LoggerFactoryExtensionsFqn =
             new ClrTypeName("Microsoft.Extensions.Logging.LoggerFactoryExtensions");
@@ -44,6 +49,8 @@ namespace ReSharper.Structured.Logging.Extensions
         private static readonly IClrTypeName NLogLoggerFqn = new ClrTypeName("NLog.Logger");
 
         private static readonly IClrTypeName ScopeContextFqn = new ClrTypeName("NLog.ScopeContext");
+
+        private static readonly IClrTypeName SerilogCoreLoggerFqn = new ClrTypeName("Serilog.Core.Logger");
 
         private static readonly IClrTypeName SerilogLogFqn = new ClrTypeName("Serilog.Log");
 
@@ -230,8 +237,9 @@ namespace ReSharper.Structured.Logging.Extensions
             var handlerConstructor = interpolatedString.HandlerConstructorReference?.Resolve()
                 .DeclaredElement as IConstructor;
 
-            return ZLoggerTemplateHandler.IsHandlerType(handlerConstructor?.GetContainingType()
-                ?.GetClrName());
+            return ZLoggerTemplateHandler.IsHandlerType(
+                handlerConstructor?.GetContainingType()
+                    ?.GetClrName());
         }
 
         public static MessageTemplateTokenInformation GetTokenInformation(
@@ -651,45 +659,102 @@ namespace ReSharper.Structured.Logging.Extensions
         }
 
         /// <summary>
-        /// Serilog only, unlike <see cref="IsContextPushPropertyMethod"/>: the destructuring analysis this
-        /// feeds is about the optional <c>destructureObjects</c> flag, which no other logger declares.
+        /// Matches the Serilog calls that attach a named property with the optional <c>destructureObjects</c>
+        /// flag: <c>LogContext.PushProperty</c>, <c>ILogger.ForContext(string, object, bool)</c> together
+        /// with its <c>Log</c> facade and <c>Serilog.Core.Logger</c> declarations, and
+        /// <c>LoggerEnrichmentConfiguration.WithProperty</c>. Serilog only, unlike
+        /// <see cref="IsContextPropertyMethod"/>: the destructuring analysis this feeds is about that flag,
+        /// which no other logger declares.
         /// </summary>
-        public static bool IsSerilogContextPushPropertyMethod(this IInvocationExpression invocationExpression)
+        /// <remarks>
+        /// <c>ForContext</c> is told apart from the <c>ForContext&lt;T&gt;()</c>, <c>ForContext(Type)</c> and
+        /// enricher overloads by its parameter shape rather than by its name, since a two argument call such
+        /// as <c>Log.ForContext(enricherA, enricherB)</c> binds to the <c>params</c> overload and has no flag
+        /// to set. The types are matched by exact name rather than by implementing <c>ILogger</c>: a third
+        /// party implementation may declare the flag under another name, and the quick fixes append it by name.
+        /// </remarks>
+        public static bool IsSerilogContextPropertyMethod(this IInvocationExpression invocationExpression)
         {
-            var typeMember = invocationExpression.Reference.Resolve()
-                .DeclaredElement as ITypeMember;
-            var containingType = typeMember?.GetContainingType();
-            if (containingType == null)
-            {
-                return false;
-            }
-
-            return LogContextFqn.Equals(containingType.GetClrName()) && typeMember.ShortName == PushPropertyMethodName;
+            return IsSerilogContextPropertyMethod(
+                invocationExpression.Reference?.Resolve()
+                    .DeclaredElement as IMethod);
         }
 
         /// <summary>
-        /// Matches the scope property calls that name the property in their first argument: Serilog's
-        /// <c>LogContext.PushProperty</c>, NLog's <c>ScopeContext.PushProperty</c> and NLog's
-        /// <c>Logger.PushScopeProperty</c>. The generic NLog overloads carry the same short name,
+        /// Matches the context property calls that name the property in their first argument: the Serilog
+        /// calls of <see cref="IsSerilogContextPropertyMethod"/>, NLog's <c>ScopeContext.PushProperty</c>
+        /// and NLog's <c>Logger.PushScopeProperty</c>. The generic NLog overloads carry the same short name,
         /// so they are matched as well.
         /// </summary>
-        public static bool IsContextPushPropertyMethod(this IInvocationExpression invocationExpression)
+        public static bool IsContextPropertyMethod(this IInvocationExpression invocationExpression)
         {
-            var typeMember = invocationExpression.Reference?.Resolve()
-                .DeclaredElement as ITypeMember;
-            var containingType = typeMember?.GetContainingType();
+            var method = invocationExpression.Reference?.Resolve()
+                .DeclaredElement as IMethod;
+            if (IsSerilogContextPropertyMethod(method))
+            {
+                return true;
+            }
+
+            var containingType = method?.GetContainingType();
             if (containingType == null)
             {
                 return false;
             }
 
             var containingTypeName = containingType.GetClrName();
-            if (LogContextFqn.Equals(containingTypeName) || ScopeContextFqn.Equals(containingTypeName))
+            if (ScopeContextFqn.Equals(containingTypeName))
             {
-                return typeMember.ShortName == PushPropertyMethodName;
+                return method.ShortName == PushPropertyMethodName;
             }
 
-            return NLogLoggerFqn.Equals(containingTypeName) && typeMember.ShortName == PushScopePropertyMethodName;
+            return NLogLoggerFqn.Equals(containingTypeName) && method.ShortName == PushScopePropertyMethodName;
+        }
+
+        private static bool IsSerilogContextPropertyMethod([CanBeNull] IMethod method)
+        {
+            var containingType = method?.GetContainingType();
+            if (containingType == null)
+            {
+                return false;
+            }
+
+            var containingTypeName = containingType.GetClrName();
+            if (LogContextFqn.Equals(containingTypeName))
+            {
+                return method.ShortName == PushPropertyMethodName;
+            }
+
+            if (LoggerEnrichmentConfigurationFqn.Equals(containingTypeName))
+            {
+                return method.ShortName == WithPropertyMethodName && HasNamedPropertyShape(method);
+            }
+
+            if (SerilogLoggerFqn.Equals(containingTypeName)
+                || SerilogLogFqn.Equals(containingTypeName)
+                || SerilogCoreLoggerFqn.Equals(containingTypeName))
+            {
+                return method.ShortName == ForContextMethodName && HasNamedPropertyShape(method);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// The <c>(string name, object value, bool destructureObjects)</c> shape the Serilog context
+        /// property calls share.
+        /// </summary>
+        private static bool HasNamedPropertyShape([NotNull] IMethod method)
+        {
+            var parameters = method.Parameters;
+            if (parameters.Count != 3)
+            {
+                return false;
+            }
+
+            var nameType = parameters[0].Type;
+            var flagType = parameters[2].Type;
+
+            return nameType.IsString() && flagType.IsBool();
         }
 
         [CanBeNull]

@@ -30,6 +30,22 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         // NLog has no destructuring flag to add, so the warning stays away from its scope properties
         [Test] public void TestNlogScopeContextWithoutDestructure() => DoNamedTest2();
 
+        [Test] public void TestSerilogForContextWithoutDestructure() => DoNamedTest2();
+
+        [Test] public void TestSerilogStaticLogForContextWithoutDestructure() => DoNamedTest2();
+
+        // The concrete logger declares ForContext as its own member rather than inheriting the interface one
+        [Test] public void TestSerilogCoreLoggerForContextWithoutDestructure() => DoNamedTest2();
+
+        [Test] public void TestSerilogForContextExplicitDestructure() => DoNamedTest2();
+
+        [Test] public void TestSerilogForContextNumericWithoutDestructure() => DoNamedTest2();
+
+        // Two enrichers bind to the params overload, which has no flag to set; the type overloads take a single argument
+        [Test] public void TestSerilogStaticLogForContextEnrichers() => DoNamedTest2();
+
+        [Test] public void TestSerilogEnrichWithPropertyWithoutDestructure() => DoNamedTest2();
+
         [Test] public void TestSerilogCustomExceptionWithoutDestructure() => DoNamedTest2();
 
         [Test] public void TestSerilogParentWithOverriddenToString() => DoNamedTest2();

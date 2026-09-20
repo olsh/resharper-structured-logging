@@ -17,12 +17,13 @@ namespace ReSharper.Structured.Logging.QuickFixes
 {
     /// <summary>
     /// States how a context property is captured by appending the destructuring flag that
-    /// <c>LogContext.PushProperty</c> leaves optional.
+    /// <c>LogContext.PushProperty</c>, <c>ForContext(string, object)</c> and
+    /// <c>Enrich.WithProperty</c> leave optional.
     /// </summary>
     public abstract class ContextLogPropertyDestructuringFixBase : QuickFixBase
     {
-        // The warning is only reported for Serilog's LogContext.PushProperty, so the flag is
-        // always declared under this name
+        // The warning is only reported for Serilog's own calls, and every one of them declares
+        // the flag under this name
         private const string DestructureObjectsParameterName = "destructureObjects";
 
         private readonly IInvocationExpression _invocationExpression;
