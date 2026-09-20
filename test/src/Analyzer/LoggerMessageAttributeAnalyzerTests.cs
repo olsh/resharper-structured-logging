@@ -26,5 +26,9 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
         [Test] public void TestNonConstantMessage() => DoNamedTest2();
 
         [Test] public void TestMethodTargetAttribute() => DoNamedTest2();
+
+        [Test] public void TestRedundantDestructuring() => DoNamedTest2();
+
+        [Test] public void TestRedundantDestructuringComplexParameter() => DoNamedTest2();
     }
 }

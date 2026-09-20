@@ -4,15 +4,12 @@ using JetBrains.Annotations;
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.QuickFixes;
-using JetBrains.ReSharper.Psi.CSharp;
-using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
-using JetBrains.ReSharper.Psi.Util;
-using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.TextControl;
 using JetBrains.Util;
 
 using ReSharper.Structured.Logging.Highlighting;
 using ReSharper.Structured.Logging.Models;
+using ReSharper.Structured.Logging.Services;
 
 namespace ReSharper.Structured.Logging.QuickFixes
 {
@@ -41,16 +38,9 @@ namespace ReSharper.Structured.Logging.QuickFixes
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
-            using (WriteLockCookie.Create())
-            {
-                var factory = CSharpElementFactory.GetInstance(_tokenInformation.StringLiteral.Expression, false);
-                var startIndex = _tokenInformation.RelativeStartIndex;
-                var expression = factory.CreateExpression(
-                    $"\"{_tokenInformation.StringLiteral.Expression.GetUnquotedText().Insert(startIndex + 1, "@")}\"");
-
-                // ReSharper disable once AssignNullToNotNullAttribute
-                ModificationUtil.ReplaceChild(_tokenInformation.StringLiteral.Expression, expression);
-            }
+            // The operator goes right after the opening brace of the hole
+            var operatorIndex = _tokenInformation.RelativeStartIndex + 1;
+            MessageTemplateLiteralRewriter.Rewrite(_tokenInformation, text => text.Insert(operatorIndex, "@"));
 
             return null;
         }

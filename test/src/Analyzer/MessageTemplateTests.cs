@@ -24,12 +24,11 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
 
         protected override void DoTestSolution([NotNull] params string[] fileSet)
         {
-            ExecuteWithinSettingsTransaction(
-                settingsStore =>
-                    {
-                        RunGuarded(() => MutateSettings(settingsStore));
-                        base.DoTestSolution(fileSet);
-                    });
+            ExecuteWithinSettingsTransaction(settingsStore =>
+            {
+                RunGuarded(() => MutateSettings(settingsStore));
+                base.DoTestSolution(fileSet);
+            });
         }
 
         protected override bool HighlightingPredicate(
@@ -45,6 +44,7 @@ namespace ReSharper.Structured.Logging.Tests.Analyzer
                    || highlighting is ExceptionPassedAsTemplateArgumentWarning
                    || highlighting is ComplexObjectDestructuringWarning
                    || highlighting is ComplexObjectDestructuringInContextWarning
+                   || highlighting is RedundantDestructuringOperatorWarning
                    || highlighting is PositionalPropertyUsedWarning
                    || highlighting is InconsistentLogPropertyNamingWarning
                    || highlighting is InconsistentContextLogPropertyNamingWarning

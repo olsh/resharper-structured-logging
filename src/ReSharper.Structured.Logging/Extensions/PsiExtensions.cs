@@ -161,6 +161,70 @@ namespace ReSharper.Structured.Logging.Extensions
         }
 
         /// <summary>
+        /// Returns the type of the value a template hole is bound to, or <c>null</c> when it cannot be told.
+        /// The three template sources bind their holes differently: a logging call binds them to the
+        /// arguments that follow the template, <c>LoggerMessage.Define</c> to its generic type arguments in
+        /// order, and a <c>[LoggerMessage]</c> or <c>[ZLoggerMessage]</c> attribute to the parameters of the
+        /// method it decorates, matched by name the way the source generators do, ignoring case.
+        /// </summary>
+        /// <param name="argumentsOwner">The logging call or attribute.</param>
+        /// <param name="namedProperty">The hole.</param>
+        /// <param name="holeIndex">The index of the hole among the template's named properties.</param>
+        /// <param name="holeArguments">
+        /// The result of <see cref="GetTemplateHoleArguments(ICSharpArgumentsOwner,TemplateParameterNameAttributeProvider)"/>,
+        /// computed once by the caller since it is the same for every hole.
+        /// </param>
+        [CanBeNull]
+        public static IType GetTemplateHoleType(
+            this ICSharpArgumentsOwner argumentsOwner,
+            [NotNull] PropertyToken namedProperty,
+            int holeIndex,
+            [CanBeNull] IReadOnlyList<ICSharpArgument> holeArguments)
+        {
+            if (argumentsOwner is IInvocationExpression invocationExpression)
+            {
+                if (invocationExpression.IsLoggerMessageDefineMethod())
+                {
+                    var typeArguments = invocationExpression.TypeArguments;
+
+                    return holeIndex < typeArguments.Count ? typeArguments[holeIndex] : null;
+                }
+
+                // A null literal or a method group has no type to speak of, which ToIType reports as null
+                return holeArguments != null && holeIndex < holeArguments.Count
+                    ? holeArguments[holeIndex]
+                        .GetExpressionType()
+                        .ToIType()
+                    : null;
+            }
+
+            if (!(argumentsOwner is IAttribute attribute))
+            {
+                return null;
+            }
+
+            // The navigator only answers for an attribute sitting on the method itself, not on one of its parameters
+            var methodDeclaration = MethodDeclarationNavigator.GetByAttribute(attribute);
+            if (methodDeclaration == null)
+            {
+                return null;
+            }
+
+            foreach (var parameterDeclaration in methodDeclaration.ParameterDeclarations)
+            {
+                if (string.Equals(
+                        parameterDeclaration.DeclaredName,
+                        namedProperty.PropertyName,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return parameterDeclaration.Type;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Returns the message template expression of a logging call or of a logging attribute
         /// such as [LoggerMessage(Message = "...")].
         /// </summary>

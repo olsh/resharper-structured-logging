@@ -1,0 +1,12 @@
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(string userName)
+        {
+            Log.Logger.Information("Escaped \r\n {@User{caret}Name} \r\n string", userName);
+        }
+    }
+}

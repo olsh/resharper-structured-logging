@@ -1,0 +1,17 @@
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(string orderId)
+        {
+            Log.Logger.Information("Order |{$OrderId}|(0) processed", orderId);
+        }
+    }
+}
+
+------------------------------------------------
+0: Destructuring or stringification operator has no effect on a scalar value
+QUICKFIXES:
+Remove stringification operator

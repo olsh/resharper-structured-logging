@@ -1,0 +1,15 @@
+using Serilog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(string userName)
+        {
+            Log.Logger.Information("User " + "|{@UserName}|(0) logged in", userName);
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value

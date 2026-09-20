@@ -1,0 +1,17 @@
+using NLog;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+        public static void Main(string userName)
+        {
+            Log.Info("User |{@UserName}|(0) logged in", userName);
+        }
+    }
+}
+
+---------------------------------------------------------
+(0): ReSharper Warning: Destructuring or stringification operator has no effect on a scalar value
