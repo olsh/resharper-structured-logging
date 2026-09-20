@@ -1,0 +1,36 @@
+﻿using System;
+
+namespace ConsoleApp
+{
+    [AttributeUsage(AttributeTargets.Method)]
+    public sealed class MessageTemplateFormatMethodAttribute : Attribute
+    {
+        public MessageTemplateFormatMethodAttribute(string messageTemplateParameterName)
+        {
+            MessageTemplateParameterName = messageTemplateParameterName;
+        }
+
+        public string MessageTemplateParameterName { get; }
+    }
+
+    public static class LoggerExtensions
+    {
+        [MessageTemplateFormatMethod("messageTemplate")]
+        public static void LogInformation(string messageTemplate, params object[] propertyValues)
+        {
+        }
+    }
+
+    public class Order
+    {
+        public int Id { get; set; }
+    }
+
+    public static class Program
+    {
+        public static void Main(Order order)
+        {
+            LoggerExtensions.LogInformation("Shipped {{caret}", order.Id);
+        }
+    }
+}

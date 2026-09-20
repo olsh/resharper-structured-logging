@@ -1,0 +1,18 @@
+﻿// ${COMPLETE_ITEM:OrderId}
+using Serilog;
+
+namespace ConsoleApp
+{
+    public class Order
+    {
+        public int Id { get; set; }
+    }
+
+    public static class Program
+    {
+        public static void Main(Order order)
+        {
+            Log.Logger.Information("Shipped {OrderId:D4}{caret}", order.Id);
+        }
+    }
+}
