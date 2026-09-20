@@ -20,58 +20,32 @@ namespace ReSharper.Structured.Logging.Completion;
 /// </summary>
 internal sealed class TemplateHole
 {
+    [NotNull] private readonly IInvocationExpression _invocation;
+
+    [NotNull] private readonly ICSharpArgument _templateArgument;
+
+    private readonly int _holesBefore;
+
+    private readonly int _holesAfter;
+
     public TemplateHole(
         [NotNull] IInvocationExpression invocation,
         [NotNull] ICSharpArgument templateArgument,
+        [NotNull] TemplateHolePosition position,
         int holesBefore,
         int holesAfter,
-        DocumentRange nameRange,
-        bool hasClosingBrace,
-        int suffixLength,
         [NotNull] ISet<string> usedPropertyNames)
     {
-        Invocation = invocation;
-        TemplateArgument = templateArgument;
-        HolesBefore = holesBefore;
-        HolesAfter = holesAfter;
-        NameRange = nameRange;
-        HasClosingBrace = hasClosingBrace;
-        SuffixLength = suffixLength;
+        _invocation = invocation;
+        _templateArgument = templateArgument;
+        _holesBefore = holesBefore;
+        _holesAfter = holesAfter;
+        Position = position;
         UsedPropertyNames = usedPropertyNames;
     }
 
     [NotNull]
-    public IInvocationExpression Invocation { get; }
-
-    [NotNull]
-    public ICSharpArgument TemplateArgument { get; }
-
-    /// <summary>
-    /// The number of complete holes before this one. A hole still being typed is not a hole to the
-    /// parser, so it never counts itself, and the count is also the index of the argument this hole
-    /// binds to.
-    /// </summary>
-    public int HolesBefore { get; }
-
-    /// <summary>
-    /// The number of complete holes after this one. They claim the last arguments, so the hole being
-    /// typed can only be named after an argument that comes before them.
-    /// </summary>
-    public int HolesAfter { get; }
-
-    /// <summary>
-    /// The range of the property name being typed, empty when the caret sits right after the brace.
-    /// The destructuring operator, the alignment and the format are outside it and are kept as they are.
-    /// </summary>
-    public DocumentRange NameRange { get; }
-
-    public bool HasClosingBrace { get; }
-
-    /// <summary>
-    /// How many characters of alignment and format sit between the name and the end of the hole. The
-    /// closing brace belongs after them, not after the name.
-    /// </summary>
-    public int SuffixLength { get; }
+    public TemplateHolePosition Position { get; }
 
     /// <summary>
     /// The names the template already binds, excluding the hole being typed, so that a name is not
@@ -81,9 +55,35 @@ internal sealed class TemplateHole
     public ISet<string> UsedPropertyNames { get; }
 
     /// <summary>
-    /// Returns the hole under the caret, or <c>null</c> when the caret is not inside the <c>{...}</c> of
-    /// a logging call message template.
+    /// The arguments whose names can fill this hole, the one it binds to first, or <c>null</c> when the
+    /// hole values cannot be tied to expressions at all. The holes before this one claim the first
+    /// arguments and the ones after it claim the last, so only what is left in between is a candidate.
     /// </summary>
+    [CanBeNull]
+    public IReadOnlyList<ICSharpArgument> GetCandidateArguments()
+    {
+        // The hole values are hidden when they were passed as one array instead of being expanded
+        var holeArguments = _invocation.GetTemplateHoleArguments(_templateArgument);
+        if (holeArguments == null)
+        {
+            return null;
+        }
+
+        var lastIndex = holeArguments.Count - _holesAfter;
+        if (_holesBefore >= lastIndex)
+        {
+            return Array.Empty<ICSharpArgument>();
+        }
+
+        var candidates = new ICSharpArgument[lastIndex - _holesBefore];
+        for (var index = 0; index < candidates.Length; index++)
+        {
+            candidates[index] = holeArguments[_holesBefore + index];
+        }
+
+        return candidates;
+    }
+
     [CanBeNull]
     public static TemplateHole TryLocate(
         [CanBeNull] ITreeNode nodeInFile,
@@ -135,13 +135,14 @@ internal sealed class TemplateHole
         return new TemplateHole(
             invocation,
             templateArgument,
+            new TemplateHolePosition(
+                new DocumentRange(
+                    contentRange.Value.StartOffset.Shift(nameStartIndex),
+                    contentRange.Value.StartOffset.Shift(nameEndIndex)),
+                IsClosingBraceAhead(templateText, suffixEndIndex),
+                suffixEndIndex - nameEndIndex),
             holes.HolesBefore,
             holes.HolesAfter,
-            new DocumentRange(
-                contentRange.Value.StartOffset.Shift(nameStartIndex),
-                contentRange.Value.StartOffset.Shift(nameEndIndex)),
-            IsClosingBraceAhead(templateText, suffixEndIndex),
-            suffixEndIndex - nameEndIndex,
             holes.UsedPropertyNames);
     }
 

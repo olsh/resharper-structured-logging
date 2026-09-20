@@ -44,33 +44,23 @@ public class MessageTemplatePropertyItemsProvider : CSharpItemsProviderBase<CSha
     protected override bool AddLookupItems(CSharpCodeCompletionContext context, IItemsCollector collector)
     {
         var hole = TryLocateHole(context);
-
-        // The hole values are hidden when they were passed as one array instead of being expanded,
-        // and there is nothing to derive a name from
-        var holeArguments = hole?.Invocation.GetTemplateHoleArguments(hole.TemplateArgument);
-        if (holeArguments == null || holeArguments.Count == 0)
+        var candidateArguments = hole?.GetCandidateArguments();
+        if (candidateArguments == null || candidateArguments.Count == 0)
         {
             return false;
         }
 
-        // The holes before the caret claim the first arguments and the ones after it claim the last, so
-        // only what is left in between can name this hole. The nth hole is filled by the nth argument,
-        // which is why the window starts there and its names lead
-        var firstArgumentIndex = hole.HolesBefore;
-        var lastArgumentIndex = holeArguments.Count - hole.HolesAfter;
-        if (firstArgumentIndex >= lastArgumentIndex)
-        {
-            return false;
-        }
-
-        var ranges = CodeCompletionContextProviderBase.GetTextLookupRanges(context.BasicContext, hole.NameRange);
+        var ranges = CodeCompletionContextProviderBase.GetTextLookupRanges(
+            context.BasicContext,
+            hole.Position.NameRange);
         var offeredNames = new HashSet<string>(StringComparer.Ordinal);
         var order = 0;
 
-        for (var argumentIndex = firstArgumentIndex; argumentIndex < lastArgumentIndex; argumentIndex++)
+        // The first candidate is the argument this hole binds to, so its names lead
+        for (var index = 0; index < candidateArguments.Count; index++)
         {
             var (leafName, qualifiedName) = TemplatePropertyNameSuggestion.GetSuggestedNames(
-                holeArguments[argumentIndex]
+                candidateArguments[index]
                     .Value);
 
             // The qualified name tells more about the value, so it leads: order.Id offers OrderId then Id
@@ -86,13 +76,10 @@ public class MessageTemplatePropertyItemsProvider : CSharpItemsProviderBase<CSha
                 collector.Add(
                     new TemplatePropertyLookupItem(
                         name,
-                        !hole.HasClosingBrace,
-                        hole.SuffixLength,
+                        hole.Position,
                         new LookupItemPlacement(
                             order.ToString("D4", CultureInfo.InvariantCulture),
-                            argumentIndex == firstArgumentIndex
-                                ? PlacementLocation.Top
-                                : PlacementLocation.Generic))
+                            index == 0 ? PlacementLocation.Top : PlacementLocation.Generic))
                     {
                         Ranges = ranges
                     });
