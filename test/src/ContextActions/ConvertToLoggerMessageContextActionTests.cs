@@ -40,6 +40,10 @@ namespace ReSharper.Structured.Logging.Tests.ContextActions
         [Test]
         public void TestMicrosoftUnrelatedLogClass() => DoNamedTest();
 
+        // A generic class would need type arguments at the call site, so it is not a candidate either
+        [Test]
+        public void TestMicrosoftGenericLogClass() => DoNamedTest();
+
         // A suitable class in another namespace cannot be reached by an unqualified name, so a new one is
         // created in the namespace of the call
         [Test]

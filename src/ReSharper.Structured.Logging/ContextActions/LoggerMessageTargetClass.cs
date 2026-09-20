@@ -6,7 +6,6 @@ using JetBrains.Metadata.Reader.Impl;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Util;
 
 namespace ReSharper.Structured.Logging.ContextActions
@@ -105,6 +104,13 @@ namespace ReSharper.Structured.Logging.ContextActions
             // another namespace, or one nested in some other type, would need qualifying or would not resolve.
             foreach (var typeElement in GetNamespaceTypeElements(invocationExpression))
             {
+                // A generic class would have to be named with its type arguments at the call site, and the
+                // action writes the bare name
+                if (typeElement.TypeParametersCount > 0)
+                {
+                    continue;
+                }
+
                 foreach (var declaration in typeElement.GetDeclarations())
                 {
                     // Only a file of this project, so the action never reaches into a dependency
