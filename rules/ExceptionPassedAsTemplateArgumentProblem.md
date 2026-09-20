@@ -16,7 +16,8 @@ catch (Exception exception)
 }
 ```
 
-When a hole is filled with a piece of the exception rather than the exception itself, as in
+When a hole is filled with the text of the exception rather than the exception itself, that is with its
+`Message`, its `StackTrace` or its parameterless `ToString()`, as in
 `Log.Error("Disk quota exceeded {Error}", exception.Message)`,
 [Exception logged as text](ExceptionLoggedAsTextProblem.md) reports it instead.
 

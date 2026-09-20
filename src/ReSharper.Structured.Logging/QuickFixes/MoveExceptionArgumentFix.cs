@@ -69,9 +69,31 @@ namespace ReSharper.Structured.Logging.QuickFixes
             // Moving the exception when another one already fills the dedicated argument
             // would pass two exceptions, which does not compile
             return !_exceptionArgumentOccupied
+                   && !HasRemainingNamedArgument()
                    && _invocationExpression.IsValid()
                    && _exceptionArgument.IsValid()
                    && _templateArgument.IsValid();
+        }
+
+        /// <summary>
+        /// Reports whether an argument the call keeps is a named one. Inserting the exception shifts every
+        /// argument after it one place along, and dropping a hole value resolves the call to a different
+        /// overload, whose hole parameters carry different names: Serilog's <c>propertyValue0</c> and
+        /// <c>propertyValue1</c> become a single <c>propertyValue</c>. Either is enough to stop a name from
+        /// binding, so the fix stays away from such a call rather than rewriting it into code that does not
+        /// compile. The argument being moved does not count, as its name goes away with it.
+        /// </summary>
+        private bool HasRemainingNamedArgument()
+        {
+            foreach (var argument in _invocationExpression.ArgumentList.Arguments)
+            {
+                if (argument.NameIdentifier != null && !Equals(argument, _exceptionArgument))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)

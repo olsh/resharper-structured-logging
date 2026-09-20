@@ -28,5 +28,14 @@ namespace ReSharper.Structured.Logging.Tests.QuickFixes
 
         [Test]
         public void TestSerilogExceptionMessageAvailable() => DoNamedTest();
+
+        // Inserting the exception shifts the arguments along and drops a hole value, which resolves the
+        // call to an overload that names its hole parameters differently, so a name the call keeps would
+        // stop binding. Both warnings share the fix and therefore both withhold it here
+        [Test]
+        public void TestSerilogNamedArgumentMessageNotAvailable() => DoNamedTest();
+
+        [Test]
+        public void TestSerilogNamedArgumentExceptionNotAvailable() => DoNamedTest();
     }
 }
