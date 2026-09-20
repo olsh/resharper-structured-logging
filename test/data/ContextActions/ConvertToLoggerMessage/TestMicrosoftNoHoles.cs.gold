@@ -1,0 +1,21 @@
+﻿using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    public static class Program
+    {
+        public static void Main(ILogger logger)
+        {
+            {caret}Log.{spotstart#1}CacheWarmedUp{spotend#1}(logger);
+        }
+    }
+
+    internal static partial class Log
+    {
+      [LoggerMessage(Level = LogLevel.Debug, Message = "Cache warmed up")]
+      public static partial void CacheWarmedUp(ILogger logger);
+    }
+}
+
+LOOKUP ITEMS IN HOTSPOTS:
+  spot#1 [Count: 1, Focus: HardAtStart] CacheWarmedUp

@@ -1,0 +1,24 @@
+﻿using Microsoft.Extensions.Logging;
+
+namespace ConsoleApp
+{
+    internal static partial class Log
+    {
+        [LoggerMessage(Level = LogLevel.Information, Message = "Cache warmed up")]
+        public static partial void CacheWarmedUp(ILogger logger);
+
+        [LoggerMessage(Level = LogLevel.Information, Message = "Order {OrderId} shipped")]
+        public static partial void OrderShipped(ILogger logger, int orderId);
+    }
+
+    public static class Program
+    {
+        public static void Main(ILogger logger, int orderId)
+        {
+            {caret}Log.{spotstart#1}OrderShipped{spotend#1}(logger, orderId);
+        }
+    }
+}
+
+LOOKUP ITEMS IN HOTSPOTS:
+  spot#1 [Count: 1, Focus: HardAtStart] OrderShipped
