@@ -1,4 +1,4 @@
-<img src="https://github.com/olsh/resharper-structured-logging/raw/master/images/logo.png" width="64" height="64" alt="Structured Logging logo">
+﻿<img src="https://github.com/olsh/resharper-structured-logging/raw/master/images/logo.png" width="64" height="64" alt="Structured Logging logo">
 
 # ReSharper Structured Logging
 
@@ -39,6 +39,34 @@ inspection does not fully replace it:
 * A template that is not a compile-time constant is reported by the IDE as a hint tied to
   [CA2254](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2254),
   while the extension reports it as a warning. The quick fix comes from ReSharper.
+
+## Code Completion
+
+A property gets its name the moment the hole is typed, so that is where the name is offered. With the caret
+inside `{` of a message template, code completion lists names built from the arguments that fill the holes:
+
+```csharp
+_logger.LogInformation("Shipped {", order.Id, customer.Email);
+//                              ^ OrderId, Id, CustomerEmail, Email
+```
+
+The names for the argument this very hole will be bound to come first, and each argument offers both its
+qualified name and its leaf one, so `order.Customer.Name` suggests `CustomerName` and then `Name`. They are
+already in the case configured under Settings -> Environment -> Structured Logging, the same one
+[the naming analyzer](rules/InconsistentLogPropertyNaming.md) holds the template to. A name another hole of
+the template already uses is left out, and accepting one closes the hole when the brace is missing, leaving
+the caret past it. The list appears after a destructuring or stringification operator as well, at `{@` and
+`{$`, and when completing the name of a hole that is already closed.
+
+Nothing is offered where no name can be derived: for a positional hole such as `{0}`, which
+[renaming it](rules/PositionalPropertyUsedProblem.md) is the answer to, for a template whose hole values are
+passed as one array instead of being expanded, for a concatenated template, and once every argument is
+already bound to a hole.
+
+Templates declared with `LoggerMessageAttribute` are completed by ReSharper and Rider themselves, from the
+parameters of the method the attribute decorates, which is the right source there because no argument fills
+those holes. `LoggerMessage.Define` binds its holes to generic type arguments and ZLogger 2.x binds them to
+the interpolations of the template, so neither has an expression to name a hole after.
 
 ## Custom Logging Wrappers
 

@@ -1,0 +1,17 @@
+﻿Completion: Basic
+Count: 2
+Focus: Hard
+Rules: [\w] => add_to_prefix
+Range: "Log.Logger.Information("{♦} shipped to {Country}", order.Id, address.Country);"
+
+##### RELEVANCE SORT #####
+
+                            [FromLightEvaluation, NotObsolete, ObsoleteRuleApplied, NormalSelectionPriority, Other]
+OrderId                     OrderStr=0000    <==
+Id                          OrderStr=0001
+
+##### ALPHABETIC SORT #####
+
+                            [Light, Top]
+OrderId                     OrderStr=0000    <==
+Id                          OrderStr=0001

@@ -1,0 +1,17 @@
+﻿Completion: Basic
+Count: 2
+Focus: Hard
+Rules: [\w] => add_to_prefix
+Range: "Log.Logger.Information("Shipped to {♦", order.Customer.Name);"
+
+##### RELEVANCE SORT #####
+
+                            [FromLightEvaluation, NotObsolete, ObsoleteRuleApplied, NormalSelectionPriority, Other]
+CustomerName                OrderStr=0000    <==
+Name                        OrderStr=0001
+
+##### ALPHABETIC SORT #####
+
+                            [Light, Top]
+CustomerName                OrderStr=0000    <==
+Name                        OrderStr=0001

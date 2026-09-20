@@ -1,0 +1,17 @@
+﻿Completion: Basic
+Prefix: "Ord"
+Count: 1
+Focus: Hard
+Rules: [\w] => add_to_prefix
+Range: "Log.Logger.Information("Shipped {Ord♦erId}", order.Id);"
+                                         ▲▲▲▲△△△△
+
+##### RELEVANCE SORT #####
+
+                            [FromLightEvaluation, PrefixMatch, NotObsolete, ObsoleteRuleApplied, NormalSelectionPriority, Other]
+ỌṛḍerId                     OrderStr=0000    <==
+
+##### ALPHABETIC SORT #####
+
+                            [Light, Top]
+ỌṛḍerId                     OrderStr=0000    <==

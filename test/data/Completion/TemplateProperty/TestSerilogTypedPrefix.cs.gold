@@ -1,0 +1,17 @@
+﻿Completion: Basic
+Prefix: "Cust"
+Count: 1
+Focus: Hard
+Rules: [\w] => add_to_prefix
+Range: "Log.Logger.Information("Shipped {Cust♦", order.Id, customer.Email);"
+                                         ▲▲▲▲▲
+
+##### RELEVANCE SORT #####
+
+                            [FromLightEvaluation, PrefixMatch, NotObsolete, ObsoleteRuleApplied, NormalSelectionPriority, Other]
+C̣ụṣṭomerEmail               OrderStr=0002    <==
+
+##### ALPHABETIC SORT #####
+
+                            [Light, Generic]
+C̣ụṣṭomerEmail               OrderStr=0002    <==

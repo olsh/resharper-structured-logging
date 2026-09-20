@@ -29,6 +29,12 @@
     </ul>
 
     <p>
+      Inside a message template, code completion offers property names built from the arguments that fill
+      the holes, in the configured naming case and with the name of the argument this very hole binds to
+      first, and closes the hole when the brace is missing.
+    </p>
+
+    <p>
       Logging statements can optionally be dimmed, the way unreachable code is rendered, so that they stand out
       less than the surrounding code. Enable <b>Dim logging statements</b> in the plugin settings.
     </p>

@@ -1,0 +1,22 @@
+﻿Completion: Basic
+Count: 4
+Focus: Hard
+Rules: [\w] => add_to_prefix
+Range: "Log.Logger.Information("Shipped {♦", order.Id, customer.Email);"
+
+##### RELEVANCE SORT #####
+
+                            [FromLightEvaluation, NotObsolete, ObsoleteRuleApplied, NormalSelectionPriority, Other]
+orderId                     OrderStr=0000    <==
+id                          OrderStr=0001
+customerEmail               OrderStr=0002
+email                       OrderStr=0003
+
+##### ALPHABETIC SORT #####
+
+                            [Light, Top]
+orderId                     OrderStr=0000    <==
+id                          OrderStr=0001
+                            [Light, Generic]
+customerEmail               OrderStr=0002
+email                       OrderStr=0003
