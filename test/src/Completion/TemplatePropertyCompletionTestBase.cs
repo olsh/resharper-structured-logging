@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+using JetBrains.Application.Settings;
 using JetBrains.ReSharper.Feature.Services.CodeCompletion.Infrastructure.LookupItems;
 using JetBrains.ReSharper.FeaturesTestFramework.Completion;
 using JetBrains.ReSharper.TestFramework;
@@ -24,11 +26,29 @@ namespace ReSharper.Structured.Logging.Tests.Completion
 
         protected override CodeCompletionTestType TestType => CodeCompletionTestType.ModernList;
 
-        // The order the names are offered in is what the nth hole rule is about, so the list is not sorted
-        // alphabetically away from it
+        // The order the names are offered in is what the nth hole rule is about, so the list is not
+        // sorted alphabetically away from it
         protected override LookupListSorting Sorting => LookupListSorting.ByRelevance;
 
         protected abstract string SubPath { get; }
+
+        /// <summary>
+        /// The settings hook the analyzer fixtures use, on the method they hang it on: everything below
+        /// this one already runs inside the reentrancy guard. CodeCompletionTestBase grew a hook of its
+        /// own in 2026.3, but the extension is built for the stable wave as well, which has none.
+        /// </summary>
+        protected override void DoTestSolution([NotNull] params string[] fileSet)
+        {
+            ExecuteWithinSettingsTransaction(settingsStore =>
+            {
+                RunGuarded(() => MutateSettings(settingsStore));
+                base.DoTestSolution(fileSet);
+            });
+        }
+
+        protected virtual void MutateSettings([NotNull] IContextBoundSettingsStore settingsStore)
+        {
+        }
 
         /// <summary>
         /// Keeps the gold about this feature. Whatever else the engine offers inside a string literal is
