@@ -1,0 +1,7 @@
+# The release notes are generated from the pull requests merged since the last release, so a feature
+# that was reverted before it ever shipped would be announced there together with the revert that took
+# it back out. Label both and neither is listed.
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
