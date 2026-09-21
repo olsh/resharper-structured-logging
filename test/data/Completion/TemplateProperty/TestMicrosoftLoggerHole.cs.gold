@@ -1,12 +1,11 @@
 ﻿Completion: Basic
 Count: 4
 Focus: Hard
-Rules: [\w] => add_to_prefix
 Range: "logger.LogInformation("Shipped {♦", order.Id, customer.Email);"
 
 ##### RELEVANCE SORT #####
 
-                            [FromLightEvaluation, NotObsolete, ObsoleteRuleApplied, NormalSelectionPriority, Other]
+                            [NotObsolete, ObsoleteRuleApplied, NormalSelectionPriority, Other]
 OrderId                     OrderStr=0000    <==
 Id                          OrderStr=0001
 CustomerEmail               OrderStr=0002

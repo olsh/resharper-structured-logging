@@ -167,6 +167,39 @@ jobs:
           MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
         run: .\build.cmd PublishRiderPlugin --configuration Release --is-rider-host
 
+  # Build and test only ever sees the SDK Directory.Build.props declares, but a release is cut from
+  # this same source for the wave below it, so a change can pass there and break here. That is how
+  # #201 was found, by a release dry run rather than by a build
+  stable-wave:
+    name: Test against the stable wave
+    runs-on: windows-2025
+
+    # A dispatched run that names an SDK already builds and tests that wave, so this is for the
+    # ordinary runs, which follow the file
+    if: inputs.sdk-version == ''
+
+    permissions:
+      contents: read
+
+    env:
+      # The wave the extension is also released for while master follows the EAP train. Keep it on the
+      # newest patch of that wave, and drop this job once master is on the stable one itself
+      SDK_VERSION_OVERRIDE: 2026.2.2
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      # Only the ReSharper suite: both test projects compile the same fixtures against the same golds,
+      # so the wave question is answered once, and the Rider SDK would double the job for nothing
+      - name: Test ReSharper plugin
+        run: .\build.cmd Test --configuration Release
+
   release:
     name: Create GitHub release
     needs: build
