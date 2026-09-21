@@ -45,7 +45,8 @@ namespace ReSharper.Structured.Logging.Tests.Completion
         // nothing for it to be compared against
         private static readonly Regex RulesHeaderLine = new Regex(
             @"^Rules: .*\r?\n",
-            RegexOptions.Multiline | RegexOptions.CultureInvariant);
+            RegexOptions.Multiline | RegexOptions.CultureInvariant,
+            TimeSpan.FromSeconds(1));
 
         protected override string RelativeTestDataPath => @"Completion\" + SubPath;
 
