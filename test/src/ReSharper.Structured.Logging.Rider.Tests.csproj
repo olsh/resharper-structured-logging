@@ -8,6 +8,21 @@
   <ItemGroup>
     <PackageReference Include="JetBrains.Rider.SDK.Tests" Version="$(SdkVersion)" PrivateAssets="all" />
   </ItemGroup>
+  <!-- A prerelease Rider SDK takes JetBrains.Rider.Native.Core.* from an open range, [263.0.0.0-a, 263.1.0.0)
+       for 2026.3, and NuGet restores the lowest version in it, which is the wave's eap01. Its time bomb goes off
+       about a month after it ships, and then every Rider test fails in setup with "the time bomb is preventing
+       them from running". So pin the native build that carries the SDK's own label: 2026.3.0-eap07 floats to
+       263.0.*-eap07*. A stable SDK asks for a stable range and gets a native build without a time bomb.
+       If JetBrains ever ships an SDK label without a native build of the same label, the float quietly falls
+       back to the lowest version again, so that is the first thing to check when this error comes back -->
+  <PropertyGroup Condition="$(SdkVersion.Contains('-'))">
+    <RiderNativeCoreVersion>$([System.Text.RegularExpressions.Regex]::Replace('$(SdkVersion)', '^\d\d(\d\d)\.(\d+)\.\d+-(.+)$', '$1$2.0.*-$3*'))</RiderNativeCoreVersion>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(RiderNativeCoreVersion)' != ''">
+    <PackageReference Include="JetBrains.Rider.Native.Core.windows-x64.Release" Version="$(RiderNativeCoreVersion)" PrivateAssets="all" />
+    <PackageReference Include="JetBrains.Rider.Native.Core.windows-x86.Release" Version="$(RiderNativeCoreVersion)" PrivateAssets="all" />
+    <PackageReference Include="JetBrains.Rider.Native.Core.windows-arm64.Release" Version="$(RiderNativeCoreVersion)" PrivateAssets="all" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ReSharper.Structured.Logging\ReSharper.Structured.Logging.Rider.csproj" />
   </ItemGroup>
